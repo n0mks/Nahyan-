@@ -1,0 +1,22764 @@
+
+
+
+<style>
+
+
+
+/* =========================================================
+
+
+
+   SHAREPOINT PAGE WIDTH
+
+
+
+========================================================= */i
+
+
+
+
+
+
+
+#contentBox,
+
+
+
+.CanvasSection,
+
+
+
+.CanvasSection-sm12,
+
+
+
+.CanvasZone,
+
+
+
+.SPPageChrome,
+
+
+
+.mainContent,
+
+
+
+#DeltaPlaceHolderMain{
+
+
+
+  max-width:100% !important;
+
+
+
+  width:100% !important;
+
+
+
+}
+
+
+
+
+
+
+
+.CanvasSection,
+
+
+
+.CanvasSection-sm12,
+
+
+
+.CanvasZone,
+
+
+
+#contentBox,
+
+
+
+#DeltaPlaceHolderMain{
+
+
+
+  padding-left:0 !important;
+
+
+
+  padding-right:0 !important;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+
+
+
+   DESIGN VARIABLES
+
+
+
+========================================================= */
+
+
+
+
+
+
+
+:root{
+
+
+
+  --rc-blue-950:#072b47;
+
+
+
+  --rc-blue-900:#0a3558;
+
+
+
+  --rc-blue-850:#0b3e66;
+
+
+
+  --rc-blue-800:#0c4672;
+
+
+
+  --rc-blue-700:#15679f;
+
+
+
+  --rc-blue-600:#1c78b5;
+
+
+
+  --rc-blue-500:#2386c8;
+
+
+
+
+
+
+
+  --rc-blue-100:#eef6fc;
+
+
+
+  --rc-blue-075:#f3f9fd;
+
+
+
+  --rc-blue-050:#f7fbff;
+
+
+
+
+
+
+
+  --rc-slate-950:#0b1220;
+
+
+
+  --rc-slate-900:#0f172a;
+
+
+
+  --rc-slate-800:#1e293b;
+
+
+
+  --rc-slate-700:#334155;
+
+
+
+  --rc-slate-600:#475569;
+
+
+
+  --rc-slate-500:#64748b;
+
+
+
+  --rc-slate-400:#94a3b8;
+
+
+
+  --rc-slate-300:#cbd5e1;
+
+
+
+  --rc-slate-200:#e2e8f0;
+
+
+
+  --rc-slate-100:#f1f5f9;
+
+
+
+  --rc-slate-050:#f8fafc;
+
+
+
+
+
+
+
+  --rc-white:#ffffff;
+
+
+
+
+
+
+
+  --rc-danger-bg:#fff4f4;
+
+
+
+  --rc-danger-border:#fecaca;
+
+
+
+  --rc-danger-text:#991b1b;
+
+
+
+
+
+
+
+  --rc-shadow-1:0 6px 18px rgba(15,23,42,.06);
+
+
+
+  --rc-shadow-2:0 20px 48px rgba(15,23,42,.10);
+
+
+
+  --rc-shadow-blue:0 9px 22px rgba(10,53,88,.17);
+
+
+
+
+
+
+
+  --rc-maxw:1480px;
+
+
+
+  --rc-sidepad:22px;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+
+
+
+   ROOT
+
+
+
+========================================================= */
+
+
+
+
+
+
+
+#rc-root,
+
+
+
+#rc-root *{
+
+
+
+  box-sizing:border-box;
+
+
+
+  font-family:"Segoe UI",Arial,sans-serif;
+
+
+
+}
+
+
+
+
+
+
+
+#rc-root{
+
+
+
+  width:100%;
+
+
+
+  max-width:var(--rc-maxw);
+
+
+
+  margin:0 auto;
+
+
+
+  padding:24px var(--rc-sidepad) 34px;
+
+
+
+  color:var(--rc-slate-900);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+
+
+
+   MAIN CONTAINER
+
+
+
+========================================================= */
+
+
+
+
+
+
+
+.rc-shell{
+
+
+
+  background:var(--rc-white);
+
+
+
+  border:1px solid var(--rc-slate-200);
+
+
+
+  border-radius:26px;
+
+
+
+  box-shadow:var(--rc-shadow-2);
+
+
+
+  overflow:hidden;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+
+
+
+   SECTION SELECTOR
+
+
+
+========================================================= */
+
+
+
+
+
+
+
+.rc-section-selector{
+
+
+
+  display:flex;
+
+
+
+  align-items:stretch;
+
+
+
+  gap:12px;
+
+
+
+  padding:20px 24px;
+
+
+
+
+
+
+
+  background:
+
+
+
+    linear-gradient(
+
+
+
+      180deg,
+
+
+
+      #ffffff 0%,
+
+
+
+      var(--rc-blue-050) 100%
+
+
+
+    );
+
+
+
+
+
+
+
+  border-bottom:1px solid var(--rc-slate-200);
+
+
+
+}
+
+
+
+
+
+
+
+.rc-section-btn{
+
+
+
+  appearance:none;
+
+
+
+
+
+
+
+  display:flex;
+
+
+
+  align-items:center;
+
+
+
+  justify-content:space-between;
+
+
+
+  gap:18px;
+
+
+
+
+
+
+
+  flex:1 1 0;
+
+
+
+  min-height:68px;
+
+
+
+
+
+
+
+  padding:14px 18px;
+
+
+
+
+
+
+
+  border:1px solid var(--rc-slate-300);
+
+
+
+  border-radius:17px;
+
+
+
+
+
+
+
+  background:#fff;
+
+
+
+  color:var(--rc-slate-700);
+
+
+
+
+
+
+
+  cursor:pointer;
+
+
+
+  text-align:left;
+
+
+
+
+
+
+
+  box-shadow:var(--rc-shadow-1);
+
+
+
+
+
+
+
+  transition:
+
+
+
+    transform .18s ease,
+
+
+
+    box-shadow .18s ease,
+
+
+
+    border-color .18s ease,
+
+
+
+    background .18s ease,
+
+
+
+    color .18s ease;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-section-btn:hover{
+
+
+
+  transform:translateY(-1px);
+
+
+
+  border-color:#9fc7e4;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-section-btn.active{
+
+
+
+  color:#fff;
+
+
+
+  border-color:transparent;
+
+
+
+
+
+
+
+  background:
+
+
+
+    linear-gradient(
+
+
+
+      135deg,
+
+
+
+      var(--rc-blue-950),
+
+
+
+      var(--rc-blue-700)
+
+
+
+    );
+
+
+
+
+
+
+
+  box-shadow:var(--rc-shadow-blue);
+
+
+
+}
+
+
+
+
+
+
+
+.rc-section-btn:focus-visible{
+
+
+
+  outline:3px solid rgba(21,103,159,.24);
+
+
+
+  outline-offset:3px;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-section-name{
+
+
+
+  font-size:16px;
+
+
+
+  font-weight:900;
+
+
+
+  line-height:1.25;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-section-count{
+
+
+
+  display:inline-flex;
+
+
+
+  align-items:center;
+
+
+
+  justify-content:center;
+
+
+
+
+
+
+
+  min-width:38px;
+
+
+
+  min-height:30px;
+
+
+
+
+
+
+
+  padding:0 10px;
+
+
+
+
+
+
+
+  border-radius:999px;
+
+
+
+
+
+
+
+  font-size:12px;
+
+
+
+  font-weight:900;
+
+
+
+
+
+
+
+  white-space:nowrap;
+
+
+
+
+
+
+
+  color:var(--rc-blue-900);
+
+
+
+  background:var(--rc-blue-100);
+
+
+
+  border:1px solid #d7eaf7;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-section-btn.active .rc-section-count{
+
+
+
+  color:#fff;
+
+
+
+  background:rgba(255,255,255,.15);
+
+
+
+  border-color:rgba(255,255,255,.22);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+
+
+
+   TOOLBAR
+
+
+
+========================================================= */
+
+
+
+
+
+
+
+.rc-toolbar{
+
+
+
+  display:grid;
+
+
+
+
+
+
+
+  grid-template-columns:
+
+
+
+    minmax(280px,1.55fr)
+
+
+
+    minmax(230px,.8fr)
+
+
+
+    auto;
+
+
+
+
+
+
+
+  gap:14px;
+
+
+
+
+
+
+
+  padding:18px 24px;
+
+
+
+
+
+
+
+  background:var(--rc-blue-050);
+
+
+
+  border-bottom:1px solid var(--rc-slate-200);
+
+
+
+}
+
+
+
+
+
+
+
+.rc-field{
+
+
+
+  display:flex;
+
+
+
+  flex-direction:column;
+
+
+
+  gap:8px;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-label{
+
+
+
+  font-size:13px;
+
+
+
+  font-weight:900;
+
+
+
+  color:var(--rc-slate-700);
+
+
+
+  letter-spacing:.2px;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-input,
+
+
+
+.rc-select{
+
+
+
+  width:100%;
+
+
+
+  height:46px;
+
+
+
+
+
+
+
+  border:1px solid var(--rc-slate-300);
+
+
+
+  border-radius:14px;
+
+
+
+
+
+
+
+  background:#fff;
+
+
+
+  color:var(--rc-slate-900);
+
+
+
+
+
+
+
+  padding:0 14px;
+
+
+
+
+
+
+
+  font-size:15px;
+
+
+
+  font-weight:700;
+
+
+
+
+
+
+
+  outline:none;
+
+
+
+
+
+
+
+  transition:
+
+
+
+    border-color .2s ease,
+
+
+
+    box-shadow .2s ease;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-input:hover,
+
+
+
+.rc-select:hover{
+
+
+
+  border-color:#adc6d9;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-input:focus,
+
+
+
+.rc-select:focus{
+
+
+
+  border-color:#8dc4eb;
+
+
+
+  box-shadow:0 0 0 4px rgba(21,103,159,.10);
+
+
+
+}
+
+
+
+
+
+
+
+.rc-actions{
+
+
+
+  display:flex;
+
+
+
+  align-items:flex-end;
+
+
+
+  gap:10px;
+
+
+
+  flex-wrap:wrap;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-btn{
+
+
+
+  display:inline-flex;
+
+
+
+  align-items:center;
+
+
+
+  justify-content:center;
+
+
+
+  gap:8px;
+
+
+
+
+
+
+
+  min-width:118px;
+
+
+
+  height:46px;
+
+
+
+
+
+
+
+  padding:0 17px;
+
+
+
+
+
+
+
+  border-radius:14px;
+
+
+
+  text-decoration:none;
+
+
+
+  border:1px solid transparent;
+
+
+
+
+
+
+
+  cursor:pointer;
+
+
+
+
+
+
+
+  font-size:14px;
+
+
+
+  font-weight:900;
+
+
+
+
+
+
+
+  transition:
+
+
+
+    transform .18s ease,
+
+
+
+    box-shadow .18s ease,
+
+
+
+    background .18s ease,
+
+
+
+    border-color .18s ease;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-btn:hover{
+
+
+
+  transform:translateY(-1px);
+
+
+
+}
+
+
+
+
+
+
+
+.rc-btn:focus-visible{
+
+
+
+  outline:3px solid rgba(21,103,159,.25);
+
+
+
+  outline-offset:2px;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-btn:disabled{
+
+
+
+  cursor:default;
+
+
+
+  opacity:.65;
+
+
+
+  transform:none;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-btn.secondary{
+
+
+
+  background:#fff;
+
+
+
+  color:var(--rc-blue-900);
+
+
+
+  border-color:var(--rc-slate-300);
+
+
+
+}
+
+
+
+
+
+
+
+.rc-btn.secondary:hover{
+
+
+
+  background:var(--rc-blue-050);
+
+
+
+}
+
+
+
+
+
+
+
+.rc-btn.primary{
+
+
+
+  color:#fff;
+
+
+
+
+
+
+
+  background:
+
+
+
+    linear-gradient(
+
+
+
+      135deg,
+
+
+
+      var(--rc-blue-900),
+
+
+
+      var(--rc-blue-700)
+
+
+
+    );
+
+
+
+
+
+
+
+  box-shadow:0 7px 16px rgba(10,53,88,.14);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+
+
+
+   MESSAGE
+
+
+
+========================================================= */
+
+
+
+
+
+
+
+.rc-msg{
+
+
+
+  display:none;
+
+
+
+
+
+
+
+  margin:18px 24px 0;
+
+
+
+  padding:14px 16px;
+
+
+
+
+
+
+
+  border-radius:16px;
+
+
+
+
+
+
+
+  font-size:14px;
+
+
+
+  font-weight:800;
+
+
+
+  line-height:1.7;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-msg.show{
+
+
+
+  display:block;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-msg.info{
+
+
+
+  color:var(--rc-slate-700);
+
+
+
+  background:var(--rc-slate-050);
+
+
+
+  border:1px solid var(--rc-slate-200);
+
+
+
+}
+
+
+
+
+
+
+
+.rc-msg.error{
+
+
+
+  color:var(--rc-danger-text);
+
+
+
+  background:var(--rc-danger-bg);
+
+
+
+  border:1px solid var(--rc-danger-border);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+
+
+
+   ACTIVE SECTION TITLE
+
+
+
+========================================================= */
+
+
+
+
+
+
+
+.rc-title-area{
+
+
+
+  display:flex;
+
+
+
+  align-items:center;
+
+
+
+  justify-content:space-between;
+
+
+
+
+
+
+
+  gap:16px;
+
+
+
+
+
+
+
+  padding:19px 24px 15px;
+
+
+
+  background:#fff;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-title-tile{
+
+
+
+  display:inline-flex;
+
+
+
+  align-items:center;
+
+
+
+  gap:11px;
+
+
+
+
+
+
+
+  min-height:45px;
+
+
+
+  padding:0 17px;
+
+
+
+
+
+
+
+  border-radius:13px;
+
+
+
+
+
+
+
+  color:var(--rc-blue-900);
+
+
+
+
+
+
+
+  background:
+
+
+
+    linear-gradient(
+
+
+
+      135deg,
+
+
+
+      var(--rc-blue-100),
+
+
+
+      #ffffff
+
+
+
+    );
+
+
+
+
+
+
+
+  border:1px solid #d7eaf7;
+
+
+
+
+
+
+
+  font-size:18px;
+
+
+
+  font-weight:900;
+
+
+
+
+
+
+
+  box-shadow:0 4px 12px rgba(15,23,42,.04);
+
+
+
+}
+
+
+
+
+
+
+
+.rc-title-dot{
+
+
+
+  width:9px;
+
+
+
+  height:9px;
+
+
+
+
+
+
+
+  border-radius:50%;
+
+
+
+  background:var(--rc-blue-600);
+
+
+
+
+
+
+
+  box-shadow:0 0 0 4px rgba(21,103,159,.10);
+
+
+
+}
+
+
+
+
+
+
+
+.rc-record-status{
+
+
+
+  display:flex;
+
+
+
+  align-items:center;
+
+
+
+  gap:8px;
+
+
+
+  flex-wrap:wrap;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-badge{
+
+
+
+  display:inline-flex;
+
+
+
+  align-items:center;
+
+
+
+  justify-content:center;
+
+
+
+
+
+
+
+  min-height:32px;
+
+
+
+  padding:0 11px;
+
+
+
+
+
+
+
+  border-radius:999px;
+
+
+
+
+
+
+
+  color:var(--rc-slate-600);
+
+
+
+  background:#fff;
+
+
+
+
+
+
+
+  border:1px solid var(--rc-slate-200);
+
+
+
+
+
+
+
+  font-size:12.5px;
+
+
+
+  font-weight:900;
+
+
+
+
+
+
+
+  white-space:nowrap;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+
+
+
+   TABLE
+
+
+
+========================================================= */
+
+
+
+
+
+
+
+.rc-tableWrap{
+
+
+
+  width:100%;
+
+
+
+  overflow:auto;
+
+
+
+  background:#fff;
+
+
+
+  border-top:1px solid var(--rc-slate-200);
+
+
+
+}
+
+
+
+
+
+
+
+.rc-table{
+
+
+
+  width:100%;
+
+
+
+  min-width:950px;
+
+
+
+
+
+
+
+  border-collapse:separate;
+
+
+
+  border-spacing:0;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-table thead th{
+
+
+
+  position:sticky;
+
+
+
+  top:0;
+
+
+
+  z-index:2;
+
+
+
+
+
+
+
+  color:#fff;
+
+
+
+
+
+
+
+  background:
+
+
+
+    linear-gradient(
+
+
+
+      135deg,
+
+
+
+      var(--rc-blue-900),
+
+
+
+      var(--rc-blue-700)
+
+
+
+    );
+
+
+
+
+
+
+
+  text-align:left;
+
+
+
+
+
+
+
+  padding:16px 18px;
+
+
+
+
+
+
+
+  font-size:15px;
+
+
+
+  font-weight:900;
+
+
+
+
+
+
+
+  letter-spacing:.2px;
+
+
+
+  white-space:nowrap;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-table tbody td{
+
+
+
+  padding:16px 18px;
+
+
+
+
+
+
+
+  border-bottom:1px solid var(--rc-slate-200);
+
+
+
+
+
+
+
+  vertical-align:top;
+
+
+
+
+
+
+
+  background:#fff;
+
+
+
+
+
+
+
+  color:var(--rc-slate-700);
+
+
+
+
+
+
+
+  font-size:14.5px;
+
+
+
+  font-weight:700;
+
+
+
+
+
+
+
+  line-height:1.7;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-table tbody tr:nth-child(even) td{
+
+
+
+  background:#fcfdff;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-table tbody tr:hover td{
+
+
+
+  background:#f6fbff;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-date{
+
+
+
+  color:var(--rc-slate-800);
+
+
+
+  font-weight:900;
+
+
+
+  white-space:nowrap;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-link{
+
+
+
+  color:var(--rc-blue-800);
+
+
+
+  font-weight:900;
+
+
+
+
+
+
+
+  text-decoration:none;
+
+
+
+
+
+
+
+  overflow-wrap:anywhere;
+
+
+
+  word-break:break-word;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-link:hover{
+
+
+
+  text-decoration:underline;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-link:focus-visible{
+
+
+
+  outline:3px solid rgba(21,103,159,.20);
+
+
+
+  outline-offset:3px;
+
+
+
+  border-radius:4px;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-circular-text{
+
+
+
+  color:var(--rc-slate-800);
+
+
+
+  font-weight:900;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-subject{
+
+
+
+  color:var(--rc-slate-800);
+
+
+
+  font-weight:800;
+
+
+
+}
+
+
+
+
+
+
+
+.rc-pill{
+
+
+
+  display:inline-flex;
+
+
+
+  align-items:center;
+
+
+
+  justify-content:center;
+
+
+
+
+
+
+
+  padding:7px 12px;
+
+
+
+
+
+
+
+  border-radius:999px;
+
+
+
+
+
+
+
+  color:var(--rc-blue-900);
+
+
+
+  background:var(--rc-blue-100);
+
+
+
+
+
+
+
+  border:1px solid #d8ebf8;
+
+
+
+
+
+
+
+  font-size:12.5px;
+
+
+
+  font-weight:900;
+
+
+
+
+
+
+
+  white-space:normal;
+
+
+
+  text-align:center;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+
+
+
+   EMPTY / LOADING
+
+
+
+========================================================= */
+
+
+
+
+
+
+
+.rc-empty,
+
+
+
+.rc-loader{
+
+
+
+  padding:38px 20px !important;
+
+
+
+  text-align:center;
+
+
+
+
+
+
+
+  color:var(--rc-slate-600) !important;
+
+
+
+
+
+
+
+  font-size:15px !important;
+
+
+
+  font-weight:900 !important;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+
+
+
+   FOOTER
+
+
+
+========================================================= */
+
+
+
+
+
+
+
+.rc-footer{
+
+
+
+  display:flex;
+
+
+
+  align-items:center;
+
+
+
+  justify-content:space-between;
+
+
+
+
+
+
+
+  gap:12px;
+
+
+
+  flex-wrap:wrap;
+
+
+
+
+
+
+
+  padding:14px 24px 17px;
+
+
+
+
+
+
+
+  color:var(--rc-slate-500);
+
+
+
+  background:#fff;
+
+
+
+
+
+
+
+  font-size:12.5px;
+
+
+
+  font-weight:800;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+
+
+
+   RESPONSIVE
+
+
+
+========================================================= */
+
+
+
+
+
+
+
+@media (max-width:1000px){
+
+
+
+
+
+
+
+  .rc-toolbar{
+
+
+
+    grid-template-columns:1fr 1fr;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-actions{
+
+
+
+    grid-column:1 / -1;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-btn{
+
+
+
+    flex:1 1 160px;
+
+
+
+  }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width:760px){
+
+
+
+
+
+
+
+  :root{
+
+
+
+    --rc-sidepad:12px;
+
+
+
+  }
+
+
+
+
+
+
+
+  #rc-root{
+
+
+
+    padding-top:12px;
+
+
+
+    padding-bottom:18px;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-shell{
+
+
+
+    border-radius:18px;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-section-selector{
+
+
+
+    flex-direction:column;
+
+
+
+    padding:14px;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-section-btn{
+
+
+
+    width:100%;
+
+
+
+    min-height:60px;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-toolbar{
+
+
+
+    grid-template-columns:1fr;
+
+
+
+    padding:16px;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-actions{
+
+
+
+    grid-column:auto;
+
+
+
+    align-items:stretch;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-btn{
+
+
+
+    width:100%;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-msg{
+
+
+
+    margin:16px 16px 0;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-title-area{
+
+
+
+    align-items:flex-start;
+
+
+
+    flex-direction:column;
+
+
+
+    padding:16px;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-title-tile{
+
+
+
+    width:100%;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-record-status{
+
+
+
+    width:100%;
+
+
+
+  }
+
+
+
+
+
+
+
+  .rc-footer{
+
+
+
+    padding-left:16px;
+
+
+
+    padding-right:16px;
+
+
+
+  }
+
+
+
+}
+
+
+
+</style>
+
+
+
+
+
+
+
+
+
+
+
+<div id="rc-root">
+
+
+
+
+
+
+
+  <div id="rc-config"
+
+
+
+       style="display:none"
+
+
+
+
+
+
+
+       data-config-xlsx="https://banki/Compliance/Test%20CBO/CBO%20New%20Page/CBO_Circulars_Config.xlsx"
+
+
+
+
+
+
+
+       data-sheetjs-src="https://banki/Compliance/Test%20CBO/CBO%20New%20Page/xlsx.full.min.js"
+
+
+
+
+
+
+
+       data-sheet-one="CBO Circulars"
+
+
+
+
+
+
+
+       data-sheet-two="Laws &amp; Decisions"
+
+
+
+
+
+
+
+       data-sharepoint-base="https://banki/Compliance/Test%20CBO/CBO%20Circulars/"
+
+
+
+
+
+
+
+       data-sharepoint-site="https://banki/Compliance/Test%20CBO">
+
+
+
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+  <div class="rc-shell">
+
+
+
+
+
+
+
+    <div class="rc-section-selector"
+
+
+
+         role="tablist"
+
+
+
+         aria-label="Circular sections">
+
+
+
+
+
+
+
+      <button id="rcSectionOne"
+
+
+
+              class="rc-section-btn active"
+
+
+
+              type="button"
+
+
+
+              role="tab"
+
+
+
+              aria-selected="true">
+
+
+
+
+
+
+
+        <span class="rc-section-name">
+
+
+
+          CBO Circulars
+
+
+
+        </span>
+
+
+
+
+
+
+
+        <span id="rcCountOne"
+
+
+
+              class="rc-section-count">
+
+
+
+          0
+
+
+
+        </span>
+
+
+
+
+
+
+
+      </button>
+
+
+
+
+
+
+
+
+
+
+
+      <button id="rcSectionTwo"
+
+
+
+              class="rc-section-btn"
+
+
+
+              type="button"
+
+
+
+              role="tab"
+
+
+
+              aria-selected="false">
+
+
+
+
+
+
+
+        <span class="rc-section-name">
+
+
+
+          Laws &amp; Decisions
+
+
+
+        </span>
+
+
+
+
+
+
+
+        <span id="rcCountTwo"
+
+
+
+              class="rc-section-count">
+
+
+
+          0
+
+
+
+        </span>
+
+
+
+
+
+
+
+      </button>
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+    <div class="rc-toolbar">
+
+
+
+
+
+
+
+      <div class="rc-field">
+
+
+
+
+
+
+
+        <label class="rc-label"
+
+
+
+               for="rcSearch">
+
+
+
+          Search
+
+
+
+        </label>
+
+
+
+
+
+
+
+        <input id="rcSearch"
+
+
+
+               class="rc-input"
+
+
+
+               type="search"
+
+
+
+               placeholder="Search by date, circular, subject, or business line"
+
+
+
+               autocomplete="off">
+
+
+
+
+
+
+
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <div class="rc-field">
+
+
+
+
+
+
+
+        <label class="rc-label"
+
+
+
+               for="rcBusinessFilter">
+
+
+
+          Business Line
+
+
+
+        </label>
+
+
+
+
+
+
+
+        <select id="rcBusinessFilter"
+
+
+
+                class="rc-select">
+
+
+
+
+
+
+
+          <option value="">
+
+
+
+            All Business Lines
+
+
+
+          </option>
+
+
+
+
+
+
+
+        </select>
+
+
+
+
+
+
+
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <div class="rc-actions">
+
+
+
+
+
+
+
+        <button id="rcClearBtn"
+
+
+
+                class="rc-btn secondary"
+
+
+
+                type="button">
+
+
+
+          Clear Filters
+
+
+
+        </button>
+
+
+
+
+
+
+
+        <button id="rcRefreshBtn"
+
+
+
+                class="rc-btn primary"
+
+
+
+                type="button">
+
+
+
+          Refresh
+
+
+
+        </button>
+
+
+
+
+
+
+
+      </div>
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+    <div id="rcMessage"
+
+
+
+         class="rc-msg info"
+
+
+
+         role="status"
+
+
+
+         aria-live="polite">
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+    <div class="rc-title-area">
+
+
+
+
+
+
+
+      <div class="rc-title-tile">
+
+
+
+
+
+
+
+        <span class="rc-title-dot"></span>
+
+
+
+
+
+
+
+        <span id="rcActiveTitleText">
+
+
+
+          CBO Circulars
+
+
+
+        </span>
+
+
+
+
+
+
+
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+      <div class="rc-record-status"
+
+
+
+           aria-live="polite">
+
+
+
+
+
+
+
+        <span id="rcTotalBadge"
+
+
+
+              class="rc-badge">
+
+
+
+          0 records
+
+
+
+        </span>
+
+
+
+
+
+
+
+        <span id="rcShowingBadge"
+
+
+
+              class="rc-badge">
+
+
+
+          Showing 0
+
+
+
+        </span>
+
+
+
+
+
+
+
+      </div>
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+    <div class="rc-tableWrap">
+
+
+
+
+
+
+
+      <table id="rcTable"
+
+
+
+             class="rc-table"
+
+
+
+             aria-label="CBO Circulars">
+
+
+
+
+
+
+
+        <thead>
+
+
+
+
+
+
+
+          <tr>
+
+
+
+
+
+
+
+            <th style="width:170px;">
+
+
+
+              Date
+
+
+
+            </th>
+
+
+
+
+
+
+
+            <th style="width:340px;">
+
+
+
+              Circular / Regulation
+
+
+
+            </th>
+
+
+
+
+
+
+
+            <th>
+
+
+
+              Subject
+
+
+
+            </th>
+
+
+
+
+
+
+
+            <th style="width:190px;">
+
+
+
+              Business Line
+
+
+
+            </th>
+
+
+
+
+
+
+
+          </tr>
+
+
+
+
+
+
+
+        </thead>
+
+
+
+
+
+
+
+
+
+
+
+        <tbody id="rcTableBody">
+
+
+
+
+
+
+
+          <tr>
+
+
+
+
+
+
+
+            <td colspan="4"
+
+
+
+                class="rc-loader">
+
+
+
+              Loading records...
+
+
+
+            </td>
+
+
+
+
+
+
+
+          </tr>
+
+
+
+
+
+
+
+        </tbody>
+
+
+
+
+
+
+
+      </table>
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+    <div class="rc-footer">
+
+
+
+
+
+
+
+      <span id="rcFooterStatus">
+
+
+
+        Ready
+
+
+
+      </span>
+
+
+
+
+
+
+
+      <span>
+
+
+
+        CBO &amp; FSA Circulars
+
+
+
+      </span>
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+  </div>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+
+
+
+(function(){
+
+
+
+
+
+
+
+  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     ELEMENTS
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  var root =
+
+
+
+    document.getElementById('rc-root');
+
+
+
+
+
+
+
+  if(!root){
+
+
+
+    return;
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  var cfg =
+
+
+
+    document.getElementById('rc-config');
+
+
+
+
+
+
+
+  var sectionOne =
+
+
+
+    document.getElementById('rcSectionOne');
+
+
+
+
+
+
+
+  var sectionTwo =
+
+
+
+    document.getElementById('rcSectionTwo');
+
+
+
+
+
+
+
+  var countOne =
+
+
+
+    document.getElementById('rcCountOne');
+
+
+
+
+
+
+
+  var countTwo =
+
+
+
+    document.getElementById('rcCountTwo');
+
+
+
+
+
+
+
+  var searchInput =
+
+
+
+    document.getElementById('rcSearch');
+
+
+
+
+
+
+
+  var businessFilter =
+
+
+
+    document.getElementById('rcBusinessFilter');
+
+
+
+
+
+
+
+  var clearBtn =
+
+
+
+    document.getElementById('rcClearBtn');
+
+
+
+
+
+
+
+  var refreshBtn =
+
+
+
+    document.getElementById('rcRefreshBtn');
+
+
+
+
+
+
+
+  var messageBox =
+
+
+
+    document.getElementById('rcMessage');
+
+
+
+
+
+
+
+  var activeTitleText =
+
+
+
+    document.getElementById('rcActiveTitleText');
+
+
+
+
+
+
+
+  var totalBadge =
+
+
+
+    document.getElementById('rcTotalBadge');
+
+
+
+
+
+
+
+  var showingBadge =
+
+
+
+    document.getElementById('rcShowingBadge');
+
+
+
+
+
+
+
+  var table =
+
+
+
+    document.getElementById('rcTable');
+
+
+
+
+
+
+
+  var tableBody =
+
+
+
+    document.getElementById('rcTableBody');
+
+
+
+
+
+
+
+  var footerStatus =
+
+
+
+    document.getElementById('rcFooterStatus');
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     STATE
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  var state = {
+
+
+
+
+
+
+
+    activeSection:'one',
+
+
+
+
+
+
+
+    workbook:null,
+
+
+
+
+
+
+
+    isLoading:false,
+
+
+
+
+
+
+
+    filterTimer:null,
+
+
+
+
+
+
+
+    fileInventory:[],
+
+
+
+
+
+
+
+    compactIndex:{},
+
+
+
+
+
+
+
+    resolverAvailable:false,
+
+
+
+
+
+
+
+    sections:{
+
+
+
+
+
+
+
+      one:{
+
+
+
+        rows:[],
+
+
+
+        filteredRows:[],
+
+
+
+        search:'',
+
+
+
+        business:''
+
+
+
+      },
+
+
+
+
+
+
+
+      two:{
+
+
+
+        rows:[],
+
+
+
+        filteredRows:[],
+
+
+
+        search:'',
+
+
+
+        business:''
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+  };
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     CONFIG
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function getAttr(name,fallback){
+
+
+
+
+
+
+
+    try{
+
+
+
+
+
+
+
+      var value =
+
+
+
+        cfg
+
+
+
+          ? cfg.getAttribute(name)
+
+
+
+          : '';
+
+
+
+
+
+
+
+      return String(
+
+
+
+        value ||
+
+
+
+        fallback ||
+
+
+
+        ''
+
+
+
+      ).trim();
+
+
+
+
+
+
+
+    }catch(e){
+
+
+
+
+
+
+
+      return String(
+
+
+
+        fallback ||
+
+
+
+        ''
+
+
+
+      ).trim();
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  var CONFIG_XLSX =
+
+
+
+    getAttr(
+
+
+
+      'data-config-xlsx',
+
+
+
+      ''
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+  var SHEETJS_SRC =
+
+
+
+    getAttr(
+
+
+
+      'data-sheetjs-src',
+
+
+
+      ''
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+  var SHEET_ONE =
+
+
+
+    getAttr(
+
+
+
+      'data-sheet-one',
+
+
+
+      'CBO Circulars'
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+  var SHEET_TWO =
+
+
+
+    getAttr(
+
+
+
+      'data-sheet-two',
+
+
+
+      'Laws & Decisions'
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+  var SHAREPOINT_SITE =
+
+
+
+    getAttr(
+
+
+
+      'data-sharepoint-site',
+
+
+
+      ''
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     TEXT HELPERS
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function esc(value){
+
+
+
+
+
+
+
+    value =
+
+
+
+      (
+
+
+
+        value === null ||
+
+
+
+        typeof value === 'undefined'
+
+
+
+      )
+
+
+
+        ? ''
+
+
+
+        : String(value);
+
+
+
+
+
+
+
+
+
+
+
+    return value
+
+
+
+
+
+
+
+      .replace(/&/g,'&amp;')
+
+
+
+
+
+
+
+      .replace(/</g,'&lt;')
+
+
+
+
+
+
+
+      .replace(/>/g,'&gt;')
+
+
+
+
+
+
+
+      .replace(/"/g,'&quot;')
+
+
+
+
+
+
+
+      .replace(/'/g,'&#39;');
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function normalizeText(value){
+
+
+
+
+
+
+
+    return String(
+
+
+
+      value ||
+
+
+
+      ''
+
+
+
+    )
+
+
+
+
+
+
+
+    .replace(/\s+/g,' ')
+
+
+
+
+
+
+
+    .trim()
+
+
+
+
+
+
+
+    .toLowerCase();
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function headerKey(value){
+
+
+
+
+
+
+
+    return normalizeText(
+
+
+
+      value
+
+
+
+    )
+
+
+
+
+
+
+
+    .replace(
+
+
+
+      /[^a-z0-9]+/g,
+
+
+
+      ''
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function decodeHtmlEntities(value){
+
+
+
+
+
+
+
+    return String(
+
+
+
+      value ||
+
+
+
+      ''
+
+
+
+    )
+
+
+
+
+
+
+
+    .replace(/&amp;/gi,'&')
+
+
+
+
+
+
+
+    .replace(/&#38;/g,'&')
+
+
+
+
+
+
+
+    .replace(/&#x26;/gi,'&')
+
+
+
+
+
+
+
+    .replace(/&quot;/gi,'"')
+
+
+
+
+
+
+
+    .replace(/&#39;/g,"'");
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function safeDecodeRepeated(value){
+
+
+
+
+
+
+
+    var current =
+
+
+
+      String(
+
+
+
+        value ||
+
+
+
+        ''
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var i = 0;
+
+
+
+      i < 4;
+
+
+
+      i++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var protectedText =
+
+
+
+        current.replace(
+
+
+
+          /%(?![0-9a-fA-F]{2})/g,
+
+
+
+          '%25'
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      var decoded;
+
+
+
+
+
+
+
+
+
+
+
+      try{
+
+
+
+
+
+
+
+        decoded =
+
+
+
+          decodeURIComponent(
+
+
+
+            protectedText
+
+
+
+          );
+
+
+
+
+
+
+
+      }catch(e){
+
+
+
+
+
+
+
+        break;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        decoded === current
+
+
+
+      ){
+
+
+
+
+
+
+
+        break;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      current =
+
+
+
+        decoded;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return current;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function cleanControlCharacters(value){
+
+
+
+
+
+
+
+    return String(
+
+
+
+      value ||
+
+
+
+      ''
+
+
+
+    )
+
+
+
+
+
+
+
+    .replace(
+
+
+
+      /[\r\n\t]+/g,
+
+
+
+      ' '
+
+
+
+    )
+
+
+
+
+
+
+
+    .replace(
+
+
+
+      /\u00a0/g,
+
+
+
+      ' '
+
+
+
+    )
+
+
+
+
+
+
+
+    .replace(
+
+
+
+      /[\u200B-\u200D\uFEFF]/g,
+
+
+
+      ''
+
+
+
+    )
+
+
+
+
+
+
+
+    .replace(
+
+
+
+      /\s{2,}/g,
+
+
+
+      ' '
+
+
+
+    )
+
+
+
+
+
+
+
+    .trim();
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function decodeAndRepair(value){
+
+
+
+
+
+
+
+    return cleanControlCharacters(
+
+
+
+
+
+
+
+      safeDecodeRepeated(
+
+
+
+
+
+
+
+        decodeHtmlEntities(
+
+
+
+          value
+
+
+
+        )
+
+
+
+
+
+
+
+      )
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function unicodeNormalize(value){
+
+
+
+
+
+
+
+    var text =
+
+
+
+      String(
+
+
+
+        value ||
+
+
+
+        ''
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    try{
+
+
+
+
+
+
+
+      if(
+
+
+
+        typeof text.normalize ===
+
+
+
+        'function'
+
+
+
+      ){
+
+
+
+
+
+
+
+        return text.normalize(
+
+
+
+          'NFKC'
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }catch(e){}
+
+
+
+
+
+
+
+
+
+
+
+    return text;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     SHAREPOINT BASE
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function normalizeSharePointBase(value){
+
+
+
+
+
+
+
+    var decoded =
+
+
+
+      decodeAndRepair(
+
+
+
+        value
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /\\/g,
+
+
+
+        '/'
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /\/+$/,
+
+
+
+        ''
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !/^https?:\/\//i.test(
+
+
+
+        decoded
+
+
+
+      )
+
+
+
+    ){
+
+
+
+
+
+
+
+      return '';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    try{
+
+
+
+
+
+
+
+      return encodeURI(
+
+
+
+        decoded
+
+
+
+      ) + '/';
+
+
+
+
+
+
+
+    }catch(e){
+
+
+
+
+
+
+
+      return decoded + '/';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  var SHAREPOINT_BASE =
+
+
+
+    normalizeSharePointBase(
+
+
+
+
+
+
+
+      getAttr(
+
+
+
+        'data-sharepoint-base',
+
+
+
+        ''
+
+
+
+      )
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+  var SHAREPOINT_ORIGIN =
+
+
+
+    '';
+
+
+
+
+
+
+
+
+
+
+
+  var SHAREPOINT_FOLDER_PATH =
+
+
+
+    '';
+
+
+
+
+
+
+
+
+
+
+
+  var SHAREPOINT_BASE_DECODED =
+
+
+
+    '';
+
+
+
+
+
+
+
+
+
+
+
+  try{
+
+
+
+
+
+
+
+    var parsedBase =
+
+
+
+      new URL(
+
+
+
+        SHAREPOINT_BASE,
+
+
+
+        window.location.href
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    SHAREPOINT_ORIGIN =
+
+
+
+      parsedBase.origin;
+
+
+
+
+
+
+
+
+
+
+
+    SHAREPOINT_FOLDER_PATH =
+
+
+
+      safeDecodeRepeated(
+
+
+
+        parsedBase.pathname
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /\/+$/,
+
+
+
+        ''
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    SHAREPOINT_BASE_DECODED =
+
+
+
+      decodeAndRepair(
+
+
+
+        SHAREPOINT_BASE
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /\/+$/,
+
+
+
+        ''
+
+
+
+      ) + '/';
+
+
+
+
+
+
+
+  }catch(e){}
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     PATH HELPERS
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function sanitizeRelativePath(path){
+
+
+
+
+
+
+
+    var decodedPath =
+
+
+
+      decodeAndRepair(
+
+
+
+        path
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /\\/g,
+
+
+
+        '/'
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /^\/+/,
+
+
+
+        ''
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /\/{2,}/g,
+
+
+
+        '/'
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    var source =
+
+
+
+      decodedPath.split('/');
+
+
+
+
+
+
+
+
+
+
+
+    var result =
+
+
+
+      [];
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var i = 0;
+
+
+
+      i < source.length;
+
+
+
+      i++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var segment =
+
+
+
+        String(
+
+
+
+          source[i] ||
+
+
+
+          ''
+
+
+
+        ).trim();
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        !segment ||
+
+
+
+        segment === '.'
+
+
+
+      ){
+
+
+
+
+
+
+
+        continue;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        segment === '..'
+
+
+
+      ){
+
+
+
+
+
+
+
+        if(
+
+
+
+          result.length
+
+
+
+        ){
+
+
+
+
+
+
+
+          result.pop();
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+        continue;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      result.push(
+
+
+
+        segment
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return result.join('/');
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function encodePathSegments(path){
+
+
+
+
+
+
+
+    return String(
+
+
+
+      path ||
+
+
+
+      ''
+
+
+
+    )
+
+
+
+
+
+
+
+    .split('/')
+
+
+
+
+
+
+
+    .map(
+
+
+
+      function(segment){
+
+
+
+
+
+
+
+        return encodeURIComponent(
+
+
+
+          segment
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+    )
+
+
+
+
+
+
+
+    .join('/');
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function buildSharePointUrl(relativePath){
+
+
+
+
+
+
+
+    if(
+
+
+
+      !SHAREPOINT_BASE
+
+
+
+    ){
+
+
+
+
+
+
+
+      return '';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var safe =
+
+
+
+      sanitizeRelativePath(
+
+
+
+        relativePath
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !safe
+
+
+
+    ){
+
+
+
+
+
+
+
+      return '';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return (
+
+
+
+      SHAREPOINT_BASE +
+
+
+
+      encodePathSegments(
+
+
+
+        safe
+
+
+
+      )
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     OLD / NEW PATH EXTRACTION
+
+
+
+
+
+
+
+     Handles:
+
+
+
+     File:///\\oabstg\compliance\circulars\cbo\cbocirculars\...
+
+
+
+
+
+
+
+     File:///C:\Users\...\CBO\CBO Circulars\...
+
+
+
+
+
+
+
+     \\oabstg2\CBO\CBO Circulars\...
+
+
+
+
+
+
+
+     CBO\CBO%20Circulars\...
+
+
+
+
+
+
+
+     SharePoint URL
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function extractCircularRelativePath(rawValue){
+
+
+
+
+
+
+
+    if(
+
+
+
+      !rawValue
+
+
+
+    ){
+
+
+
+
+
+
+
+      return '';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var decoded =
+
+
+
+      decodeAndRepair(
+
+
+
+        rawValue
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /\\/g,
+
+
+
+        '/'
+
+
+
+      )
+
+
+
+
+
+
+
+      .trim();
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !decoded
+
+
+
+    ){
+
+
+
+
+
+
+
+      return '';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Existing SharePoint URL
+
+
+
+    */
+
+
+
+
+
+
+
+    if(
+
+
+
+      SHAREPOINT_BASE_DECODED
+
+
+
+    ){
+
+
+
+
+
+
+
+      var lowerDecoded =
+
+
+
+        decoded.toLowerCase();
+
+
+
+
+
+
+
+
+
+
+
+      var lowerBase =
+
+
+
+        SHAREPOINT_BASE_DECODED.toLowerCase();
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        lowerDecoded.indexOf(
+
+
+
+          lowerBase
+
+
+
+        ) === 0
+
+
+
+      ){
+
+
+
+
+
+
+
+        return sanitizeRelativePath(
+
+
+
+
+
+
+
+          decoded.substring(
+
+
+
+            SHAREPOINT_BASE_DECODED.length
+
+
+
+          )
+
+
+
+
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Remove file:// / file:/// prefixes.
+
+
+
+    */
+
+
+
+
+
+
+
+    decoded =
+
+
+
+      decoded.replace(
+
+
+
+        /^file:\/*/i,
+
+
+
+        ''
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Normalize all slashes.
+
+
+
+    */
+
+
+
+
+
+
+
+    decoded =
+
+
+
+      decoded.replace(
+
+
+
+        /\/{2,}/g,
+
+
+
+        '/'
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    decoded =
+
+
+
+      decoded.replace(
+
+
+
+        /^\/+/,
+
+
+
+        ''
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    var lower =
+
+
+
+      decoded.toLowerCase();
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      All known historical source structures.
+
+
+
+    */
+
+
+
+
+
+
+
+    var markers = [
+
+
+
+
+
+
+
+      'oabstg/compliance/circulars/cbo/cbocirculars/',
+
+
+
+
+
+
+
+      'oabstg2/compliance/circulars/cbo/cbocirculars/',
+
+
+
+
+
+
+
+      'compliance/circulars/cbo/cbocirculars/',
+
+
+
+
+
+
+
+      'oabstg/compliance/circulars/cbo/cbo circulars/',
+
+
+
+
+
+
+
+      'oabstg2/compliance/circulars/cbo/cbo circulars/',
+
+
+
+
+
+
+
+      'compliance/circulars/cbo/cbo circulars/',
+
+
+
+
+
+
+
+      'oabstg/cbo/cbo circulars/',
+
+
+
+
+
+
+
+      'oabstg2/cbo/cbo circulars/',
+
+
+
+
+
+
+
+      'cbo/cbocirculars/',
+
+
+
+
+
+
+
+      'cbo/cbo circulars/',
+
+
+
+
+
+
+
+      'cbocirculars/',
+
+
+
+
+
+
+
+      'cbo circulars/'
+
+
+
+
+
+
+
+    ];
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var i = 0;
+
+
+
+      i < markers.length;
+
+
+
+      i++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var index =
+
+
+
+        lower.indexOf(
+
+
+
+          markers[i]
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        index >= 0
+
+
+
+      ){
+
+
+
+
+
+
+
+        return sanitizeRelativePath(
+
+
+
+
+
+
+
+          decoded.substring(
+
+
+
+
+
+
+
+            index +
+
+
+
+            markers[i].length
+
+
+
+
+
+
+
+          )
+
+
+
+
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Flexible CBO/CBOCirculars matcher.
+
+
+
+    */
+
+
+
+
+
+
+
+    var flexible =
+
+
+
+      decoded.match(
+
+
+
+
+
+
+
+        /(?:^|\/)cbo\/cbo\s*circulars\/(.+)$/i
+
+
+
+
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      flexible &&
+
+
+
+      flexible[1]
+
+
+
+    ){
+
+
+
+
+
+
+
+      return sanitizeRelativePath(
+
+
+
+        flexible[1]
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Flexible compliance path.
+
+
+
+    */
+
+
+
+
+
+
+
+    var complianceMatch =
+
+
+
+      decoded.match(
+
+
+
+
+
+
+
+        /(?:^|\/)compliance\/circulars\/cbo\/cbo\s*circulars\/(.+)$/i
+
+
+
+
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      complianceMatch &&
+
+
+
+      complianceMatch[1]
+
+
+
+    ){
+
+
+
+
+
+
+
+      return sanitizeRelativePath(
+
+
+
+        complianceMatch[1]
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Already only a filename.
+
+
+
+    */
+
+
+
+
+
+
+
+    if(
+
+
+
+      decoded.indexOf('/') < 0
+
+
+
+    ){
+
+
+
+
+
+
+
+      return sanitizeRelativePath(
+
+
+
+        decoded
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return '';
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function getBaseName(value){
+
+
+
+
+
+
+
+    var path =
+
+
+
+      extractCircularRelativePath(
+
+
+
+        value
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !path
+
+
+
+    ){
+
+
+
+
+
+
+
+      return '';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    path =
+
+
+
+      path.replace(
+
+
+
+        /[?#].*$/,
+
+
+
+        ''
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    var index =
+
+
+
+      path.lastIndexOf('/');
+
+
+
+
+
+
+
+
+
+
+
+    return (
+
+
+
+      index >= 0
+
+
+
+    )
+
+
+
+
+
+
+
+      ? path.substring(
+
+
+
+          index + 1
+
+
+
+        )
+
+
+
+
+
+
+
+      : path;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     DATE NORMALIZATION
+
+
+
+
+
+
+
+     10-Aug-26 -> 10-08-2026
+
+
+
+     6-Aug-26  -> 06-08-2026
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function normalizeDateForFile(value){
+
+
+
+
+
+
+
+    var text =
+
+
+
+      decodeAndRepair(
+
+
+
+        value
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !text
+
+
+
+    ){
+
+
+
+
+
+
+
+      return '';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var months = {
+
+
+
+
+
+
+
+      jan:'01',
+
+
+
+      feb:'02',
+
+
+
+      mar:'03',
+
+
+
+      apr:'04',
+
+
+
+      may:'05',
+
+
+
+      jun:'06',
+
+
+
+      jul:'07',
+
+
+
+      aug:'08',
+
+
+
+      sep:'09',
+
+
+
+      oct:'10',
+
+
+
+      nov:'11',
+
+
+
+      dec:'12'
+
+
+
+
+
+
+
+    };
+
+
+
+
+
+
+
+
+
+
+
+    var match =
+
+
+
+      text.match(
+
+
+
+
+
+
+
+        /^(\d{1,2})[-\/.\s]+([A-Za-z]{3,9})[-\/.\s]+(\d{2,4})$/
+
+
+
+
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      match
+
+
+
+    ){
+
+
+
+
+
+
+
+      var monthName =
+
+
+
+        match[2]
+
+
+
+          .substring(0,3)
+
+
+
+          .toLowerCase();
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        months[monthName]
+
+
+
+      ){
+
+
+
+
+
+
+
+        var year =
+
+
+
+          match[3];
+
+
+
+
+
+
+
+
+
+
+
+        if(
+
+
+
+          year.length === 2
+
+
+
+        ){
+
+
+
+
+
+
+
+          year =
+
+
+
+            '20' + year;
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+        return (
+
+
+
+          ('0' + match[1]).slice(-2)
+
+
+
+          +
+
+
+
+          '-'
+
+
+
+          +
+
+
+
+          months[monthName]
+
+
+
+          +
+
+
+
+          '-'
+
+
+
+          +
+
+
+
+          year
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    match =
+
+
+
+      text.match(
+
+
+
+
+
+
+
+        /^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})$/
+
+
+
+
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      match
+
+
+
+    ){
+
+
+
+
+
+
+
+      var numericYear =
+
+
+
+        match[3];
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        numericYear.length === 2
+
+
+
+      ){
+
+
+
+
+
+
+
+        numericYear =
+
+
+
+          '20' +
+
+
+
+          numericYear;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      return (
+
+
+
+        ('0' + match[1]).slice(-2)
+
+
+
+        +
+
+
+
+        '-'
+
+
+
+        +
+
+
+
+        ('0' + match[2]).slice(-2)
+
+
+
+        +
+
+
+
+        '-'
+
+
+
+        +
+
+
+
+        numericYear
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return text;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     FILE COMPARISON
+
+
+
+
+
+
+
+     Extensions, spaces and punctuation are ignored.
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function removeFileExtension(value){
+
+
+
+
+
+
+
+    return String(
+
+
+
+      value ||
+
+
+
+      ''
+
+
+
+    )
+
+
+
+
+
+
+
+    .replace(
+
+
+
+      /\.[A-Za-z0-9]{1,10}$/,
+
+
+
+      ''
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function normalizeFileStem(value){
+
+
+
+
+
+
+
+    var text =
+
+
+
+      decodeAndRepair(
+
+
+
+        value
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    text =
+
+
+
+      unicodeNormalize(
+
+
+
+        text
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    text =
+
+
+
+      text.replace(
+
+
+
+        /\\/g,
+
+
+
+        '/'
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    var slash =
+
+
+
+      text.lastIndexOf('/');
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      slash >= 0
+
+
+
+    ){
+
+
+
+
+
+
+
+      text =
+
+
+
+        text.substring(
+
+
+
+          slash + 1
+
+
+
+        );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    text =
+
+
+
+      text.replace(
+
+
+
+        /[?#].*$/,
+
+
+
+        ''
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    text =
+
+
+
+      removeFileExtension(
+
+
+
+        text
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    return text
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /[\u2010\u2011\u2012\u2013\u2014\u2212]/g,
+
+
+
+        '-'
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /&/g,
+
+
+
+        ' and '
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /\s+/g,
+
+
+
+        ' '
+
+
+
+      )
+
+
+
+
+
+
+
+      .trim()
+
+
+
+
+
+
+
+      .toLowerCase();
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function compactFileKey(value){
+
+
+
+
+
+
+
+    return normalizeFileStem(
+
+
+
+      value
+
+
+
+    )
+
+
+
+
+
+
+
+    .replace(
+
+
+
+      /[^a-z0-9]+/g,
+
+
+
+      ''
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function getFileExtension(value){
+
+
+
+
+
+
+
+    var match =
+
+
+
+      String(
+
+
+
+        value ||
+
+
+
+        ''
+
+
+
+      )
+
+
+
+
+
+
+
+      .toLowerCase()
+
+
+
+
+
+
+
+      .match(
+
+
+
+        /\.([a-z0-9]{1,10})$/
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    return match
+
+
+
+      ? match[1]
+
+
+
+      : '';
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     CREATE LOOKUP CANDIDATES FROM EXCEL ROW
+
+
+
+
+
+
+
+     Important fix for links such as:
+
+
+
+
+
+
+
+     10-08-2026SD2026Banks314
+
+
+
+
+
+
+
+     The real filename can still be found using:
+
+
+
+
+
+
+
+     Date + Circular + Subject
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function addUniqueCandidate(
+
+
+
+    list,
+
+
+
+    used,
+
+
+
+    value
+
+
+
+  ){
+
+
+
+
+
+
+
+    value =
+
+
+
+      String(
+
+
+
+        value ||
+
+
+
+        ''
+
+
+
+      ).trim();
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !value
+
+
+
+    ){
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var key =
+
+
+
+      compactFileKey(
+
+
+
+        value
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !key ||
+
+
+
+      used[key]
+
+
+
+    ){
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    used[key] =
+
+
+
+      true;
+
+
+
+
+
+
+
+
+
+
+
+    list.push(
+
+
+
+      value
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function buildRowFileCandidates(row){
+
+
+
+
+
+
+
+    var list =
+
+
+
+      [];
+
+
+
+
+
+
+
+
+
+
+
+    var used =
+
+
+
+      {};
+
+
+
+
+
+
+
+
+
+
+
+    var oldFileName =
+
+
+
+      getBaseName(
+
+
+
+        row.rawLink
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    var date =
+
+
+
+      normalizeDateForFile(
+
+
+
+        row.date
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    var circular =
+
+
+
+      String(
+
+
+
+        row.circular ||
+
+
+
+        ''
+
+
+
+      ).trim();
+
+
+
+
+
+
+
+
+
+
+
+    var subject =
+
+
+
+      String(
+
+
+
+        row.subject ||
+
+
+
+        ''
+
+
+
+      ).trim();
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Candidate 1:
+
+
+
+      filename contained in old hyperlink
+
+
+
+    */
+
+
+
+
+
+
+
+    addUniqueCandidate(
+
+
+
+      list,
+
+
+
+      used,
+
+
+
+      oldFileName
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Candidate 2:
+
+
+
+      strongest reconstruction
+
+
+
+    */
+
+
+
+
+
+
+
+    addUniqueCandidate(
+
+
+
+
+
+
+
+      list,
+
+
+
+      used,
+
+
+
+
+
+
+
+      [
+
+
+
+        date,
+
+
+
+        circular,
+
+
+
+        subject
+
+
+
+      ]
+
+
+
+
+
+
+
+      .filter(
+
+
+
+        function(value){
+
+
+
+          return !!value;
+
+
+
+        }
+
+
+
+      )
+
+
+
+
+
+
+
+      .join(' ')
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Candidate 3:
+
+
+
+      Date + Circular.
+
+
+
+      Perfect for truncated legacy links.
+
+
+
+    */
+
+
+
+
+
+
+
+    addUniqueCandidate(
+
+
+
+
+
+
+
+      list,
+
+
+
+      used,
+
+
+
+
+
+
+
+      [
+
+
+
+        date,
+
+
+
+        circular
+
+
+
+      ]
+
+
+
+
+
+
+
+      .filter(
+
+
+
+        function(value){
+
+
+
+          return !!value;
+
+
+
+        }
+
+
+
+      )
+
+
+
+
+
+
+
+      .join(' ')
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Candidate 4
+
+
+
+    */
+
+
+
+
+
+
+
+    addUniqueCandidate(
+
+
+
+
+
+
+
+      list,
+
+
+
+      used,
+
+
+
+
+
+
+
+      [
+
+
+
+        circular,
+
+
+
+        subject
+
+
+
+      ]
+
+
+
+
+
+
+
+      .filter(
+
+
+
+        function(value){
+
+
+
+          return !!value;
+
+
+
+        }
+
+
+
+      )
+
+
+
+
+
+
+
+      .join(' ')
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Candidate 5
+
+
+
+    */
+
+
+
+
+
+
+
+    addUniqueCandidate(
+
+
+
+      list,
+
+
+
+      used,
+
+
+
+      subject
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    return list;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     NORMAL DIRECT LINK
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function normalizeWebUrl(value){
+
+
+
+
+
+
+
+    var decoded =
+
+
+
+      decodeAndRepair(
+
+
+
+        value
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    try{
+
+
+
+
+
+
+
+      return encodeURI(
+
+
+
+        decoded
+
+
+
+      );
+
+
+
+
+
+
+
+    }catch(e){
+
+
+
+
+
+
+
+      return decoded;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function isCurrentSharePointDocument(value){
+
+
+
+
+
+
+
+    if(
+
+
+
+      !SHAREPOINT_BASE_DECODED
+
+
+
+    ){
+
+
+
+
+
+
+
+      return false;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return (
+
+
+
+
+
+
+
+      decodeAndRepair(
+
+
+
+        value
+
+
+
+      )
+
+
+
+
+
+
+
+      .toLowerCase()
+
+
+
+
+
+
+
+      .indexOf(
+
+
+
+        SHAREPOINT_BASE_DECODED.toLowerCase()
+
+
+
+      )
+
+
+
+
+
+
+
+      === 0
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function isCboFileReference(value){
+
+
+
+
+
+
+
+    var decoded =
+
+
+
+      decodeAndRepair(
+
+
+
+        value
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /\\/g,
+
+
+
+        '/'
+
+
+
+      )
+
+
+
+
+
+
+
+      .toLowerCase();
+
+
+
+
+
+
+
+
+
+
+
+    return (
+
+
+
+
+
+
+
+      decoded.indexOf(
+
+
+
+        'cbo/cbo circulars/'
+
+
+
+      ) >= 0
+
+
+
+
+
+
+
+      ||
+
+
+
+
+
+
+
+      decoded.indexOf(
+
+
+
+        'cbo/cbocirculars/'
+
+
+
+      ) >= 0
+
+
+
+
+
+
+
+      ||
+
+
+
+
+
+
+
+      decoded.indexOf(
+
+
+
+        'compliance/circulars/cbo/'
+
+
+
+      ) >= 0
+
+
+
+
+
+
+
+      ||
+
+
+
+
+
+
+
+      isCurrentSharePointDocument(
+
+
+
+        value
+
+
+
+      )
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function normalizeHyperlink(value){
+
+
+
+
+
+
+
+    var raw =
+
+
+
+      String(
+
+
+
+        value ||
+
+
+
+        ''
+
+
+
+      ).trim();
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !raw
+
+
+
+    ){
+
+
+
+
+
+
+
+      return '';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var decoded =
+
+
+
+      decodeAndRepair(
+
+
+
+        raw
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      /^https?:\/\//i.test(
+
+
+
+        decoded
+
+
+
+      )
+
+
+
+    ){
+
+
+
+
+
+
+
+      if(
+
+
+
+        isCboFileReference(
+
+
+
+          decoded
+
+
+
+        )
+
+
+
+      ){
+
+
+
+
+
+
+
+        return buildSharePointUrl(
+
+
+
+
+
+
+
+          extractCircularRelativePath(
+
+
+
+            decoded
+
+
+
+          )
+
+
+
+
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      return normalizeWebUrl(
+
+
+
+        decoded
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var relative =
+
+
+
+      extractCircularRelativePath(
+
+
+
+        decoded
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      relative
+
+
+
+    ){
+
+
+
+
+
+
+
+      return buildSharePointUrl(
+
+
+
+        relative
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return '';
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     EXCEL CELL
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function formatCell(cell){
+
+
+
+
+
+
+
+    if(
+
+
+
+      !cell
+
+
+
+    ){
+
+
+
+
+
+
+
+      return '';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+
+
+
+
+      typeof cell.w !==
+
+
+
+      'undefined'
+
+
+
+
+
+
+
+      &&
+
+
+
+
+
+
+
+      cell.w !== null
+
+
+
+
+
+
+
+      &&
+
+
+
+
+
+
+
+      String(
+
+
+
+        cell.w
+
+
+
+      ).trim() !== ''
+
+
+
+
+
+
+
+    ){
+
+
+
+
+
+
+
+      return String(
+
+
+
+        cell.w
+
+
+
+      ).trim();
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+
+
+
+
+      typeof cell.v !==
+
+
+
+      'undefined'
+
+
+
+
+
+
+
+      &&
+
+
+
+
+
+
+
+      cell.v !== null
+
+
+
+
+
+
+
+    ){
+
+
+
+
+
+
+
+      return String(
+
+
+
+        cell.v
+
+
+
+      ).trim();
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return '';
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function extractCellLink(cell){
+
+
+
+
+
+
+
+    if(
+
+
+
+      !cell
+
+
+
+    ){
+
+
+
+
+
+
+
+      return '';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Standard Excel hyperlink
+
+
+
+    */
+
+
+
+
+
+
+
+    if(
+
+
+
+      cell.l
+
+
+
+    ){
+
+
+
+
+
+
+
+      if(
+
+
+
+        cell.l.Target
+
+
+
+      ){
+
+
+
+
+
+
+
+        return String(
+
+
+
+          cell.l.Target
+
+
+
+        ).trim();
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        cell.l.target
+
+
+
+      ){
+
+
+
+
+
+
+
+        return String(
+
+
+
+          cell.l.target
+
+
+
+        ).trim();
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Excel HYPERLINK()
+
+
+
+    */
+
+
+
+
+
+
+
+    if(
+
+
+
+      cell.f
+
+
+
+    ){
+
+
+
+
+
+
+
+      var formula =
+
+
+
+        String(
+
+
+
+          cell.f
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      var match =
+
+
+
+        formula.match(
+
+
+
+
+
+
+
+          /^HYPERLINK\s*\(\s*"((?:[^"]|"")+)"/i
+
+
+
+
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        match &&
+
+
+
+        match[1]
+
+
+
+      ){
+
+
+
+
+
+
+
+        return match[1]
+
+
+
+
+
+
+
+          .replace(
+
+
+
+            /""/g,
+
+
+
+            '"'
+
+
+
+          )
+
+
+
+
+
+
+
+          .trim();
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var value =
+
+
+
+      formatCell(
+
+
+
+        cell
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !value
+
+
+
+    ){
+
+
+
+
+
+
+
+      return '';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Includes:
+
+
+
+      File:///\\oabstg\...
+
+
+
+    */
+
+
+
+
+
+
+
+    if(
+
+
+
+      /^file:/i.test(
+
+
+
+        value
+
+
+
+      )
+
+
+
+    ){
+
+
+
+
+
+
+
+      return value;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      /^https?:\/\//i.test(
+
+
+
+        value
+
+
+
+      )
+
+
+
+    ){
+
+
+
+
+
+
+
+      return value;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      /^\\\\/.test(
+
+
+
+        value
+
+
+
+      )
+
+
+
+    ){
+
+
+
+
+
+
+
+      return value;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      /^[A-Za-z]:[\\/]/.test(
+
+
+
+        value
+
+
+
+      )
+
+
+
+    ){
+
+
+
+
+
+
+
+      return value;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var normalized =
+
+
+
+      decodeAndRepair(
+
+
+
+        value
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /\\/g,
+
+
+
+        '/'
+
+
+
+      )
+
+
+
+
+
+
+
+      .toLowerCase();
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+
+
+
+
+      normalized.indexOf(
+
+
+
+        'cbo/cbo circulars/'
+
+
+
+      ) >= 0
+
+
+
+
+
+
+
+      ||
+
+
+
+
+
+
+
+      normalized.indexOf(
+
+
+
+        'cbo/cbocirculars/'
+
+
+
+      ) >= 0
+
+
+
+
+
+
+
+      ||
+
+
+
+
+
+
+
+      normalized.indexOf(
+
+
+
+        'compliance/circulars/cbo/'
+
+
+
+      ) >= 0
+
+
+
+
+
+
+
+    ){
+
+
+
+
+
+
+
+      return value;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return '';
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     HEADERS
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function findHeaderRow(
+
+
+
+    ws,
+
+
+
+    range
+
+
+
+  ){
+
+
+
+
+
+
+
+    var best =
+
+
+
+      null;
+
+
+
+
+
+
+
+
+
+
+
+    var maxRow =
+
+
+
+      Math.min(
+
+
+
+        range.e.r,
+
+
+
+        range.s.r + 30
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var r = range.s.r;
+
+
+
+      r <= maxRow;
+
+
+
+      r++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var map = {
+
+
+
+
+
+
+
+        date:-1,
+
+
+
+
+
+
+
+        circular:-1,
+
+
+
+
+
+
+
+        subject:-1,
+
+
+
+
+
+
+
+        business:-1
+
+
+
+
+
+
+
+      };
+
+
+
+
+
+
+
+
+
+
+
+      for(
+
+
+
+        var c = range.s.c;
+
+
+
+        c <= range.e.c;
+
+
+
+        c++
+
+
+
+      ){
+
+
+
+
+
+
+
+        var cell =
+
+
+
+          ws[
+
+
+
+            XLSX.utils.encode_cell({
+
+
+
+              r:r,
+
+
+
+              c:c
+
+
+
+            })
+
+
+
+          ];
+
+
+
+
+
+
+
+
+
+
+
+        var key =
+
+
+
+          headerKey(
+
+
+
+            formatCell(
+
+
+
+              cell
+
+
+
+            )
+
+
+
+          );
+
+
+
+
+
+
+
+
+
+
+
+        if(
+
+
+
+          key === 'date'
+
+
+
+        ){
+
+
+
+
+
+
+
+          map.date =
+
+
+
+            c;
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+        if(
+
+
+
+
+
+
+
+          key === 'circularregulation'
+
+
+
+
+
+
+
+          ||
+
+
+
+
+
+
+
+          key === 'circular'
+
+
+
+
+
+
+
+          ||
+
+
+
+
+
+
+
+          key === 'regulation'
+
+
+
+
+
+
+
+          ||
+
+
+
+
+
+
+
+          key.indexOf(
+
+
+
+            'circular'
+
+
+
+          ) >= 0
+
+
+
+
+
+
+
+          ||
+
+
+
+
+
+
+
+          key.indexOf(
+
+
+
+            'regulation'
+
+
+
+          ) >= 0
+
+
+
+
+
+
+
+        ){
+
+
+
+
+
+
+
+          map.circular =
+
+
+
+            c;
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+        if(
+
+
+
+          key === 'subject'
+
+
+
+        ){
+
+
+
+
+
+
+
+          map.subject =
+
+
+
+            c;
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+        if(
+
+
+
+
+
+
+
+          key === 'businessline'
+
+
+
+
+
+
+
+          ||
+
+
+
+
+
+
+
+          key === 'business'
+
+
+
+
+
+
+
+        ){
+
+
+
+
+
+
+
+          map.business =
+
+
+
+            c;
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      var score =
+
+
+
+        0;
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        map.date >= 0
+
+
+
+      ){
+
+
+
+        score++;
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        map.circular >= 0
+
+
+
+      ){
+
+
+
+        score++;
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        map.subject >= 0
+
+
+
+      ){
+
+
+
+        score++;
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        map.business >= 0
+
+
+
+      ){
+
+
+
+        score++;
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        !best ||
+
+
+
+        score > best.score
+
+
+
+      ){
+
+
+
+
+
+
+
+        best = {
+
+
+
+
+
+
+
+          row:r,
+
+
+
+
+
+
+
+          score:score,
+
+
+
+
+
+
+
+          map:map
+
+
+
+
+
+
+
+        };
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        score === 4
+
+
+
+      ){
+
+
+
+
+
+
+
+        break;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return (
+
+
+
+      best &&
+
+
+
+      best.score === 4
+
+
+
+    )
+
+
+
+
+
+
+
+      ? best
+
+
+
+
+
+
+
+      : null;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     PARSE SHEET
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function parseSheetRows(
+
+
+
+    workbook,
+
+
+
+    sheetName
+
+
+
+  ){
+
+
+
+
+
+
+
+    var ws =
+
+
+
+      workbook.Sheets[
+
+
+
+        sheetName
+
+
+
+      ];
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !ws ||
+
+
+
+      !ws['!ref']
+
+
+
+    ){
+
+
+
+
+
+
+
+      return {
+
+
+
+
+
+
+
+        ok:false,
+
+
+
+
+
+
+
+        error:
+
+
+
+          'Worksheet "' +
+
+
+
+          sheetName +
+
+
+
+          '" was not found or is empty.',
+
+
+
+
+
+
+
+        rows:[]
+
+
+
+
+
+
+
+      };
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var range =
+
+
+
+      XLSX.utils.decode_range(
+
+
+
+        ws['!ref']
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    var header =
+
+
+
+      findHeaderRow(
+
+
+
+        ws,
+
+
+
+        range
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !header
+
+
+
+    ){
+
+
+
+
+
+
+
+      return {
+
+
+
+
+
+
+
+        ok:false,
+
+
+
+
+
+
+
+        error:
+
+
+
+          'Required headers were not found in "' +
+
+
+
+          sheetName +
+
+
+
+          '".',
+
+
+
+
+
+
+
+        rows:[]
+
+
+
+
+
+
+
+      };
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var rows =
+
+
+
+      [];
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var r = header.row + 1;
+
+
+
+      r <= range.e.r;
+
+
+
+      r++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var dateCell =
+
+
+
+        ws[
+
+
+
+          XLSX.utils.encode_cell({
+
+
+
+            r:r,
+
+
+
+            c:header.map.date
+
+
+
+          })
+
+
+
+        ];
+
+
+
+
+
+
+
+
+
+
+
+      var circularCell =
+
+
+
+        ws[
+
+
+
+          XLSX.utils.encode_cell({
+
+
+
+            r:r,
+
+
+
+            c:header.map.circular
+
+
+
+          })
+
+
+
+        ];
+
+
+
+
+
+
+
+
+
+
+
+      var subjectCell =
+
+
+
+        ws[
+
+
+
+          XLSX.utils.encode_cell({
+
+
+
+            r:r,
+
+
+
+            c:header.map.subject
+
+
+
+          })
+
+
+
+        ];
+
+
+
+
+
+
+
+
+
+
+
+      var businessCell =
+
+
+
+        ws[
+
+
+
+          XLSX.utils.encode_cell({
+
+
+
+            r:r,
+
+
+
+            c:header.map.business
+
+
+
+          })
+
+
+
+        ];
+
+
+
+
+
+
+
+
+
+
+
+      var rawLink =
+
+
+
+        extractCellLink(
+
+
+
+          circularCell
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      var row = {
+
+
+
+
+
+
+
+        date:
+
+
+
+          formatCell(
+
+
+
+            dateCell
+
+
+
+          ),
+
+
+
+
+
+
+
+        circular:
+
+
+
+          formatCell(
+
+
+
+            circularCell
+
+
+
+          ),
+
+
+
+
+
+
+
+        subject:
+
+
+
+          formatCell(
+
+
+
+            subjectCell
+
+
+
+          ),
+
+
+
+
+
+
+
+        business:
+
+
+
+          formatCell(
+
+
+
+            businessCell
+
+
+
+          ),
+
+
+
+
+
+
+
+        rawLink:
+
+
+
+          rawLink,
+
+
+
+
+
+
+
+        directLink:
+
+
+
+          normalizeHyperlink(
+
+
+
+            rawLink
+
+
+
+          ),
+
+
+
+
+
+
+
+        link:'',
+
+
+
+
+
+
+
+        resolved:false
+
+
+
+
+
+
+
+      };
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+
+
+
+
+        !row.date
+
+
+
+
+
+
+
+        &&
+
+
+
+
+
+
+
+        !row.circular
+
+
+
+
+
+
+
+        &&
+
+
+
+
+
+
+
+        !row.subject
+
+
+
+
+
+
+
+        &&
+
+
+
+
+
+
+
+        !row.business
+
+
+
+
+
+
+
+      ){
+
+
+
+
+
+
+
+        continue;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      row.link =
+
+
+
+        row.directLink;
+
+
+
+
+
+
+
+
+
+
+
+      rows.push(
+
+
+
+        row
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return {
+
+
+
+
+
+
+
+      ok:true,
+
+
+
+
+
+
+
+      error:'',
+
+
+
+
+
+
+
+      rows:rows
+
+
+
+
+
+
+
+    };
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     ACTUAL SHAREPOINT FILE URL
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function buildActualFileUrl(file){
+
+
+
+
+
+
+
+    if(
+
+
+
+      !file
+
+
+
+    ){
+
+
+
+
+
+
+
+      return '';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var serverRelative =
+
+
+
+      String(
+
+
+
+        file.ServerRelativeUrl ||
+
+
+
+        ''
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Best case:
+
+
+
+      SharePoint returned exact ServerRelativeUrl.
+
+
+
+    */
+
+
+
+
+
+
+
+    if(
+
+
+
+      serverRelative &&
+
+
+
+      SHAREPOINT_ORIGIN
+
+
+
+    ){
+
+
+
+
+
+
+
+      try{
+
+
+
+
+
+
+
+        var decoded =
+
+
+
+          safeDecodeRepeated(
+
+
+
+            serverRelative
+
+
+
+          );
+
+
+
+
+
+
+
+
+
+
+
+        var segments =
+
+
+
+          decoded.split('/');
+
+
+
+
+
+
+
+
+
+
+
+        var encoded =
+
+
+
+          segments
+
+
+
+
+
+
+
+          .map(
+
+
+
+            function(segment,index){
+
+
+
+
+
+
+
+              if(
+
+
+
+                index === 0 &&
+
+
+
+                segment === ''
+
+
+
+              ){
+
+
+
+
+
+
+
+                return '';
+
+
+
+
+
+
+
+              }
+
+
+
+
+
+
+
+
+
+
+
+              return encodeURIComponent(
+
+
+
+                segment
+
+
+
+              );
+
+
+
+
+
+
+
+            }
+
+
+
+          )
+
+
+
+
+
+
+
+          .join('/');
+
+
+
+
+
+
+
+
+
+
+
+        return (
+
+
+
+          SHAREPOINT_ORIGIN +
+
+
+
+          encoded
+
+
+
+        );
+
+
+
+
+
+
+
+      }catch(e){}
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      Fallback using Name.
+
+
+
+    */
+
+
+
+
+
+
+
+    if(
+
+
+
+      file.Name
+
+
+
+    ){
+
+
+
+
+
+
+
+      return buildSharePointUrl(
+
+
+
+        file.Name
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return '';
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     FILE INVENTORY
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function resetFileInventory(){
+
+
+
+
+
+
+
+    state.fileInventory =
+
+
+
+      [];
+
+
+
+
+
+
+
+
+
+
+
+    state.compactIndex =
+
+
+
+      {};
+
+
+
+
+
+
+
+
+
+
+
+    state.resolverAvailable =
+
+
+
+      false;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function indexFiles(files){
+
+
+
+
+
+
+
+    resetFileInventory();
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var i = 0;
+
+
+
+      i < files.length;
+
+
+
+      i++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var original =
+
+
+
+        files[i];
+
+
+
+
+
+
+
+
+
+
+
+      var name =
+
+
+
+        String(
+
+
+
+          original.Name ||
+
+
+
+          ''
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        !name
+
+
+
+      ){
+
+
+
+
+
+
+
+        continue;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      var item = {
+
+
+
+
+
+
+
+        Name:
+
+
+
+          name,
+
+
+
+
+
+
+
+        ServerRelativeUrl:
+
+
+
+          String(
+
+
+
+            original.ServerRelativeUrl ||
+
+
+
+            ''
+
+
+
+          ),
+
+
+
+
+
+
+
+        compact:
+
+
+
+          compactFileKey(
+
+
+
+            name
+
+
+
+          ),
+
+
+
+
+
+
+
+        extension:
+
+
+
+          getFileExtension(
+
+
+
+            name
+
+
+
+          ),
+
+
+
+
+
+
+
+        url:
+
+
+
+          ''
+
+
+
+
+
+
+
+      };
+
+
+
+
+
+
+
+
+
+
+
+      item.url =
+
+
+
+        buildActualFileUrl(
+
+
+
+          item
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      state.fileInventory.push(
+
+
+
+        item
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        !state.compactIndex[
+
+
+
+          item.compact
+
+
+
+        ]
+
+
+
+      ){
+
+
+
+
+
+
+
+        state.compactIndex[
+
+
+
+          item.compact
+
+
+
+        ] =
+
+
+
+          [];
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      state.compactIndex[
+
+
+
+        item.compact
+
+
+
+      ].push(
+
+
+
+        item
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    state.resolverAvailable =
+
+
+
+      state.fileInventory.length > 0;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     TOKEN MATCHING
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function tokenize(value){
+
+
+
+
+
+
+
+    var text =
+
+
+
+      normalizeFileStem(
+
+
+
+        value
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /[^a-z0-9]+/g,
+
+
+
+        ' '
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    var source =
+
+
+
+      text.split(/\s+/);
+
+
+
+
+
+
+
+
+
+
+
+    var result =
+
+
+
+      [];
+
+
+
+
+
+
+
+
+
+
+
+    var used =
+
+
+
+      {};
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var i = 0;
+
+
+
+      i < source.length;
+
+
+
+      i++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var token =
+
+
+
+        source[i];
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        !token ||
+
+
+
+        token.length < 2 ||
+
+
+
+        used[token]
+
+
+
+      ){
+
+
+
+
+
+
+
+        continue;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      used[token] =
+
+
+
+        true;
+
+
+
+
+
+
+
+
+
+
+
+      result.push(
+
+
+
+        token
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return result;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function similarity(a,b){
+
+
+
+
+
+
+
+    var aTokens =
+
+
+
+      tokenize(
+
+
+
+        a
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    var bTokens =
+
+
+
+      tokenize(
+
+
+
+        b
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !aTokens.length ||
+
+
+
+      !bTokens.length
+
+
+
+    ){
+
+
+
+
+
+
+
+      return 0;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var map =
+
+
+
+      {};
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var i = 0;
+
+
+
+      i < bTokens.length;
+
+
+
+      i++
+
+
+
+    ){
+
+
+
+
+
+
+
+      map[
+
+
+
+        bTokens[i]
+
+
+
+      ] =
+
+
+
+        true;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var common =
+
+
+
+      0;
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var j = 0;
+
+
+
+      j < aTokens.length;
+
+
+
+      j++
+
+
+
+    ){
+
+
+
+
+
+
+
+      if(
+
+
+
+        map[
+
+
+
+          aTokens[j]
+
+
+
+        ]
+
+
+
+      ){
+
+
+
+
+
+
+
+        common++;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return (
+
+
+
+      2 *
+
+
+
+      common /
+
+
+
+      (
+
+
+
+        aTokens.length +
+
+
+
+        bTokens.length
+
+
+
+      )
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     SMART ROW RESOLVER
+
+
+
+
+
+
+
+     This is the important new part.
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function resolveRowFile(row){
+
+
+
+
+
+
+
+    if(
+
+
+
+      !state.resolverAvailable
+
+
+
+    ){
+
+
+
+
+
+
+
+      return null;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var candidates =
+
+
+
+      buildRowFileCandidates(
+
+
+
+        row
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      1. Exact compact match.
+
+
+
+    */
+
+
+
+
+
+
+
+    for(
+
+
+
+      var i = 0;
+
+
+
+      i < candidates.length;
+
+
+
+      i++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var exactKey =
+
+
+
+        compactFileKey(
+
+
+
+          candidates[i]
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      var exactFiles =
+
+
+
+        state.compactIndex[
+
+
+
+          exactKey
+
+
+
+        ];
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        exactFiles &&
+
+
+
+        exactFiles.length === 1
+
+
+
+      ){
+
+
+
+
+
+
+
+        return exactFiles[0];
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      2. Strong Date + Circular prefix.
+
+
+
+
+
+
+
+      Example:
+
+
+
+
+
+
+
+      Excel:
+
+
+
+      10-08-2026SD2026Banks314
+
+
+
+
+
+
+
+      Real file:
+
+
+
+      10-08-2026 SD 2026 Banks 314 Treatment...
+
+
+
+    */
+
+
+
+
+
+
+
+    var core =
+
+
+
+      compactFileKey(
+
+
+
+
+
+
+
+        normalizeDateForFile(
+
+
+
+          row.date
+
+
+
+        )
+
+
+
+
+
+
+
+        +
+
+
+
+
+
+
+
+        ' '
+
+
+
+
+
+
+
+        +
+
+
+
+
+
+
+
+        String(
+
+
+
+          row.circular ||
+
+
+
+          ''
+
+
+
+        )
+
+
+
+
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      core.length >= 10
+
+
+
+    ){
+
+
+
+
+
+
+
+      var coreMatches =
+
+
+
+        [];
+
+
+
+
+
+
+
+
+
+
+
+      for(
+
+
+
+        var c = 0;
+
+
+
+        c < state.fileInventory.length;
+
+
+
+        c++
+
+
+
+      ){
+
+
+
+
+
+
+
+        if(
+
+
+
+          state.fileInventory[c]
+
+
+
+            .compact
+
+
+
+            .indexOf(
+
+
+
+              core
+
+
+
+            ) === 0
+
+
+
+        ){
+
+
+
+
+
+
+
+          coreMatches.push(
+
+
+
+            state.fileInventory[c]
+
+
+
+          );
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        coreMatches.length === 1
+
+
+
+      ){
+
+
+
+
+
+
+
+        return coreMatches[0];
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      3. Prefix matching for every candidate.
+
+
+
+    */
+
+
+
+
+
+
+
+    for(
+
+
+
+      var p = 0;
+
+
+
+      p < candidates.length;
+
+
+
+      p++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var candidateKey =
+
+
+
+        compactFileKey(
+
+
+
+          candidates[p]
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        candidateKey.length < 12
+
+
+
+      ){
+
+
+
+
+
+
+
+        continue;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      var prefixMatches =
+
+
+
+        [];
+
+
+
+
+
+
+
+
+
+
+
+      for(
+
+
+
+        var f = 0;
+
+
+
+        f < state.fileInventory.length;
+
+
+
+        f++
+
+
+
+      ){
+
+
+
+
+
+
+
+        var actualKey =
+
+
+
+          state.fileInventory[f]
+
+
+
+            .compact;
+
+
+
+
+
+
+
+
+
+
+
+        if(
+
+
+
+
+
+
+
+          actualKey.indexOf(
+
+
+
+            candidateKey
+
+
+
+          ) === 0
+
+
+
+
+
+
+
+          ||
+
+
+
+
+
+
+
+          (
+
+
+
+            actualKey.length >= 14
+
+
+
+
+
+
+
+            &&
+
+
+
+
+
+
+
+            candidateKey.indexOf(
+
+
+
+              actualKey
+
+
+
+            ) === 0
+
+
+
+          )
+
+
+
+
+
+
+
+        ){
+
+
+
+
+
+
+
+          prefixMatches.push(
+
+
+
+            state.fileInventory[f]
+
+
+
+          );
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        prefixMatches.length === 1
+
+
+
+      ){
+
+
+
+
+
+
+
+        return prefixMatches[0];
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
+
+
+      4. Controlled fuzzy match using the
+
+
+
+         reconstructed full filename.
+
+
+
+    */
+
+
+
+
+
+
+
+    var fullCandidate =
+
+
+
+      [
+
+
+
+
+
+
+
+        normalizeDateForFile(
+
+
+
+          row.date
+
+
+
+        ),
+
+
+
+
+
+
+
+        row.circular,
+
+
+
+
+
+
+
+        row.subject
+
+
+
+
+
+
+
+      ]
+
+
+
+
+
+
+
+      .filter(
+
+
+
+        function(value){
+
+
+
+          return !!value;
+
+
+
+        }
+
+
+
+      )
+
+
+
+
+
+
+
+      .join(' ');
+
+
+
+
+
+
+
+
+
+
+
+    var best =
+
+
+
+      null;
+
+
+
+
+
+
+
+
+
+
+
+    var bestScore =
+
+
+
+      0;
+
+
+
+
+
+
+
+
+
+
+
+    var secondScore =
+
+
+
+      0;
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var x = 0;
+
+
+
+      x < state.fileInventory.length;
+
+
+
+      x++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var score =
+
+
+
+        similarity(
+
+
+
+
+
+
+
+          fullCandidate,
+
+
+
+
+
+
+
+          state.fileInventory[x].Name
+
+
+
+
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        core &&
+
+
+
+        state.fileInventory[x]
+
+
+
+          .compact
+
+
+
+          .indexOf(
+
+
+
+            core
+
+
+
+          ) === 0
+
+
+
+      ){
+
+
+
+
+
+
+
+        score +=
+
+
+
+          0.35;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        score > bestScore
+
+
+
+      ){
+
+
+
+
+
+
+
+        secondScore =
+
+
+
+          bestScore;
+
+
+
+
+
+
+
+
+
+
+
+        bestScore =
+
+
+
+          score;
+
+
+
+
+
+
+
+
+
+
+
+        best =
+
+
+
+          state.fileInventory[x];
+
+
+
+
+
+
+
+      }else if(
+
+
+
+        score > secondScore
+
+
+
+      ){
+
+
+
+
+
+
+
+        secondScore =
+
+
+
+          score;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+
+
+
+
+      best
+
+
+
+
+
+
+
+      &&
+
+
+
+
+
+
+
+      bestScore >= 0.72
+
+
+
+
+
+
+
+      &&
+
+
+
+
+
+
+
+      (
+
+
+
+        bestScore -
+
+
+
+        secondScore
+
+
+
+      ) >= 0.08
+
+
+
+
+
+
+
+    ){
+
+
+
+
+
+
+
+      return best;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return null;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function resolveAllLinks(){
+
+
+
+
+
+
+
+    var sectionKeys =
+
+
+
+      [
+
+
+
+        'one',
+
+
+
+        'two'
+
+
+
+      ];
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var s = 0;
+
+
+
+      s < sectionKeys.length;
+
+
+
+      s++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var rows =
+
+
+
+        state.sections[
+
+
+
+          sectionKeys[s]
+
+
+
+        ].rows;
+
+
+
+
+
+
+
+
+
+
+
+      for(
+
+
+
+        var i = 0;
+
+
+
+        i < rows.length;
+
+
+
+        i++
+
+
+
+      ){
+
+
+
+
+
+
+
+        var row =
+
+
+
+          rows[i];
+
+
+
+
+
+
+
+
+
+
+
+        row.resolved =
+
+
+
+          false;
+
+
+
+
+
+
+
+
+
+
+
+        /*
+
+
+
+          Keep genuine external websites untouched.
+
+
+
+        */
+
+
+
+
+
+
+
+        if(
+
+
+
+
+
+
+
+          row.rawLink
+
+
+
+
+
+
+
+          &&
+
+
+
+
+
+
+
+          /^https?:\/\//i.test(
+
+
+
+            decodeAndRepair(
+
+
+
+              row.rawLink
+
+
+
+            )
+
+
+
+          )
+
+
+
+
+
+
+
+          &&
+
+
+
+
+
+
+
+          !isCboFileReference(
+
+
+
+            row.rawLink
+
+
+
+          )
+
+
+
+
+
+
+
+        ){
+
+
+
+
+
+
+
+          row.link =
+
+
+
+            row.directLink;
+
+
+
+
+
+
+
+
+
+
+
+          continue;
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+        var matchedFile =
+
+
+
+          resolveRowFile(
+
+
+
+            row
+
+
+
+          );
+
+
+
+
+
+
+
+
+
+
+
+        if(
+
+
+
+          matchedFile &&
+
+
+
+          matchedFile.url
+
+
+
+        ){
+
+
+
+
+
+
+
+          /*
+
+
+
+            Use the REAL file URL returned
+
+
+
+            from SharePoint.
+
+
+
+          */
+
+
+
+
+
+
+
+          row.link =
+
+
+
+            matchedFile.url;
+
+
+
+
+
+
+
+
+
+
+
+          row.resolved =
+
+
+
+            true;
+
+
+
+
+
+
+
+        }else{
+
+
+
+
+
+
+
+          /*
+
+
+
+            Fallback to standard converted URL.
+
+
+
+          */
+
+
+
+
+
+
+
+          row.link =
+
+
+
+            row.directLink;
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     SHAREPOINT REST
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function buildFilesApiUrl(siteBase){
+
+
+
+
+
+
+
+    var folder =
+
+
+
+      SHAREPOINT_FOLDER_PATH
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /'/g,
+
+
+
+        "''"
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    var endpoint =
+
+
+
+
+
+
+
+      String(
+
+
+
+        siteBase ||
+
+
+
+        ''
+
+
+
+      )
+
+
+
+
+
+
+
+      .replace(
+
+
+
+        /\/+$/,
+
+
+
+        ''
+
+
+
+      )
+
+
+
+
+
+
+
+      +
+
+
+
+
+
+
+
+      "/_api/web/GetFolderByServerRelativeUrl('"
+
+
+
+
+
+
+
+      +
+
+
+
+
+
+
+
+      folder
+
+
+
+
+
+
+
+      +
+
+
+
+
+
+
+
+      "')/Files"
+
+
+
+
+
+
+
+      +
+
+
+
+
+
+
+
+      "?$select=Name,ServerRelativeUrl"
+
+
+
+
+
+
+
+      +
+
+
+
+
+
+
+
+      "&$top=5000";
+
+
+
+
+
+
+
+
+
+
+
+    try{
+
+
+
+
+
+
+
+      return encodeURI(
+
+
+
+        endpoint
+
+
+
+      );
+
+
+
+
+
+
+
+    }catch(e){
+
+
+
+
+
+
+
+      return endpoint;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function extractRestFiles(json){
+
+
+
+
+
+
+
+    if(
+
+
+
+      !json
+
+
+
+    ){
+
+
+
+
+
+
+
+      return [];
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      Array.isArray(
+
+
+
+        json.value
+
+
+
+      )
+
+
+
+    ){
+
+
+
+
+
+
+
+      return json.value;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      json.d
+
+
+
+      &&
+
+
+
+      Array.isArray(
+
+
+
+        json.d.results
+
+
+
+      )
+
+
+
+    ){
+
+
+
+
+
+
+
+      return json.d.results;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return [];
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function fetchJson(
+
+
+
+    url,
+
+
+
+    callback
+
+
+
+  ){
+
+
+
+
+
+
+
+    fetch(
+
+
+
+      url,
+
+
+
+      {
+
+
+
+
+
+
+
+        method:'GET',
+
+
+
+
+
+
+
+        credentials:'same-origin',
+
+
+
+
+
+
+
+        cache:'no-store',
+
+
+
+
+
+
+
+        headers:{
+
+
+
+
+
+
+
+          'Accept':
+
+
+
+            'application/json;odata=verbose'
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+      }
+
+
+
+    )
+
+
+
+
+
+
+
+    .then(
+
+
+
+      function(response){
+
+
+
+
+
+
+
+        if(
+
+
+
+          !response.ok
+
+
+
+        ){
+
+
+
+
+
+
+
+          throw new Error(
+
+
+
+            'REST request failed'
+
+
+
+          );
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+        return response.json();
+
+
+
+
+
+
+
+      }
+
+
+
+    )
+
+
+
+
+
+
+
+    .then(
+
+
+
+      function(json){
+
+
+
+
+
+
+
+        callback(
+
+
+
+          json
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+    )
+
+
+
+
+
+
+
+    .catch(
+
+
+
+      function(){
+
+
+
+
+
+
+
+        callback(
+
+
+
+          null
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function fetchSharePointFiles(callback){
+
+
+
+
+
+
+
+    if(
+
+
+
+      !SHAREPOINT_SITE ||
+
+
+
+      !SHAREPOINT_FOLDER_PATH
+
+
+
+    ){
+
+
+
+
+
+
+
+      callback(
+
+
+
+        []
+
+
+
+      );
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    fetchJson(
+
+
+
+
+
+
+
+      buildFilesApiUrl(
+
+
+
+        SHAREPOINT_SITE
+
+
+
+      ),
+
+
+
+
+
+
+
+      function(json){
+
+
+
+
+
+
+
+        callback(
+
+
+
+          extractRestFiles(
+
+
+
+            json
+
+
+
+          )
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     BUSINESS FILTER
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function splitBusinessLines(value){
+
+
+
+
+
+
+
+    var text =
+
+
+
+      String(
+
+
+
+        value ||
+
+
+
+        ''
+
+
+
+      ).trim();
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !text
+
+
+
+    ){
+
+
+
+
+
+
+
+      return [];
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return text
+
+
+
+
+
+
+
+      .split(
+
+
+
+        /[\/;,|]+/
+
+
+
+      )
+
+
+
+
+
+
+
+      .map(
+
+
+
+        function(value){
+
+
+
+
+
+
+
+          return String(
+
+
+
+            value ||
+
+
+
+            ''
+
+
+
+          ).trim();
+
+
+
+
+
+
+
+        }
+
+
+
+      )
+
+
+
+
+
+
+
+      .filter(
+
+
+
+        function(value){
+
+
+
+
+
+
+
+          return !!value;
+
+
+
+
+
+
+
+        }
+
+
+
+      );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function rowMatchesBusiness(
+
+
+
+    rowBusiness,
+
+
+
+    filterValue
+
+
+
+  ){
+
+
+
+
+
+
+
+    var target =
+
+
+
+      normalizeText(
+
+
+
+        filterValue
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !target
+
+
+
+    ){
+
+
+
+
+
+
+
+      return true;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var items =
+
+
+
+      splitBusinessLines(
+
+
+
+        rowBusiness
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var i = 0;
+
+
+
+      i < items.length;
+
+
+
+      i++
+
+
+
+    ){
+
+
+
+
+
+
+
+      if(
+
+
+
+        normalizeText(
+
+
+
+          items[i]
+
+
+
+        ) === target
+
+
+
+      ){
+
+
+
+
+
+
+
+        return true;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return false;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function populateBusinessFilter(
+
+
+
+    rows,
+
+
+
+    selected
+
+
+
+  ){
+
+
+
+
+
+
+
+    var used =
+
+
+
+      {};
+
+
+
+
+
+
+
+
+
+
+
+    var values =
+
+
+
+      [];
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var i = 0;
+
+
+
+      i < rows.length;
+
+
+
+      i++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var businesses =
+
+
+
+        splitBusinessLines(
+
+
+
+          rows[i].business
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      for(
+
+
+
+        var j = 0;
+
+
+
+        j < businesses.length;
+
+
+
+        j++
+
+
+
+      ){
+
+
+
+
+
+
+
+        var key =
+
+
+
+          normalizeText(
+
+
+
+            businesses[j]
+
+
+
+          );
+
+
+
+
+
+
+
+
+
+
+
+        if(
+
+
+
+          !key ||
+
+
+
+          used[key]
+
+
+
+        ){
+
+
+
+
+
+
+
+          continue;
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+        used[key] =
+
+
+
+          true;
+
+
+
+
+
+
+
+
+
+
+
+        values.push(
+
+
+
+          businesses[j]
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    values.sort(
+
+
+
+      function(a,b){
+
+
+
+
+
+
+
+        return a.localeCompare(
+
+
+
+          b
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    businessFilter.innerHTML =
+
+
+
+
+
+
+
+      '<option value="">' +
+
+
+
+
+
+
+
+        'All Business Lines' +
+
+
+
+
+
+
+
+      '</option>';
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var x = 0;
+
+
+
+      x < values.length;
+
+
+
+      x++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var option =
+
+
+
+        document.createElement(
+
+
+
+          'option'
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      option.value =
+
+
+
+        values[x];
+
+
+
+
+
+
+
+
+
+
+
+      option.textContent =
+
+
+
+        values[x];
+
+
+
+
+
+
+
+
+
+
+
+      businessFilter.appendChild(
+
+
+
+        option
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    businessFilter.value =
+
+
+
+      selected ||
+
+
+
+      '';
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     CURRENT SECTION
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function getActiveSection(){
+
+
+
+
+
+
+
+    return state.sections[
+
+
+
+      state.activeSection
+
+
+
+    ];
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function getActiveSheetName(){
+
+
+
+
+
+
+
+    return state.activeSection ===
+
+
+
+      'one'
+
+
+
+
+
+
+
+      ? SHEET_ONE
+
+
+
+
+
+
+
+      : SHEET_TWO;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function updateSectionCounters(){
+
+
+
+
+
+
+
+    countOne.textContent =
+
+
+
+      state.sections.one.rows.length;
+
+
+
+
+
+
+
+
+
+
+
+    countTwo.textContent =
+
+
+
+      state.sections.two.rows.length;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function updateActiveCounters(
+
+
+
+    total,
+
+
+
+    showing
+
+
+
+  ){
+
+
+
+
+
+
+
+    totalBadge.textContent =
+
+
+
+
+
+
+
+      total +
+
+
+
+
+
+
+
+      (
+
+
+
+        total === 1
+
+
+
+          ? ' record'
+
+
+
+          : ' records'
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    showingBadge.textContent =
+
+
+
+
+
+
+
+      'Showing ' +
+
+
+
+      showing;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     TABLE
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function renderRows(rows){
+
+
+
+
+
+
+
+    if(
+
+
+
+      !rows.length
+
+
+
+    ){
+
+
+
+
+
+
+
+      tableBody.innerHTML =
+
+
+
+
+
+
+
+        '<tr>' +
+
+
+
+
+
+
+
+          '<td colspan="4" class="rc-empty">' +
+
+
+
+
+
+
+
+            'No records found for the selected filters.' +
+
+
+
+
+
+
+
+          '</td>' +
+
+
+
+
+
+
+
+        '</tr>';
+
+
+
+
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var html =
+
+
+
+      '';
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var i = 0;
+
+
+
+      i < rows.length;
+
+
+
+      i++
+
+
+
+    ){
+
+
+
+
+
+
+
+      var row =
+
+
+
+        rows[i];
+
+
+
+
+
+
+
+
+
+
+
+      var circularText =
+
+
+
+        esc(
+
+
+
+          row.circular ||
+
+
+
+          '-'
+
+
+
+        );
+
+
+
+
+
+
+
+
+
+
+
+      var circularHtml;
+
+
+
+
+
+
+
+
+
+
+
+      if(
+
+
+
+        row.link
+
+
+
+      ){
+
+
+
+
+
+
+
+        circularHtml =
+
+
+
+
+
+
+
+          '<a class="rc-link"' +
+
+
+
+
+
+
+
+          ' href="' +
+
+
+
+          esc(
+
+
+
+            row.link
+
+
+
+          ) +
+
+
+
+          '"' +
+
+
+
+
+
+
+
+          ' target="_blank"' +
+
+
+
+
+
+
+
+          ' rel="noopener noreferrer"' +
+
+
+
+
+
+
+
+          ' title="Open document">' +
+
+
+
+
+
+
+
+          circularText +
+
+
+
+
+
+
+
+          '</a>';
+
+
+
+
+
+
+
+      }else{
+
+
+
+
+
+
+
+        circularHtml =
+
+
+
+
+
+
+
+          '<span class="rc-circular-text">' +
+
+
+
+
+
+
+
+          circularText +
+
+
+
+
+
+
+
+          '</span>';
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+      html +=
+
+
+
+
+
+
+
+        '<tr>' +
+
+
+
+
+
+
+
+          '<td class="rc-date">' +
+
+
+
+
+
+
+
+            esc(
+
+
+
+              row.date ||
+
+
+
+              '-'
+
+
+
+            ) +
+
+
+
+
+
+
+
+          '</td>' +
+
+
+
+
+
+
+
+          '<td>' +
+
+
+
+
+
+
+
+            circularHtml +
+
+
+
+
+
+
+
+          '</td>' +
+
+
+
+
+
+
+
+          '<td class="rc-subject">' +
+
+
+
+
+
+
+
+            esc(
+
+
+
+              row.subject ||
+
+
+
+              '-'
+
+
+
+            ) +
+
+
+
+
+
+
+
+          '</td>' +
+
+
+
+
+
+
+
+          '<td>' +
+
+
+
+
+
+
+
+            '<span class="rc-pill">' +
+
+
+
+
+
+
+
+              esc(
+
+
+
+                row.business ||
+
+
+
+                '-'
+
+
+
+              ) +
+
+
+
+
+
+
+
+            '</span>' +
+
+
+
+
+
+
+
+          '</td>' +
+
+
+
+
+
+
+
+        '</tr>';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    tableBody.innerHTML =
+
+
+
+      html;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     FILTERING
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function applyFilters(){
+
+
+
+
+
+
+
+    var section =
+
+
+
+      getActiveSection();
+
+
+
+
+
+
+
+
+
+
+
+    section.search =
+
+
+
+      searchInput.value ||
+
+
+
+      '';
+
+
+
+
+
+
+
+
+
+
+
+    section.business =
+
+
+
+      businessFilter.value ||
+
+
+
+      '';
+
+
+
+
+
+
+
+
+
+
+
+    var query =
+
+
+
+      normalizeText(
+
+
+
+        section.search
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    section.filteredRows =
+
+
+
+      section.rows.filter(
+
+
+
+
+
+
+
+        function(row){
+
+
+
+
+
+
+
+          var searchable =
+
+
+
+            normalizeText([
+
+
+
+
+
+
+
+              row.date,
+
+
+
+
+
+
+
+              row.circular,
+
+
+
+
+
+
+
+              row.subject,
+
+
+
+
+
+
+
+              row.business
+
+
+
+
+
+
+
+            ].join(' '));
+
+
+
+
+
+
+
+
+
+
+
+          var matchesSearch =
+
+
+
+
+
+
+
+            !query
+
+
+
+
+
+
+
+            ||
+
+
+
+
+
+
+
+            searchable.indexOf(
+
+
+
+              query
+
+
+
+            ) >= 0;
+
+
+
+
+
+
+
+
+
+
+
+          var matchesBusiness =
+
+
+
+            rowMatchesBusiness(
+
+
+
+
+
+
+
+              row.business,
+
+
+
+
+
+
+
+              section.business
+
+
+
+
+
+
+
+            );
+
+
+
+
+
+
+
+
+
+
+
+          return (
+
+
+
+            matchesSearch &&
+
+
+
+            matchesBusiness
+
+
+
+          );
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    renderRows(
+
+
+
+      section.filteredRows
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    updateActiveCounters(
+
+
+
+
+
+
+
+      section.rows.length,
+
+
+
+
+
+
+
+      section.filteredRows.length
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    setFooter(
+
+
+
+
+
+
+
+      'Showing ' +
+
+
+
+
+
+
+
+      section.filteredRows.length +
+
+
+
+
+
+
+
+      ' of ' +
+
+
+
+
+
+
+
+      section.rows.length +
+
+
+
+
+
+
+
+      ' records'
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function scheduleApplyFilters(){
+
+
+
+
+
+
+
+    if(
+
+
+
+      state.filterTimer
+
+
+
+    ){
+
+
+
+
+
+
+
+      clearTimeout(
+
+
+
+        state.filterTimer
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    state.filterTimer =
+
+
+
+      setTimeout(
+
+
+
+
+
+
+
+        function(){
+
+
+
+
+
+
+
+          state.filterTimer =
+
+
+
+            null;
+
+
+
+
+
+
+
+
+
+
+
+          applyFilters();
+
+
+
+
+
+
+
+        },
+
+
+
+
+
+
+
+        120
+
+
+
+
+
+
+
+      );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     SECTION UI
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function updateSectionButtons(){
+
+
+
+
+
+
+
+    var one =
+
+
+
+      state.activeSection ===
+
+
+
+      'one';
+
+
+
+
+
+
+
+
+
+
+
+    sectionOne.className =
+
+
+
+
+
+
+
+      'rc-section-btn' +
+
+
+
+
+
+
+
+      (
+
+
+
+        one
+
+
+
+          ? ' active'
+
+
+
+          : ''
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    sectionTwo.className =
+
+
+
+
+
+
+
+      'rc-section-btn' +
+
+
+
+
+
+
+
+      (
+
+
+
+        !one
+
+
+
+          ? ' active'
+
+
+
+          : ''
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    sectionOne.setAttribute(
+
+
+
+
+
+
+
+      'aria-selected',
+
+
+
+
+
+
+
+      one
+
+
+
+        ? 'true'
+
+
+
+        : 'false'
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    sectionTwo.setAttribute(
+
+
+
+
+
+
+
+      'aria-selected',
+
+
+
+
+
+
+
+      !one
+
+
+
+        ? 'true'
+
+
+
+        : 'false'
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function renderActiveSection(){
+
+
+
+
+
+
+
+    var section =
+
+
+
+      getActiveSection();
+
+
+
+
+
+
+
+
+
+
+
+    var name =
+
+
+
+      getActiveSheetName();
+
+
+
+
+
+
+
+
+
+
+
+    updateSectionButtons();
+
+
+
+
+
+
+
+
+
+
+
+    activeTitleText.textContent =
+
+
+
+      name;
+
+
+
+
+
+
+
+
+
+
+
+    table.setAttribute(
+
+
+
+      'aria-label',
+
+
+
+      name
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    searchInput.value =
+
+
+
+      section.search ||
+
+
+
+      '';
+
+
+
+
+
+
+
+
+
+
+
+    populateBusinessFilter(
+
+
+
+
+
+
+
+      section.rows,
+
+
+
+
+
+
+
+      section.business
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    applyFilters();
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function switchSection(key){
+
+
+
+
+
+
+
+    if(
+
+
+
+      state.activeSection === key
+
+
+
+    ){
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    state.activeSection =
+
+
+
+      key;
+
+
+
+
+
+
+
+
+
+
+
+    showMessage(
+
+
+
+      '',
+
+
+
+      'info'
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    renderActiveSection();
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     STATUS
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function showMessage(
+
+
+
+    text,
+
+
+
+    type
+
+
+
+  ){
+
+
+
+
+
+
+
+    if(
+
+
+
+      !text
+
+
+
+    ){
+
+
+
+
+
+
+
+      messageBox.className =
+
+
+
+        'rc-msg info';
+
+
+
+
+
+
+
+
+
+
+
+      messageBox.textContent =
+
+
+
+        '';
+
+
+
+
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    messageBox.textContent =
+
+
+
+      text;
+
+
+
+
+
+
+
+
+
+
+
+    messageBox.className =
+
+
+
+
+
+
+
+      'rc-msg show ' +
+
+
+
+
+
+
+
+      (
+
+
+
+        type === 'error'
+
+
+
+          ? 'error'
+
+
+
+          : 'info'
+
+
+
+      );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function setFooter(text){
+
+
+
+
+
+
+
+    footerStatus.textContent =
+
+
+
+      text ||
+
+
+
+      '';
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function setLoading(text){
+
+
+
+
+
+
+
+    tableBody.innerHTML =
+
+
+
+
+
+
+
+      '<tr>' +
+
+
+
+
+
+
+
+        '<td colspan="4" class="rc-loader">' +
+
+
+
+
+
+
+
+          esc(
+
+
+
+            text ||
+
+
+
+            'Loading records...'
+
+
+
+          ) +
+
+
+
+
+
+
+
+        '</td>' +
+
+
+
+
+
+
+
+      '</tr>';
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  function setLoadingState(value){
+
+
+
+
+
+
+
+    state.isLoading =
+
+
+
+      !!value;
+
+
+
+
+
+
+
+
+
+
+
+    refreshBtn.disabled =
+
+
+
+      state.isLoading;
+
+
+
+
+
+
+
+
+
+
+
+    refreshBtn.textContent =
+
+
+
+
+
+
+
+      state.isLoading
+
+
+
+
+
+
+
+        ? 'Refreshing...'
+
+
+
+
+
+
+
+        : 'Refresh';
+
+
+
+
+
+
+
+
+
+
+
+    sectionOne.disabled =
+
+
+
+      state.isLoading;
+
+
+
+
+
+
+
+
+
+
+
+    sectionTwo.disabled =
+
+
+
+      state.isLoading;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     EVENTS
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function bindUI(){
+
+
+
+
+
+
+
+    searchInput.addEventListener(
+
+
+
+
+
+
+
+      'input',
+
+
+
+
+
+
+
+      scheduleApplyFilters
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    businessFilter.addEventListener(
+
+
+
+
+
+
+
+      'change',
+
+
+
+
+
+
+
+      applyFilters
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    clearBtn.addEventListener(
+
+
+
+
+
+
+
+      'click',
+
+
+
+
+
+
+
+      function(){
+
+
+
+
+
+
+
+        var section =
+
+
+
+          getActiveSection();
+
+
+
+
+
+
+
+
+
+
+
+        section.search =
+
+
+
+          '';
+
+
+
+
+
+
+
+
+
+
+
+        section.business =
+
+
+
+          '';
+
+
+
+
+
+
+
+
+
+
+
+        searchInput.value =
+
+
+
+          '';
+
+
+
+
+
+
+
+
+
+
+
+        businessFilter.value =
+
+
+
+          '';
+
+
+
+
+
+
+
+
+
+
+
+        applyFilters();
+
+
+
+
+
+
+
+
+
+
+
+        searchInput.focus();
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    refreshBtn.addEventListener(
+
+
+
+
+
+
+
+      'click',
+
+
+
+
+
+
+
+      function(){
+
+
+
+
+
+
+
+        loadWorkbook(
+
+
+
+          true
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    sectionOne.addEventListener(
+
+
+
+
+
+
+
+      'click',
+
+
+
+
+
+
+
+      function(){
+
+
+
+
+
+
+
+        switchSection(
+
+
+
+          'one'
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    sectionTwo.addEventListener(
+
+
+
+
+
+
+
+      'click',
+
+
+
+
+
+
+
+      function(){
+
+
+
+
+
+
+
+        switchSection(
+
+
+
+          'two'
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     SHEETJS
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function loadScriptOnce(
+
+
+
+    src,
+
+
+
+    callback
+
+
+
+  ){
+
+
+
+
+
+
+
+    if(
+
+
+
+      window.XLSX
+
+
+
+    ){
+
+
+
+
+
+
+
+      callback(
+
+
+
+        true
+
+
+
+      );
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var scripts =
+
+
+
+      document.getElementsByTagName(
+
+
+
+        'script'
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    for(
+
+
+
+      var i = 0;
+
+
+
+      i < scripts.length;
+
+
+
+      i++
+
+
+
+    ){
+
+
+
+
+
+
+
+      if(
+
+
+
+        scripts[i]
+
+
+
+          .getAttribute(
+
+
+
+            'data-rc-src'
+
+
+
+          ) === src
+
+
+
+      ){
+
+
+
+
+
+
+
+        scripts[i]
+
+
+
+          .addEventListener(
+
+
+
+
+
+
+
+            'load',
+
+
+
+
+
+
+
+            function(){
+
+
+
+
+
+
+
+              callback(
+
+
+
+                !!window.XLSX
+
+
+
+              );
+
+
+
+
+
+
+
+            }
+
+
+
+
+
+
+
+          );
+
+
+
+
+
+
+
+
+
+
+
+        return;
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    var script =
+
+
+
+      document.createElement(
+
+
+
+        'script'
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    script.src =
+
+
+
+      src;
+
+
+
+
+
+
+
+
+
+
+
+    script.async =
+
+
+
+      true;
+
+
+
+
+
+
+
+
+
+
+
+    script.setAttribute(
+
+
+
+      'data-rc-src',
+
+
+
+      src
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    script.onload =
+
+
+
+      function(){
+
+
+
+
+
+
+
+        callback(
+
+
+
+          !!window.XLSX
+
+
+
+        );
+
+
+
+
+
+
+
+      };
+
+
+
+
+
+
+
+
+
+
+
+    script.onerror =
+
+
+
+      function(){
+
+
+
+
+
+
+
+        callback(
+
+
+
+          false
+
+
+
+        );
+
+
+
+
+
+
+
+      };
+
+
+
+
+
+
+
+
+
+
+
+    document.head.appendChild(
+
+
+
+      script
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     FETCH EXCEL
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function fetchArrayBuffer(
+
+
+
+    url,
+
+
+
+    callback
+
+
+
+  ){
+
+
+
+
+
+
+
+    var separator =
+
+
+
+      url.indexOf('?') >= 0
+
+
+
+        ? '&'
+
+
+
+        : '?';
+
+
+
+
+
+
+
+
+
+
+
+    var requestUrl =
+
+
+
+
+
+
+
+      url +
+
+
+
+
+
+
+
+      separator +
+
+
+
+
+
+
+
+      'v=' +
+
+
+
+
+
+
+
+      new Date().getTime();
+
+
+
+
+
+
+
+
+
+
+
+    fetch(
+
+
+
+      requestUrl,
+
+
+
+      {
+
+
+
+
+
+
+
+        method:'GET',
+
+
+
+
+
+
+
+        credentials:'same-origin',
+
+
+
+
+
+
+
+        cache:'no-store'
+
+
+
+
+
+
+
+      }
+
+
+
+    )
+
+
+
+
+
+
+
+    .then(
+
+
+
+      function(response){
+
+
+
+
+
+
+
+        if(
+
+
+
+          !response.ok
+
+
+
+        ){
+
+
+
+
+
+
+
+          throw new Error(
+
+
+
+            'Excel request failed'
+
+
+
+          );
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+        return response.arrayBuffer();
+
+
+
+
+
+
+
+      }
+
+
+
+    )
+
+
+
+
+
+
+
+    .then(
+
+
+
+      function(buffer){
+
+
+
+
+
+
+
+        callback(
+
+
+
+          buffer
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+    )
+
+
+
+
+
+
+
+    .catch(
+
+
+
+      function(){
+
+
+
+
+
+
+
+        callback(
+
+
+
+          null
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     READ SHEETS
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function readConfiguredSheets(
+
+
+
+    workbook
+
+
+
+  ){
+
+
+
+
+
+
+
+    var one =
+
+
+
+      parseSheetRows(
+
+
+
+        workbook,
+
+
+
+        SHEET_ONE
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    var two =
+
+
+
+      parseSheetRows(
+
+
+
+        workbook,
+
+
+
+        SHEET_TWO
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    state.sections.one.rows =
+
+
+
+      one.rows;
+
+
+
+
+
+
+
+
+
+
+
+    state.sections.one.filteredRows =
+
+
+
+      one.rows.slice(0);
+
+
+
+
+
+
+
+
+
+
+
+    state.sections.two.rows =
+
+
+
+      two.rows;
+
+
+
+
+
+
+
+
+
+
+
+    state.sections.two.filteredRows =
+
+
+
+      two.rows.slice(0);
+
+
+
+
+
+
+
+
+
+
+
+    updateSectionCounters();
+
+
+
+
+
+
+
+
+
+
+
+    var errors =
+
+
+
+      [];
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !one.ok
+
+
+
+    ){
+
+
+
+
+
+
+
+      errors.push(
+
+
+
+        one.error
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !two.ok
+
+
+
+    ){
+
+
+
+
+
+
+
+      errors.push(
+
+
+
+        two.error
+
+
+
+      );
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    return errors;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     MAIN LOAD
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function loadWorkbook(isRefresh){
+
+
+
+
+
+
+
+    if(
+
+
+
+      state.isLoading
+
+
+
+    ){
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      !CONFIG_XLSX ||
+
+
+
+      !SHEETJS_SRC ||
+
+
+
+      !SHAREPOINT_BASE
+
+
+
+    ){
+
+
+
+
+
+
+
+      showMessage(
+
+
+
+
+
+
+
+        'Page configuration is incomplete.',
+
+
+
+
+
+
+
+        'error'
+
+
+
+
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    setLoadingState(
+
+
+
+      true
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    setLoading(
+
+
+
+
+
+
+
+      isRefresh
+
+
+
+
+
+
+
+        ? 'Refreshing records...'
+
+
+
+
+
+
+
+        : 'Loading records...'
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    setFooter(
+
+
+
+      'Loading...'
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    showMessage(
+
+
+
+      '',
+
+
+
+      'info'
+
+
+
+    );
+
+
+
+
+
+
+
+
+
+
+
+    loadScriptOnce(
+
+
+
+
+
+
+
+      SHEETJS_SRC,
+
+
+
+
+
+
+
+      function(loaded){
+
+
+
+
+
+
+
+        if(
+
+
+
+          !loaded
+
+
+
+        ){
+
+
+
+
+
+
+
+          setLoadingState(
+
+
+
+            false
+
+
+
+          );
+
+
+
+
+
+
+
+
+
+
+
+          showMessage(
+
+
+
+
+
+
+
+            'Unable to load the Excel reader library.',
+
+
+
+
+
+
+
+            'error'
+
+
+
+
+
+
+
+          );
+
+
+
+
+
+
+
+
+
+
+
+          setLoading(
+
+
+
+            'Unable to load records.'
+
+
+
+          );
+
+
+
+
+
+
+
+
+
+
+
+          return;
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+        fetchArrayBuffer(
+
+
+
+
+
+
+
+          CONFIG_XLSX,
+
+
+
+
+
+
+
+          function(buffer){
+
+
+
+
+
+
+
+            if(
+
+
+
+              !buffer
+
+
+
+            ){
+
+
+
+
+
+
+
+              setLoadingState(
+
+
+
+                false
+
+
+
+              );
+
+
+
+
+
+
+
+
+
+
+
+              showMessage(
+
+
+
+
+
+
+
+                'Unable to load the Excel configuration file.',
+
+
+
+
+
+
+
+                'error'
+
+
+
+
+
+
+
+              );
+
+
+
+
+
+
+
+
+
+
+
+              setLoading(
+
+
+
+                'Unable to load records.'
+
+
+
+              );
+
+
+
+
+
+
+
+
+
+
+
+              return;
+
+
+
+
+
+
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+            try{
+
+
+
+
+
+
+
+              var workbook =
+
+
+
+                XLSX.read(
+
+
+
+
+
+
+
+                  new Uint8Array(
+
+
+
+                    buffer
+
+
+
+                  ),
+
+
+
+
+
+
+
+                  {
+
+
+
+
+
+
+
+                    type:'array',
+
+
+
+
+
+
+
+                    cellFormula:true,
+
+
+
+
+
+
+
+                    cellText:true
+
+
+
+
+
+
+
+                  }
+
+
+
+
+
+
+
+                );
+
+
+
+
+
+
+
+
+
+
+
+              state.workbook =
+
+
+
+                workbook;
+
+
+
+
+
+
+
+
+
+
+
+              var errors =
+
+
+
+                readConfiguredSheets(
+
+
+
+                  workbook
+
+
+
+                );
+
+
+
+
+
+
+
+
+
+
+
+              /*
+
+
+
+                Read the REAL SharePoint files.
+
+
+
+              */
+
+
+
+
+
+
+
+              fetchSharePointFiles(
+
+
+
+
+
+
+
+                function(files){
+
+
+
+
+
+
+
+                  if(
+
+
+
+                    files &&
+
+
+
+                    files.length
+
+
+
+                  ){
+
+
+
+
+
+
+
+                    indexFiles(
+
+
+
+                      files
+
+
+
+                    );
+
+
+
+
+
+
+
+
+
+
+
+                    /*
+
+
+
+                      Replace old/local/network
+
+
+
+                      links with actual SharePoint files.
+
+
+
+                    */
+
+
+
+
+
+
+
+                    resolveAllLinks();
+
+
+
+
+
+
+
+                  }
+
+
+
+
+
+
+
+
+
+
+
+                  renderActiveSection();
+
+
+
+
+
+
+
+
+
+
+
+                  setLoadingState(
+
+
+
+                    false
+
+
+
+                  );
+
+
+
+
+
+
+
+
+
+
+
+                  if(
+
+
+
+                    errors.length
+
+
+
+                  ){
+
+
+
+
+
+
+
+                    showMessage(
+
+
+
+
+
+
+
+                      errors.join(' '),
+
+
+
+
+
+
+
+                      'error'
+
+
+
+
+
+
+
+                    );
+
+
+
+
+
+
+
+                  }else{
+
+
+
+
+
+
+
+                    showMessage(
+
+
+
+                      '',
+
+
+
+                      'info'
+
+
+
+                    );
+
+
+
+
+
+
+
+                  }
+
+
+
+
+
+
+
+
+
+
+
+                  var total =
+
+
+
+
+
+
+
+                    state.sections.one.rows.length
+
+
+
+
+
+
+
+                    +
+
+
+
+
+
+
+
+                    state.sections.two.rows.length;
+
+
+
+
+
+
+
+
+
+
+
+                  setFooter(
+
+
+
+
+
+
+
+                    'Loaded ' +
+
+
+
+                    total +
+
+
+
+                    ' total records'
+
+
+
+
+
+
+
+                  );
+
+
+
+
+
+
+
+                }
+
+
+
+
+
+
+
+              );
+
+
+
+
+
+
+
+
+
+
+
+            }catch(e){
+
+
+
+
+
+
+
+              setLoadingState(
+
+
+
+                false
+
+
+
+              );
+
+
+
+
+
+
+
+
+
+
+
+              showMessage(
+
+
+
+
+
+
+
+                'The Excel file could not be read.',
+
+
+
+
+
+
+
+                'error'
+
+
+
+
+
+
+
+              );
+
+
+
+
+
+
+
+
+
+
+
+              setLoading(
+
+
+
+                'Unable to read records.'
+
+
+
+              );
+
+
+
+
+
+
+
+            }
+
+
+
+
+
+
+
+          }
+
+
+
+
+
+
+
+        );
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    );
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     CONFIGURED LABELS
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  function setLabels(){
+
+
+
+
+
+
+
+    var one =
+
+
+
+      sectionOne.querySelector(
+
+
+
+        '.rc-section-name'
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    var two =
+
+
+
+      sectionTwo.querySelector(
+
+
+
+        '.rc-section-name'
+
+
+
+      );
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      one
+
+
+
+    ){
+
+
+
+
+
+
+
+      one.textContent =
+
+
+
+        SHEET_ONE;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    if(
+
+
+
+      two
+
+
+
+    ){
+
+
+
+
+
+
+
+      two.textContent =
+
+
+
+        SHEET_TWO;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+
+
+
+     START
+
+
+
+  ======================================================== */
+
+
+
+
+
+
+
+  setLabels();
+
+
+
+
+
+
+
+  bindUI();
+
+
+
+
+
+
+
+  loadWorkbook(
+
+
+
+    false
+
+
+
+  );
+
+
+
+
+
+
+
+
+
+
+
+})();
+
+
+
+</script>

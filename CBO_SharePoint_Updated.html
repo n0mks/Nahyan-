@@ -1,0 +1,257 @@
+<style>
+#rc-root{--rc-navy:#0a3558;--rc-blue:#156fa7;--rc-ink:#183247;--rc-muted:#617589;--rc-line:#e1eaf1;width:100%;max-width:1480px;margin:0 auto;padding:24px 18px;color:var(--rc-ink);font:14px/1.6 "Segoe UI",Tahoma,Arial,sans-serif;color-scheme:light}
+#rc-root,#rc-root *{box-sizing:border-box}
+#rc-root [hidden]{display:none!important}
+#rc-root button,#rc-root input,#rc-root select{font:inherit}
+#rc-root button{min-width:0;margin:0;cursor:pointer}
+#rc-root button:disabled{cursor:default;opacity:.5}
+#rc-root :focus-visible{outline:3px solid #2282bc;outline-offset:3px}
+#rc-root svg{width:20px;height:20px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#rc-root .rc-shell{overflow:hidden;background:#fff;border:1px solid var(--rc-line);border-radius:24px;box-shadow:0 18px 50px #0a355810}
+#rc-root .rc-header{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:28px 30px;background:radial-gradient(ellipse at 100% 0,#1a739678,transparent 65%),linear-gradient(115deg,#082c49,#10496b);color:#fff}
+#rc-root .rc-eyebrow{font-size:11px;font-weight:700;letter-spacing:2px;color:#b6d8e8}
+#rc-root h2{margin:4px 0 6px;font-size:29px;font-weight:650;line-height:1.25;letter-spacing:-.5px;color:#fff}
+#rc-root .rc-header p{margin:0;color:#d6e6f0;font-size:13px}
+#rc-root .rc-total{display:flex;align-items:center;gap:12px;padding:12px 18px;border:1px solid #ffffff30;border-radius:16px;background:#ffffff0c;white-space:nowrap}
+#rc-root .rc-total strong{font-size:28px;line-height:1;font-weight:650;font-variant-numeric:tabular-nums}
+#rc-root .rc-total span{max-width:66px;white-space:normal;color:#d6e6f0;font-size:12px;line-height:1.3}
+#rc-root .rc-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:22px 24px 18px}
+#rc-root .rc-tab{display:flex;align-items:center;gap:12px;padding:17px 15px;border:1px solid var(--rc-line);border-radius:15px;background:#fff;color:#425c70;text-align:left;transition:background .2s,border-color .2s,box-shadow .2s,transform .2s}
+#rc-root .rc-tab:hover:not(:disabled){border-color:#a4c9de;transform:translateY(-2px);box-shadow:0 8px 20px #0a35580d}
+#rc-root .rc-tab[aria-selected=true]{background:var(--rc-navy);border-color:var(--rc-navy);color:#fff;box-shadow:0 7px 18px #0a355821}
+#rc-root .rc-tab-icon{display:grid;place-items:center;width:38px;height:38px;flex-shrink:0;border-radius:11px;background:#f0f6fa;color:var(--rc-blue)}
+#rc-root .rc-tab[aria-selected=true] .rc-tab-icon{background:#ffffff18;color:#d1edf9}
+#rc-root .rc-tab-name{flex:1;font-size:14px;font-weight:650;line-height:1.4}
+#rc-root .rc-count{display:grid;place-items:center;min-width:32px;height:27px;padding:0 8px;border-radius:8px;background:#edf4f9;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+#rc-root .rc-tab[aria-selected=true] .rc-count{background:#ffffff20;color:#fff}
+#rc-root .rc-toolbar{display:flex;align-items:flex-end;gap:12px;padding:0 24px 20px}
+#rc-root .rc-search-field{flex:1;min-width:0}
+#rc-root .rc-label{display:block;margin:0 0 6px;font-size:12px;font-weight:650;color:#456177}
+#rc-root .rc-search-wrap{position:relative}
+#rc-root .rc-search-wrap>svg{position:absolute;left:14px;top:14px;color:#7d92a3;pointer-events:none}
+#rc-root .rc-input{width:100%;height:48px;padding:0 14px 0 43px;border:1px solid #ccdbe6;border-radius:12px;background:#f9fbfd;color:var(--rc-ink);transition:box-shadow .2s,border-color .2s}
+#rc-root .rc-input:focus{outline:none;border-color:#2589bc;box-shadow:0 0 0 3px #2589bc18;background:#fff}
+#rc-root .rc-input::placeholder{color:#778a9a;font-size:13px}
+#rc-root .rc-actions{display:flex;gap:9px}
+#rc-root .rc-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 16px;border:1px solid #ccdbe6;border-radius:12px;background:#fff;color:var(--rc-navy);font-weight:600;white-space:nowrap;transition:background .18s,transform .18s}
+#rc-root .rc-btn:hover:not(:disabled){background:#f0f6fa;transform:translateY(-1px)}
+#rc-root .rc-btn-primary{background:var(--rc-navy);border-color:var(--rc-navy);color:#fff}
+#rc-root .rc-btn-primary:hover:not(:disabled){background:#11517d}
+#rc-root .rc-btn-primary[aria-busy=true] svg{animation:rc-spin 1s linear infinite}
+#rc-root .rc-message{margin:0 24px 18px;padding:12px 15px;border:1px solid #eed69c;border-radius:11px;background:#fff9eb;color:#75540f;font-size:13px;white-space:pre-line}
+#rc-root .rc-message[data-error=true]{border-color:#f1c2c2;background:#fff4f4;color:#912b2b}
+#rc-root .rc-results{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 24px;border-top:1px solid var(--rc-line);background:#f8fbfd;font-size:12px;color:var(--rc-muted)}
+#rc-root .rc-results strong{color:var(--rc-ink);font-weight:650}
+#rc-root .rc-size{display:flex;align-items:center;gap:8px;white-space:nowrap}
+#rc-root .rc-size select{width:66px;height:32px;padding:0 8px;border:1px solid #ccdbe6;border-radius:8px;background:#fff;color:var(--rc-ink)}
+#rc-root .rc-table-wrap{width:100%;max-height:640px;overflow:auto;scrollbar-width:thin;scrollbar-color:#b8cdda #f7fafc;border-top:1px solid var(--rc-line)}
+#rc-root .rc-table{width:100%;min-width:850px;margin:0;border-collapse:separate;border-spacing:0;table-layout:fixed}
+#rc-root .rc-table th{position:sticky;top:0;z-index:1;padding:0;background:#eaf2f8;border-bottom:1px solid #d7e4ee;text-align:left}
+#rc-root .rc-table th:nth-child(1){width:145px}
+#rc-root .rc-table th:nth-child(2){width:27%}
+#rc-root .rc-table th:nth-child(4){width:19%}
+#rc-root .rc-sort{display:flex;align-items:center;justify-content:space-between;gap:9px;width:100%;min-height:52px;padding:12px 18px;border:0;background:transparent;color:#284e6b;text-align:left;font-size:12px;font-weight:700}
+#rc-root .rc-sort:hover:not(:disabled){background:#deebf4}
+#rc-root .rc-sort span:last-child{color:#738ea3;font-size:16px}
+#rc-root th[aria-sort=ascending] .rc-sort span:last-child,#rc-root th[aria-sort=descending] .rc-sort span:last-child{color:var(--rc-blue)}
+#rc-root .rc-table td{padding:17px 18px;border-bottom:1px solid #e8eef3;vertical-align:top;overflow-wrap:anywhere;background:#fff;transition:background .15s}
+#rc-root .rc-table tr:nth-child(even) td{background:#fbfdff}
+#rc-root .rc-table tr:hover td{background:#f0f7fc}
+#rc-root .rc-date{font-size:12px;font-weight:600;color:#526b7e;white-space:nowrap;font-variant-numeric:tabular-nums}
+#rc-root .rc-doc{display:flex;align-items:flex-start;gap:10px}
+#rc-root .rc-doc>svg{width:17px;height:17px;margin-top:3px;color:#7d9bb0}
+#rc-root .rc-link{color:#116693;text-decoration:none;font-weight:650;line-height:1.55}
+#rc-root .rc-link:hover{color:#084563;text-decoration:underline;text-underline-offset:3px}
+#rc-root .rc-doc-text{font-weight:600}
+#rc-root .rc-subject{font-size:13px;line-height:1.8;color:#3a5366;unicode-bidi:plaintext}
+#rc-root .rc-pill{display:inline-block;max-width:100%;padding:4px 10px;border:1px solid #dfebf4;border-radius:7px;background:#f0f6fb;color:#446b87;font-size:11px;font-weight:600;line-height:1.6}
+#rc-root .rc-empty{padding:52px 20px!important;text-align:center;color:var(--rc-muted);font-size:14px}
+#rc-root .rc-empty svg{display:block;width:28px;height:28px;margin:0 auto 12px;color:#8ca5b8}
+#rc-root .rc-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 24px;background:#fff;font-size:12px;color:var(--rc-muted)}
+#rc-root .rc-pagination{display:flex;align-items:center;gap:12px}
+#rc-root .rc-pagination .rc-btn{height:34px;padding:0 10px;border-radius:9px;font-size:12px}
+#rc-root .rc-page{min-width:73px;text-align:center;font-variant-numeric:tabular-nums}
+#rc-root .rc-reveal{animation:rc-reveal .22s ease-out}
+@keyframes rc-spin{to{transform:rotate(360deg)}}
+@keyframes rc-reveal{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:980px){#rc-root .rc-tabs{gap:9px}#rc-root .rc-tab{padding:14px 11px;gap:9px}#rc-root .rc-tab-icon{display:none}#rc-root .rc-tab-name{font-size:13px}}
+@media(max-width:680px){#rc-root{padding:12px 6px}#rc-root .rc-shell{border-radius:18px}#rc-root .rc-header{padding:23px 18px}#rc-root h2{font-size:23px}#rc-root .rc-header p{font-size:12px}#rc-root .rc-total{display:none}#rc-root .rc-tabs{grid-template-columns:1fr;padding:16px;gap:8px}#rc-root .rc-tab{padding:11px 13px}#rc-root .rc-tab-icon{display:grid;width:32px;height:32px}#rc-root .rc-tab-name{font-size:13px}#rc-root .rc-toolbar{flex-direction:column;align-items:stretch;padding:0 16px 17px}#rc-root .rc-actions .rc-btn{flex:1}#rc-root .rc-message{margin:0 16px 16px}#rc-root .rc-results{padding:12px 16px;flex-wrap:wrap}#rc-root .rc-footer{padding:14px 16px;justify-content:center}#rc-root .rc-footer>span{width:100%;text-align:center}#rc-root .rc-table-wrap{max-height:560px}}
+@media(prefers-reduced-motion:reduce){#rc-root *,#rc-root *::before,#rc-root *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+<div id="rc-root" dir="ltr" data-config-xlsx="https://banki/Compliance/Test%20CBO/CBO%20New%20Page/CBO_Circulars_Config.xlsx" data-sheetjs-src="https://banki/Compliance/Test%20CBO/CBO%20New%20Page/xlsx.full.min.js" data-sheet-one="CBO Circulars" data-sheet-two="Laws &amp; Royal Decrees" data-sheet-three="CBO Correspondence" data-sharepoint-base="https://banki/Compliance/Test%20CBO/CBO%20Circulars/" data-sharepoint-site="https://banki/Compliance/Test%20CBO">
+<div class="rc-shell">
+<header class="rc-header"><div><div class="rc-eyebrow">COMPLIANCE</div><h2>CBO Regulatory Library</h2><p>Circulars, legislation and official correspondence.</p></div><div class="rc-total"><strong id="rcTotal">—</strong><span>Total records</span></div></header>
+<div id="rcTabs" class="rc-tabs" role="tablist" aria-label="Document sections"></div>
+<div id="rcPanel" role="tabpanel" aria-labelledby="rcTab-one" tabindex="0" aria-busy="true">
+<div class="rc-toolbar"><div class="rc-search-field"><label class="rc-label" for="rcSearch">Search this section</label><div class="rc-search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg><input id="rcSearch" class="rc-input" type="search" placeholder="Search by date, reference, subject or business line" autocomplete="off" aria-controls="rcTable"></div></div><div class="rc-actions"><button id="rcClear" class="rc-btn" type="button">Clear search</button><button id="rcRefresh" class="rc-btn rc-btn-primary" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17"></path></svg><span>Refresh</span></button></div></div>
+<div id="rcMessage" class="rc-message" role="status" aria-live="polite" hidden></div>
+<div class="rc-results"><span id="rcResults" role="status" aria-live="polite">Loading records...</span><label class="rc-size" for="rcPageSize">Rows per page<select id="rcPageSize"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label></div>
+<div id="rcTableWrap" class="rc-table-wrap" role="region" aria-label="Document table" tabindex="0"><table id="rcTable" class="rc-table" aria-label="CBO Circulars"><thead><tr id="rcHead"></tr></thead><tbody id="rcBody"><tr><td colspan="4" class="rc-empty">Loading records...</td></tr></tbody></table></div>
+<footer class="rc-footer"><span id="rcUpdated">Loading records...</span><nav class="rc-pagination" aria-label="Table pages"><button id="rcPrev" class="rc-btn" type="button" disabled>Previous</button><span id="rcPage" class="rc-page" role="status" aria-live="polite">Page 1 of 1</span><button id="rcNext" class="rc-btn" type="button" disabled>Next</button></nav></footer>
+</div></div></div>
+<script>
+(function(){
+'use strict';
+const root=document.getElementById('rc-root');
+if(!root||root.dataset.ready)return;
+root.dataset.ready='true';
+const $=id=>root.querySelector('#'+id),attr=(name,fallback='')=>root.getAttribute(name)||fallback;
+const ui={tabs:$('rcTabs'),panel:$('rcPanel'),search:$('rcSearch'),clear:$('rcClear'),refresh:$('rcRefresh'),message:$('rcMessage'),results:$('rcResults'),size:$('rcPageSize'),head:$('rcHead'),body:$('rcBody'),table:$('rcTable'),wrap:$('rcTableWrap'),total:$('rcTotal'),updated:$('rcUpdated'),prev:$('rcPrev'),next:$('rcNext'),page:$('rcPage')};
+const paths={file:'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z M14 3v6h6 M8 13h8 M8 17h5',law:'M12 3v17 M5 21h14 M4 7h16 M6 7l-4 8h8L6 7 M18 7l-4 8h8l-4-8',mail:'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1 M3 6l9 7 9-7',search:'M16 16l5 5 M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0'};
+const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+paths[name]+'"></path></svg>';
+const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const defs=[['one','CBO Circulars','Circular / Regulation','file'],['two','Laws & Royal Decrees','Law / Royal Decree','law'],['three','CBO Correspondence','Correspondence','mail']];
+const sections=defs.map(d=>({key:d[0],name:attr('data-sheet-'+d[0],d[1]),label:d[2],icon:d[3],base:attr('data-folder-'+d[0],attr('data-sharepoint-base')),rows:[],loaded:false,updated:'',error:'',warning:'',query:'',sort:'stamp',direction:-1,page:1}));
+let active=0,busy=false,timer=0,loadError='',sheetTask=null;
+const current=()=>sections[active],digits=s=>String(s).replace(/[٠-٩۰-۹]/g,c=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(c)>=0?'٠١٢٣٤٥٦٧٨٩'.indexOf(c):'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)));
+function repair(value){
+let text=String(value==null?'':value),cp='€\u0081‚ƒ„…†‡ˆ‰Š‹Œ\u008dŽ\u008f\u0090‘’“”•–—˜™š›œ\u009džŸ';
+for(let n=0;n<3;n++){const next=text.replace(/[\x00-\xFF\u0152\u0153\u0160\u0161\u0178\u017D\u017E\u0192\u02C6\u02DC\u2013-\u201E\u2020-\u2022\u2026\u2030\u2039\u203A\u20AC]+/g,part=>{if(!/[ÃÂØÙ]/.test(part))return part;try{return decodeURIComponent(Array.from(part,c=>{let v=c.charCodeAt(0);if(v>255){const i=cp.indexOf(c);if(i<0)throw Error();v=128+i;}return '%'+v.toString(16).padStart(2,'0');}).join(''));}catch(e){return part;}});if(next===text)break;text=next;}
+return text;
+}
+const clean=value=>repair(value).replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\s+/g,' ').trim();
+const norm=value=>digits(clean(value).normalize('NFKC')).toLowerCase().replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي');
+const headerKey=value=>norm(value).replace(/[^a-z0-9\u0600-\u06ff]/g,'');
+const cellText=cell=>cell?clean(cell.w!=null&&String(cell.w).trim()!==''?cell.w:cell.v):'';
+function decoded(value){let text=String(value||'');for(let i=0;i<3;i++){try{const next=decodeURIComponent(text.replace(/%(?![\da-f]{2})/gi,'%25'));if(next===text)break;text=next;}catch(e){break;}}return repair(text);}
+const encodePath=path=>path.split('/').map(encodeURIComponent).join('/');
+function webUrl(value,base){try{const raw=String(value||'').trim();if(!raw||/[\x00-\x1f\x7f]/.test(raw))return '';const url=new URL(raw,base);return /^https?:$/.test(url.protocol)?url.href:'';}catch(e){return '';}}
+function directUrl(value){const raw=String(value||'').trim();if(/^https?:\/\//i.test(raw))return webUrl(raw);if(/^\/(?!\/)/.test(raw))return webUrl(raw,attr('data-sharepoint-site'));return '';}
+function relativePath(raw){
+let value=decoded(raw).replace(/\\/g,'/').trim();
+const match=value.match(/(?:^|\/)(?:cbo\s*circulars|laws\s*&\s*(?:decisions|royal\s*decrees)|cbo\s*correspondence)\/(.+)$/i);
+if(match)value=match[1];else if(/^(?:file:|[a-z]:|\/)/i.test(value))return '';
+const parts=value.split('/').filter(p=>p&&p!=='.');
+return parts.length&&!parts.includes('..')&&!/^[a-z][a-z\d+.-]*:/i.test(value)?parts.join('/'):'';
+}
+function mappedUrl(raw,section){const rel=relativePath(raw),base=webUrl(section.base);return rel&&base?base.replace(/\/+$/,'')+'/'+encodePath(rel):'';}
+function cellLink(ws,cell){
+if(!cell)return '';
+if(cell.l&&(cell.l.Target||cell.l.target))return String(cell.l.Target||cell.l.target).trim();
+const formula=String(cell.f||'').replace(/^\s*=?\s*(?:_xlfn\.)?/,'');
+let match=formula.match(/^HYPERLINK\s*\(\s*"((?:[^"]|"")*)"/i);
+if(match)return match[1].replace(/""/g,'"');
+match=formula.match(/^HYPERLINK\s*\(\s*(\$?[A-Z]+\$?\d+)\s*[,;]/i);
+if(match)return String((ws[match[1].replace(/\$/g,'').toUpperCase()]||{}).v||'').trim();
+const value=String(cell.v==null?'':cell.v).trim();
+return /^(?:https?:\/\/|file:|\\\\|[A-Za-z]:[\\/]|\/)/i.test(value)||/\.(?:pdf|docx?|xlsx?|pptx?|msg|eml|txt|zip)$/i.test(value)?value:'';
+}
+function dateInfo(cell,workbook){
+const original=cellText(cell),raw=cell&&cell.v,months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let y,m,d,match,text=digits(original),parts;
+if(typeof raw==='number'){parts=window.XLSX.SSF.parse_date_code(raw,{date1904:!!(workbook.Workbook&&workbook.Workbook.WBProps&&workbook.Workbook.WBProps.date1904)});if(parts){y=parts.y;m=parts.m;d=parts.d;}}
+else if(raw instanceof Date&&!isNaN(raw)){y=raw.getFullYear();m=raw.getMonth()+1;d=raw.getDate();}
+else if((match=text.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?:[T\s].*)?$/))){y=+match[1];m=+match[2];d=+match[3];}
+else if((match=text.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2}|\d{4})$/))){d=+match[1];m=+match[2];y=+match[3];if(match[3].length===2)y+=y<50?2000:1900;}
+else if((match=text.match(/^(\d{1,2})[-\s/.]+([A-Za-z]{3,9})[-\s/.,]+(\d{2}|\d{4})$/))){d=+match[1];m=months.map(v=>v.toLowerCase()).indexOf(match[2].slice(0,3).toLowerCase())+1;y=+match[3];if(match[3].length===2)y+=y<50?2000:1900;}
+const stamp=Date.UTC(y,m-1,d),date=new Date(stamp);
+if(!y||date.getUTCFullYear()!==y||date.getUTCMonth()!==m-1||date.getUTCDate()!==d)return {text:original,stamp:null,file:original,original:original};
+return {text:String(d).padStart(2,'0')+' '+months[m-1]+' '+y,stamp:stamp,file:String(d).padStart(2,'0')+'-'+String(m).padStart(2,'0')+'-'+y,original:original};
+}
+const aliases={date:['date','issuedate','circulardate','correspondencedate','التاريخ','تاريخ'],title:['circularregulation','circular','circularno','circularnumber','regulation','lawroyaldecree','lawsroyaldecrees','lawsdecisions','law','royaldecree','royaldecrees','correspondence','cbocorrespondence','correspondenceno','reference','referenceno','referencenumber','documentreference','document','letter','letterno','التعميم','رقمالتعميم','المرجع'],subject:['subject','description','title','الموضوع'],business:['businessline','business','group','department','قطاعالاعمال'],link:['url','link','hyperlink','documentlink','documenturl','filepath','الرابط']};
+function parseSheet(workbook,section){
+const sheetName=workbook.SheetNames.find(n=>clean(n).toLowerCase()===section.name.toLowerCase()),ws=workbook.Sheets[sheetName];
+if(!ws)throw Error('Worksheet "'+section.name+'" was not found.');
+if(!ws['!ref'])return [];
+const range=window.XLSX.utils.decode_range(ws['!ref']),cell=(r,c)=>c==null?null:ws[window.XLSX.utils.encode_cell({r:r,c:c})];
+let header=null;
+for(let r=range.s.r;r<=Math.min(range.e.r,range.s.r+49);r++){const map={};for(let c=range.s.c;c<=Math.min(range.e.c,range.s.c+99);c++){const key=headerKey(cellText(cell(r,c)));Object.keys(aliases).forEach(k=>{if(map[k]==null&&aliases[k].includes(key))map[k]=c;});}if(map.date!=null&&map.title!=null&&map.subject!=null){header={row:r,map:map};break;}}
+if(!header)throw Error('Check the Date, reference and Subject headers in "'+section.name+'".');
+const map=header.map,rowNumbers=Array.from(new Set(Object.keys(ws).filter(k=>/^[A-Z]+\d+$/.test(k)).map(k=>Number(k.match(/\d+$/)[0])-1).filter(r=>r>header.row))).sort((a,b)=>a-b),rows=[];
+rowNumbers.forEach(r=>{const dc=cell(r,map.date),tc=cell(r,map.title),sc=cell(r,map.subject),bc=cell(r,map.business),lc=cell(r,map.link);const title=cellText(tc),subject=cellText(sc),business=cellText(bc),date=dateInfo(dc,workbook);if(!date.text&&!title&&!subject&&!business)return;if(aliases.date.includes(headerKey(date.text))&&aliases.subject.includes(headerKey(subject)))return;const raw=cellLink(ws,tc)||cellLink(ws,lc)||(lc?String(lc.v||'').trim():'')||cellLink(ws,sc);rows.push({date:date.text,stamp:date.stamp,fileDate:date.file,title:title,subject:subject,business:business,raw:raw,link:directUrl(raw),order:rows.length,search:norm([date.text,date.file,date.original,title,subject,business].join(' '))});});
+return rows;
+}
+const nameKey=value=>String(value||'').normalize('NFC').toLowerCase();
+const stem=value=>norm(value).replace(/\.[a-z0-9]{1,8}$/i,'').replace(/&/g,'and').replace(/[^a-z0-9\u0600-\u06ff]+/g,'');
+function fileIndex(files,base){
+const names=new Map(),stems=new Map(),origin=new URL(base).origin;
+files.forEach(file=>{if(!file.Name)return;const path=file.ServerRelativePath&&file.ServerRelativePath.DecodedUrl||file.ServerRelativeUrl;const item={name:String(file.Name),url:path?origin+encodePath(path):base.replace(/\/+$/,'')+'/'+encodeURIComponent(file.Name)};[[names,nameKey(item.name)],[stems,stem(item.name)]].forEach(pair=>{if(!pair[0].has(pair[1]))pair[0].set(pair[1],[]);pair[0].get(pair[1]).push(item);});});
+return {names:names,stems:stems};
+}
+function resolveLink(row,section,index){
+if(row.link)return row.link;
+if(/^\s*#/.test(row.raw)||/^[a-z][a-z\d+.-]*:/i.test(row.raw)&&!/^file:/i.test(row.raw)&&!/^[a-z]:[\\/]/i.test(row.raw))return '';
+if(relativePath(row.raw).includes('/'))return mappedUrl(row.raw,section);
+const rawName=row.raw.replace(/\\/g,'/').split('/').pop()||'',fixedName=decoded(rawName),candidates=[rawName,fixedName];
+if(index){
+for(const name of candidates){const exact=index.names.get(nameKey(name))||[];if(exact.length>1)return '';if(exact.length===1)return exact[0].url;}
+const joined=[row.fileDate,row.title,row.subject].filter(Boolean).join(' ');
+if(row.title&&row.subject)candidates.push(joined);
+if(row.fileDate&&row.title)candidates.push(row.fileDate+' '+row.title);
+if(row.title&&row.subject)candidates.push(row.title+' '+row.subject);
+for(const candidate of candidates){const key=stem(candidate);if(!key)continue;let found=index.stems.get(key)||[];const ext=candidate.match(/\.([a-z0-9]{1,8})$/i);if(ext)found=found.filter(f=>f.name.toLowerCase().endsWith('.'+ext[1].toLowerCase()));if(found.length>1)return '';if(found.length===1)return found[0].url;}
+}
+return row.raw?mappedUrl(row.raw,section):'';
+}
+async function request(url,kind,timeout=25000){
+const controller=new AbortController(),id=setTimeout(()=>controller.abort(),timeout);
+try{const response=await fetch(url,{credentials:'same-origin',cache:'no-store',signal:controller.signal,headers:{Accept:kind==='json'?'application/json;odata=verbose':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}});if(!response.ok){const error=Error('Request failed ('+response.status+').');error.status=response.status;throw error;}if(kind==='json')return await response.json();if(/text\/html/i.test(response.headers.get('content-type')||''))throw Error('The Excel request returned a sign-in page.');return await response.arrayBuffer();}finally{clearTimeout(id);}
+}
+async function inventory(base){
+const site=webUrl(attr('data-sharepoint-site')),folder=webUrl(base);
+if(!site||!folder)throw Error('Document folder is not configured.');
+const parsed=new URL(folder),siteUrl=new URL(site);if(parsed.origin!==siteUrl.origin)throw Error('Document folder must use the configured SharePoint site.');
+const path=decodeURIComponent(parsed.pathname).replace(/\/+$/,''),literal=encodeURIComponent(path.replace(/'/g,"''")).replace(/'/g,'%27'),api=site.replace(/\/+$/,'')+'/_api/web/';
+const endpoint=modern=>api+(modern?"GetFolderByServerRelativePath(decodedUrl='":"GetFolderByServerRelativeUrl('")+literal+"')/Files?$select=Name,ServerRelativeUrl&$top=5000";
+let url=endpoint(true),json;
+try{json=await request(url,'json',12000);}catch(error){if(![400,404,501].includes(error.status))throw error;url=endpoint(false);json=await request(url,'json',12000);}
+const files=[],seen=new Set();
+while(true){if(seen.has(url)||seen.size>=100)throw Error('Document list could not be completed.');seen.add(url);const batch=json.value||(json.d&&json.d.results);if(!Array.isArray(batch))throw Error('Document list is unavailable.');files.push(...batch);const next=json['@odata.nextLink']||json['odata.nextLink']||(json.d&&json.d.__next);if(!next)break;url=webUrl(next,url);if(!url||new URL(url).origin!==siteUrl.origin||!new URL(url).pathname.toLowerCase().includes('/_api/'))throw Error('Invalid document list page.');json=await request(url,'json',12000);}
+return fileIndex(files,folder);
+}
+function ensureReader(){
+if(window.XLSX&&window.XLSX.read&&window.XLSX.utils&&window.XLSX.SSF)return Promise.resolve();
+if(sheetTask)return sheetTask;
+sheetTask=new Promise((resolve,reject)=>{const src=webUrl(attr('data-sheetjs-src'),location.href);if(!src){reject(Error('Excel reader URL is missing.'));return;}const script=document.createElement('script');let done=false;const finish=ok=>{if(done)return;done=true;clearTimeout(timeout);script.onload=script.onerror=null;if(ok)resolve();else{script.remove();reject(Error('Unable to load the Excel reader. Check the library URL and access.'));}};const timeout=setTimeout(()=>finish(false),20000);script.src=src;script.async=true;script.onload=()=>finish(!!(window.XLSX&&window.XLSX.read&&window.XLSX.utils&&window.XLSX.SSF));script.onerror=()=>finish(false);document.head.appendChild(script);}).catch(error=>{sheetTask=null;throw error;});
+return sheetTask;
+}
+function showMessage(){const section=current(),text=[loadError,section.error,section.warning].filter(Boolean).join('\n');ui.message.hidden=!text;ui.message.textContent=text;ui.message.dataset.error=String(!!(loadError||section.error));}
+function updateTabs(){
+sections.forEach((section,i)=>{const tab=$('rcTab-'+section.key);tab.setAttribute('aria-selected',String(i===active));tab.tabIndex=i===active?0:-1;tab.disabled=busy;tab.querySelector('.rc-count').textContent=section.loaded?section.rows.length.toLocaleString():section.error?'!':'—';});
+ui.total.textContent=sections.some(s=>s.loaded)?sections.reduce((sum,s)=>sum+s.rows.length,0).toLocaleString():'—';
+ui.total.parentElement.title=sections.some(s=>s.error)?'Total for available sections':'Total records across all sections';
+ui.panel.setAttribute('aria-labelledby','rcTab-'+current().key);
+}
+function setBusy(value){busy=value;ui.panel.setAttribute('aria-busy',String(value));ui.refresh.setAttribute('aria-busy',String(value));ui.refresh.querySelector('span').textContent=value?'Refreshing...':'Refresh';[ui.search,ui.clear,ui.refresh,ui.size,ui.prev,ui.next].forEach(el=>el.disabled=value);ui.head.querySelectorAll('button').forEach(el=>el.disabled=value);updateTabs();}
+function render(){
+const section=current(),tokens=norm(section.query).split(/\s+/).filter(Boolean),rows=section.rows.filter(row=>tokens.every(word=>row.search.includes(word)));
+rows.sort((a,b)=>{let comparison;if(section.sort==='stamp'){if(a.stamp==null||b.stamp==null)return a.stamp==null&&b.stamp==null?a.order-b.order:a.stamp==null?1:-1;comparison=a.stamp-b.stamp;}else comparison=norm(a[section.sort]).localeCompare(norm(b[section.sort]),undefined,{numeric:true});return comparison*section.direction||a.order-b.order;});
+const size=Number(ui.size.value),pages=Math.max(1,Math.ceil(rows.length/size));section.page=Math.max(1,Math.min(section.page,pages));const start=(section.page-1)*size,visible=rows.slice(start,start+size);
+ui.table.setAttribute('aria-label',section.name);ui.search.value=section.query;
+ui.head.innerHTML=[['stamp','Date'],['title',section.label],['subject','Subject'],['business','Business Line']].map(c=>'<th scope="col" aria-sort="'+(section.sort===c[0]?(section.direction===1?'ascending':'descending'):'none')+'"><button class="rc-sort" type="button" data-sort="'+c[0]+'"'+(busy?' disabled':'')+'><span>'+esc(c[1])+'</span><span aria-hidden="true">'+(section.sort===c[0]?(section.direction===1?'↑':'↓'):'↕')+'</span></button></th>').join('');
+if(visible.length)ui.body.innerHTML=visible.map(row=>'<tr><td class="rc-date">'+esc(row.date||'—')+'</td><td><div class="rc-doc">'+icon('file')+(row.link?'<a class="rc-link" dir="auto" href="'+esc(row.link)+'" target="_blank" rel="noopener noreferrer" title="Open document in a new tab">'+esc(row.title||'Open document')+'</a>':'<span class="rc-doc-text" dir="auto">'+esc(row.title||'—')+'</span>')+'</div></td><td class="rc-subject" dir="auto">'+esc(row.subject||'—')+'</td><td>'+(row.business?'<span class="rc-pill" dir="auto">'+esc(row.business)+'</span>':'—')+'</td></tr>').join('');
+else ui.body.innerHTML='<tr><td colspan="4" class="rc-empty">'+icon('search')+esc(!section.loaded?(busy?'Loading records...':'Records are unavailable.'):tokens.length?'No records match your search.':'No records in this section yet.')+'</td></tr>';
+ui.results.innerHTML='<strong>'+esc(section.name)+'</strong> · '+(section.loaded?(rows.length?'Showing '+(start+1)+'–'+Math.min(start+size,rows.length)+' of '+rows.length.toLocaleString():'0 records')+(tokens.length?' · '+section.rows.length.toLocaleString()+' total':''):busy?'Loading...':'Unavailable');
+ui.page.textContent='Page '+section.page+' of '+pages;ui.prev.disabled=busy||section.page===1;ui.next.disabled=busy||section.page>=pages;ui.clear.disabled=busy||!section.query;ui.wrap.scrollTop=0;
+ui.updated.textContent=section.updated?'Last loaded '+section.updated:busy?'Loading records...':'No data loaded';
+ui.body.classList.remove('rc-reveal');void ui.body.offsetWidth;ui.body.classList.add('rc-reveal');updateTabs();showMessage();
+}
+async function load(){
+if(busy)return;
+clearTimeout(timer);loadError='';setBusy(true);showMessage();ui.updated.textContent='Loading records...';
+try{
+await ensureReader();const url=webUrl(attr('data-config-xlsx'),location.href);if(!url)throw Error('Excel configuration URL is missing.');const fetchUrl=new URL(url);fetchUrl.searchParams.set('rcv',Date.now());
+let buffer;try{buffer=await request(fetchUrl.href,'buffer');}catch(error){throw Error('Unable to load the Excel file. Check your SharePoint session, file URL and access.');}
+const bytes=new Uint8Array(buffer);if(bytes[0]!==80||bytes[1]!==75)throw Error('The configuration is not a valid .xlsx file.');
+let workbook;try{workbook=window.XLSX.read(bytes,{type:'array',cellFormula:true,cellText:true,cellDates:false});}catch(error){throw Error('The Excel file could not be read.');}
+const fresh=sections.map(section=>{try{return {section:section,rows:parseSheet(workbook,section),error:''};}catch(error){return {section:section,rows:null,error:error.message};}}),catalogs=new Map();
+await Promise.all(Array.from(new Set(fresh.filter(item=>item.rows&&item.rows.some(row=>!row.link)).map(item=>item.section.base))).map(async base=>{try{catalogs.set(base,await inventory(base));}catch(error){catalogs.set(base,null);}}));
+const loadedAt=new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+fresh.forEach(item=>{const section=item.section;section.error=item.error;section.warning='';if(item.rows){const index=catalogs.get(section.base);item.rows.forEach(row=>row.link=resolveLink(row,section,index));section.rows=item.rows;section.loaded=true;section.updated=loadedAt;if(index===null&&item.rows.some(row=>row.raw&&!directUrl(row.raw)))section.warning='Some document links could not be checked during this refresh.';}else if(section.loaded)section.error+=' Previously loaded records are still shown.';});
+}catch(error){loadError=error.message+(sections.some(section=>section.loaded)?' Previously loaded records are still shown.':'');}
+finally{setBusy(false);render();}
+}
+function switchTab(index,focus){if(busy)return;clearTimeout(timer);current().query=ui.search.value;active=index;render();if(focus)$('rcTab-'+current().key).focus();}
+ui.tabs.innerHTML=sections.map((section,i)=>'<button id="rcTab-'+section.key+'" class="rc-tab" type="button" role="tab" aria-selected="'+String(i===0)+'" aria-controls="rcPanel" tabindex="'+(i===0?'0':'-1')+'" data-index="'+i+'"><span class="rc-tab-icon">'+icon(section.icon)+'</span><span class="rc-tab-name">'+esc(section.name)+'</span><span class="rc-count">—</span></button>').join('');
+ui.tabs.addEventListener('click',event=>{const tab=event.target.closest('[data-index]');if(tab)switchTab(Number(tab.dataset.index),false);});
+ui.tabs.addEventListener('keydown',event=>{if(!['ArrowRight','ArrowLeft','ArrowDown','ArrowUp','Home','End'].includes(event.key))return;event.preventDefault();switchTab(event.key==='Home'?0:event.key==='End'?sections.length-1:(active+(['ArrowRight','ArrowDown'].includes(event.key)?1:sections.length-1))%sections.length,true);});
+ui.search.addEventListener('input',()=>{current().query=ui.search.value;current().page=1;clearTimeout(timer);timer=setTimeout(()=>{if(!busy)render();},140);});
+ui.clear.addEventListener('click',()=>{clearTimeout(timer);current().query='';current().page=1;render();ui.search.focus();});
+ui.refresh.addEventListener('click',load);
+ui.size.addEventListener('change',()=>{current().page=1;render();});
+ui.head.addEventListener('click',event=>{const button=event.target.closest('[data-sort]');if(!button||busy)return;const section=current(),key=button.dataset.sort;section.direction=section.sort===key?-section.direction:key==='stamp'?-1:1;section.sort=key;section.page=1;render();ui.head.querySelector('[data-sort="'+key+'"]').focus();});
+ui.prev.addEventListener('click',()=>{if(!busy){current().page--;render();}});
+ui.next.addEventListener('click',()=>{if(!busy){current().page++;render();}});
+render();load();
+})();
+</script>

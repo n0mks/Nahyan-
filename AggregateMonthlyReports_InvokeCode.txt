@@ -2,8 +2,9 @@
 ' Language: VBNet. This is the code body: do not add Sub, Class or Module.
 ' Arguments: see README_AR.md. Excel must be installed on the Windows robot.
 ' No Microsoft.Office.Interop.Excel reference or VBA project access is required.
-' Build 2026-10-13-CopyFix2: create new books from a single-sheet copy;
-' use an explicit named Before argument when copying into existing books.
+' Build 2026-10-13-RangeExport3: export cells into an explicitly created worksheet.
+' Supports missing group sheets and empty header repair using this report's own template.
+' Does not call Worksheet.Copy or infer a copied worksheet from ActiveWorkbook.
 '
 ' in_SourceWorkbookPath As String        In
 ' in_CrmGroupFilePath As String          In
@@ -21,6 +22,9 @@ out_UpdatedFiles = New String() {}
 ' No new UiPath arguments: adjust these two constants only if required.
 Dim inputWaitTimeoutSeconds As Integer = 60
 Dim inputPollMilliseconds As Integer = 2000
+Dim headerRow As Integer = 2
+Dim missingSheetPolicy As String = "HeadersOnly" ' HeadersOnly / Fail
+Dim repairEmptyHeaderRow As Boolean = True
 
 If System.Environment.OSVersion.Platform <> System.PlatformID.Win32NT Then
     Throw New System.PlatformNotSupportedException("Excel COM automation requires Windows.")
@@ -114,8 +118,7 @@ Dim xl As System.Func(Of Object, String, Microsoft.VisualBasic.CallType, Object(
         Throw New System.InvalidOperationException("Excel COM retry limit reached.")
     End Function
 
-' Invoke worksheet Copy/Move directly through COM with explicit argument names.
-' No Missing/After positional arguments and no dependency on the active destination.
+' Invoke Range.Copy and Worksheets.Add/Move with explicit argument names.
 Dim xlMethod As System.Func(Of Object, String, Object(), String(), Object) =
     Function(target As Object, member As String, args As Object(), argumentNames As String()) As Object
         For attempt As Integer = 1 To 3
@@ -183,6 +186,72 @@ Dim sheetNames As System.Func(Of Object, System.Collections.Generic.HashSet(Of S
         Return names
     End Function
 
+Dim columnName As System.Func(Of Integer, String) =
+    Function(columnNumber As Integer) As String
+        Dim name As String = String.Empty
+        Do While columnNumber > 0
+            columnNumber -= 1
+            name = System.Convert.ToChar(65 + (columnNumber Mod 26)).ToString() & name
+            columnNumber = columnNumber \ 26
+        Loop
+        Return name
+    End Function
+
+Dim valueAt As System.Func(Of Object, Integer, Integer, Object) =
+    Function(raw As Object, rowOffset As Integer, columnOffset As Integer) As Object
+        Dim matrix As System.Array = TryCast(raw, System.Array)
+        If matrix IsNot Nothing Then
+            If matrix.Rank <> 2 Then Throw New System.InvalidOperationException("Excel returned an unexpected value array.")
+            Return matrix.GetValue(matrix.GetLowerBound(0) + rowOffset, matrix.GetLowerBound(1) + columnOffset)
+        End If
+        If rowOffset = 0 AndAlso columnOffset = 0 Then Return raw
+        Return Nothing
+    End Function
+
+Dim hasValue As System.Func(Of Object, Boolean) =
+    Function(value As Object) As Boolean
+        If value Is Nothing OrElse value Is System.DBNull.Value Then Return False
+        If TypeOf value Is String Then Return DirectCast(value, String).Length > 0
+        Return True
+    End Function
+
+Dim valuesMatch As System.Func(Of Object, Object, Boolean) =
+    Function(left As Object, right As Object) As Boolean
+        If Not hasValue(left) AndAlso Not hasValue(right) Then Return True
+        Dim leftError As System.Runtime.InteropServices.ErrorWrapper = TryCast(left, System.Runtime.InteropServices.ErrorWrapper)
+        Dim rightError As System.Runtime.InteropServices.ErrorWrapper = TryCast(right, System.Runtime.InteropServices.ErrorWrapper)
+        If leftError IsNot Nothing OrElse rightError IsNot Nothing Then
+            Return leftError IsNot Nothing AndAlso rightError IsNot Nothing AndAlso leftError.ErrorCode = rightError.ErrorCode
+        End If
+        Return System.Object.Equals(left, right)
+    End Function
+
+Dim headerInfo As System.Func(Of Object, Integer()) =
+    Function(sheet As Object) As Integer()
+        Dim area As Object = Nothing
+        Dim areaColumns As Object = Nothing
+        Dim headers As Object = Nothing
+        Try
+            area = xl(sheet, "UsedRange", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            areaColumns = xl(area, "Columns", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            Dim lastColumn As Integer = System.Convert.ToInt32(xl(area, "Column", Microsoft.VisualBasic.CallType.Get, New Object() {})) +
+                System.Convert.ToInt32(xl(areaColumns, "Count", Microsoft.VisualBasic.CallType.Get, New Object() {})) - 1
+            headers = xl(sheet, "Range", Microsoft.VisualBasic.CallType.Get,
+                New Object() {"A" & headerRow.ToString() & ":" & columnName(lastColumn) & headerRow.ToString()})
+            Dim raw As Object = xl(headers, "Value2", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            Dim labelCount As Integer = 0
+            For columnOffset As Integer = 0 To lastColumn - 1
+                Dim label As Object = valueAt(raw, 0, columnOffset)
+                If TypeOf label Is String AndAlso Not String.IsNullOrWhiteSpace(DirectCast(label, String)) Then labelCount += 1
+            Next
+            Return New Integer() {labelCount, lastColumn}
+        Finally
+            releaseCom(headers)
+            releaseCom(areaColumns)
+            releaseCom(area)
+        End Try
+    End Function
+
 Dim hashStream As System.Func(Of System.IO.Stream, String) =
     Function(stream As System.IO.Stream) As String
         stream.Position = 0
@@ -205,6 +274,9 @@ Dim success As Boolean = False
 Dim duplicateCount As Integer = 0
 Dim currentGroup As String = String.Empty
 Dim currentStep As String = "Initialize export"
+Dim missingSheetCount As Integer = 0
+Dim repairedHeaderCount As Integer = 0
+Dim emptyGroupCount As Integer = 0
 Dim log As System.Action(Of String) =
     Sub(message As String)
         System.IO.File.AppendAllText(journalPath,
@@ -299,7 +371,7 @@ Try
     currentStep = "Create export work folders"
     System.IO.Directory.CreateDirectory(stageFolder)
     System.IO.Directory.CreateDirectory(journalFolder)
-    log("START | Build=2026-10-13-CopyFix2 | RunId=" & runId & " | Period=" & reportMonth & " | InputPeriod=" & periodInput & " | Report=" & in_ReportNumber.ToString())
+    log("START | Build=2026-10-13-RangeExport3 | RunId=" & runId & " | Period=" & reportMonth & " | InputPeriod=" & periodInput & " | Report=" & in_ReportNumber.ToString())
 
     currentStep = "Wait for source workbook"
     waitForInput(sourcePath)
@@ -400,23 +472,71 @@ Try
 
     currentStep = "Open source workbook"
     sourceBook = openBook(workbooks, sourcePath, True)
-    currentStep = "Validate source group sheets"
+    currentStep = "Validate group names and select the header template"
     Dim sourceNames As System.Collections.Generic.HashSet(Of String) = sheetNames(sourceBook)
     Dim missingGroups As New System.Collections.Generic.List(Of String)()
-    For Each groupName As String In groups
-        If Not sourceNames.Contains(groupName) Then missingGroups.Add(groupName)
-        Dim finalPath As String = System.IO.Path.Combine(periodFolder, "New Report - " & groupName & ".xlsx")
-        If String.Equals(finalPath, sourcePath, System.StringComparison.OrdinalIgnoreCase) OrElse
-           String.Equals(finalPath, groupsPath, System.StringComparison.OrdinalIgnoreCase) Then
-            Throw New System.ArgumentException("An output path must not overwrite an input workbook.")
-        End If
+    Dim ignoredSheets As New System.Collections.Generic.List(Of String)()
+    Dim headerTemplateName As String = String.Empty
+    Dim headerTemplateColumnCount As Integer = 0
+    Dim bestHeaderCount As Integer = 0
+    Dim sourceHeaders As New System.Collections.Generic.Dictionary(Of String, Integer())(System.StringComparer.OrdinalIgnoreCase)
+    Dim sourceDate1904 As Boolean = System.Convert.ToBoolean(xl(sourceBook, "Date1904", Microsoft.VisualBasic.CallType.Get, New Object() {}))
+    Dim templateSheets As Object = Nothing
+    Try
+        templateSheets = xl(sourceBook, "Worksheets", Microsoft.VisualBasic.CallType.Get, New Object() {})
+        For Each groupName As String In groups
+            If Not sourceNames.Contains(groupName) Then
+                missingGroups.Add(groupName)
+            Else
+                Dim candidate As Object = Nothing
+                Try
+                    candidate = xl(templateSheets, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {groupName})
+                    Dim info As Integer() = headerInfo(candidate)
+                    sourceHeaders.Add(groupName, info)
+                    If info(0) > bestHeaderCount Then
+                        bestHeaderCount = info(0)
+                        headerTemplateName = groupName
+                        headerTemplateColumnCount = info(1)
+                    End If
+                Finally
+                    releaseCom(candidate)
+                End Try
+            End If
+            Dim finalPath As String = System.IO.Path.Combine(periodFolder, "New Report - " & groupName & ".xlsx")
+            If String.Equals(finalPath, sourcePath, System.StringComparison.OrdinalIgnoreCase) OrElse
+               String.Equals(finalPath, groupsPath, System.StringComparison.OrdinalIgnoreCase) Then
+                Throw New System.ArgumentException("An output path must not overwrite an input workbook.")
+            End If
+        Next
+    Finally
+        releaseCom(templateSheets)
+    End Try
+    For Each sourceName As String In sourceNames
+        Dim requiredName As Boolean = False
+        For Each groupName As String In groups
+            If String.Equals(groupName, sourceName, System.StringComparison.OrdinalIgnoreCase) Then
+                requiredName = True
+                Exit For
+            End If
+        Next
+        If Not requiredName Then ignoredSheets.Add(sourceName)
     Next
-    If missingGroups.Count > 0 Then
+    If missingGroups.Count > 0 AndAlso String.Equals(missingSheetPolicy, "Fail", System.StringComparison.OrdinalIgnoreCase) Then
         Throw New System.IO.InvalidDataException("Source report is missing required group sheets: " & String.Join(", ", missingGroups.ToArray()))
     End If
-    log("VALIDATED | Groups=" & groups.Count.ToString() & " | DuplicateNamesIgnored=" & duplicateCount.ToString())
+    If Not String.Equals(missingSheetPolicy, "HeadersOnly", System.StringComparison.OrdinalIgnoreCase) AndAlso
+       Not String.Equals(missingSheetPolicy, "Fail", System.StringComparison.OrdinalIgnoreCase) Then
+        Throw New System.ArgumentException("missingSheetPolicy must be HeadersOnly or Fail.")
+    End If
+    If headerTemplateName.Length = 0 AndAlso (missingGroups.Count > 0 OrElse repairEmptyHeaderRow) Then
+        Throw New System.IO.InvalidDataException("No required group sheet has a nonempty header row " & headerRow.ToString() &
+            ". Supply at least one group sheet with this report's real column headers.")
+    End If
+    log("VALIDATED | Groups=" & groups.Count.ToString() & " | MissingSheets=" & missingGroups.Count.ToString() &
+        " | HeaderTemplate=" & headerTemplateName & " | DuplicateNamesIgnored=" & duplicateCount.ToString())
+    If ignoredSheets.Count > 0 Then log("IGNORED_SOURCE_SHEETS | Names=" & String.Join(", ", ignoredSheets.ToArray()))
 
-    ' Build every group file in staging before publishing any changes.
+    ' All group files are staged before any final file is updated.
     For Each groupName As String In groups
         currentGroup = groupName
         currentStep = "Prepare destination workbook"
@@ -424,16 +544,25 @@ Try
         Dim finalPath As String = System.IO.Path.Combine(periodFolder, fileName)
         Dim stagedPath As String = System.IO.Path.Combine(stageFolder, fileName)
         Dim existed As Boolean = System.IO.File.Exists(finalPath)
+        Dim missingSource As Boolean = Not sourceNames.Contains(groupName)
+        Dim sourceSheetName As String = If(missingSource, headerTemplateName, groupName)
         Dim previousNames As New System.Collections.Generic.HashSet(Of String)(System.StringComparer.OrdinalIgnoreCase)
         Dim destinationSheets As Object = Nothing
         Dim sourceSheets As Object = Nothing
         Dim sourceSheet As Object = Nothing
+        Dim sourceArea As Object = Nothing
+        Dim sourceAreaRows As Object = Nothing
+        Dim sourceAreaColumns As Object = Nothing
+        Dim sourceRange As Object = Nothing
+        Dim destinationRange As Object = Nothing
+        Dim destinationRows As Object = Nothing
+        Dim sourceRows As Object = Nothing
+        Dim destinationColumns As Object = Nothing
+        Dim sourceColumns As Object = Nothing
         Dim anchorSheet As Object = Nothing
-        Dim copiedSheet As Object = Nothing
+        Dim reportSheet As Object = Nothing
         Dim oldSheet As Object = Nothing
-        Dim usedRange As Object = Nothing
-        Dim restoreSourceVisibility As Boolean = False
-        Dim originalSourceVisibility As Integer = -1
+        Dim sourceDataRows As Integer = 0
         Try
             If existed Then
                 If (System.IO.File.GetAttributes(finalPath) And System.IO.FileAttributes.ReadOnly) <> 0 Then
@@ -454,39 +583,25 @@ Try
                 If System.Convert.ToBoolean(xl(destinationBook, "ProtectStructure", Microsoft.VisualBasic.CallType.Get, New Object() {})) Then
                     Throw New System.IO.InvalidDataException("Output workbook structure is protected: " & fileName)
                 End If
+                If System.Convert.ToBoolean(xl(destinationBook, "Date1904", Microsoft.VisualBasic.CallType.Get, New Object() {})) <> sourceDate1904 Then
+                    Throw New System.IO.InvalidDataException("Source and output workbook date systems differ: " & fileName)
+                End If
             Else
                 expectedHashes.Add(finalPath, Nothing)
+                destinationBook = xl(workbooks, "Add", Microsoft.VisualBasic.CallType.Method, New Object() {-4167})
+                xl(destinationBook, "Date1904", Microsoft.VisualBasic.CallType.Let, New Object() {sourceDate1904})
+            End If
+            If System.Convert.ToBoolean(xl(destinationBook, "ReadOnly", Microsoft.VisualBasic.CallType.Get, New Object() {})) Then
+                Throw New System.UnauthorizedAccessException("Staged output is read-only: " & fileName)
             End If
 
-            sourceSheets = xl(sourceBook, "Worksheets", Microsoft.VisualBasic.CallType.Get, New Object() {})
-            sourceSheet = xl(sourceSheets, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {groupName})
-            currentStep = "Make source group sheet visible for copying"
-            originalSourceVisibility = System.Convert.ToInt32(xl(sourceSheet, "Visible", Microsoft.VisualBasic.CallType.Get, New Object() {}))
-            If originalSourceVisibility <> -1 Then
-                If System.Convert.ToBoolean(xl(sourceBook, "ProtectStructure", Microsoft.VisualBasic.CallType.Get, New Object() {})) Then
-                    Throw New System.IO.InvalidDataException("Cannot copy a hidden source sheet while the source workbook structure is protected: " & groupName)
-                End If
-                xl(sourceSheet, "Visible", Microsoft.VisualBasic.CallType.Let, New Object() {-1})
-                restoreSourceVisibility = True
-            End If
-
-            ' Remove any saved multi-sheet selection inside our private read-only source.
-            currentStep = "Select only the source group sheet"
-            xl(sourceBook, "Activate", Microsoft.VisualBasic.CallType.Method, New Object() {})
-            xl(sourceSheet, "Select", Microsoft.VisualBasic.CallType.Method, New Object() {True})
-
-            Dim namesBeforeCopy As New System.Collections.Generic.HashSet(Of String)(System.StringComparer.OrdinalIgnoreCase)
-            Dim worksheetsBeforeCopy As Integer = 0
-            Dim booksBeforeCopy As Integer = System.Convert.ToInt32(xl(workbooks, "Count", Microsoft.VisualBasic.CallType.Get, New Object() {}))
-            Dim copyMode As String = If(existed, "ExistingWorkbook", "NewWorkbook")
+            currentStep = "Create an explicit report worksheet"
+            destinationSheets = xl(destinationBook, "Worksheets", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            Dim beforeCount As Integer = System.Convert.ToInt32(xl(destinationSheets, "Count", Microsoft.VisualBasic.CallType.Get, New Object() {}))
             If existed Then
-                currentStep = "Prepare explicit destination sheet"
-                namesBeforeCopy = sheetNames(destinationBook)
-                destinationSheets = xl(destinationBook, "Worksheets", Microsoft.VisualBasic.CallType.Get, New Object() {})
-                Dim destinationCount As Integer = System.Convert.ToInt32(xl(destinationSheets, "Count", Microsoft.VisualBasic.CallType.Get, New Object() {}))
-                worksheetsBeforeCopy = destinationCount
-                For anchorIndex As Integer = 1 To destinationCount
-                    Dim candidate As Object = xl(destinationSheets, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {anchorIndex})
+                xl(destinationBook, "Activate", Microsoft.VisualBasic.CallType.Method, New Object() {})
+                For index As Integer = 1 To beforeCount
+                    Dim candidate As Object = xl(destinationSheets, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {index})
                     Try
                         If System.Convert.ToInt32(xl(candidate, "Visible", Microsoft.VisualBasic.CallType.Get, New Object() {})) = -1 Then
                             anchorSheet = candidate
@@ -497,126 +612,201 @@ Try
                         releaseCom(candidate)
                     End Try
                 Next
-                If anchorSheet Is Nothing Then
-                    Throw New System.IO.InvalidDataException("Output workbook has no visible worksheet to anchor the copy: " & fileName)
-                End If
-                log("COPY_BEGIN | Group=" & groupName & " | Mode=" & copyMode &
-                    " | Destination=" & System.Convert.ToString(xl(destinationBook, "FullName", Microsoft.VisualBasic.CallType.Get, New Object() {})) &
-                    " | BeforeCount=" & worksheetsBeforeCopy.ToString())
-                currentStep = "Copy group with explicit Before argument"
-                xlMethod(sourceSheet, "Copy", New Object() {anchorSheet}, New String() {"Before"})
-                releaseCom(anchorSheet)
-                anchorSheet = Nothing
-                ' Reacquire the collection after the structural change.
-                releaseCom(destinationSheets)
-                destinationSheets = Nothing
+                If anchorSheet Is Nothing Then Throw New System.IO.InvalidDataException("Output has no visible worksheet: " & fileName)
+                reportSheet = xlMethod(destinationSheets, "Add", New Object() {anchorSheet, 1, -4167},
+                    New String() {"Before", "Count", "Type"})
             Else
-                log("COPY_BEGIN | Group=" & groupName & " | Mode=" & copyMode & " | BeforeCount=0")
-                currentStep = "Copy group into a new workbook"
-                ' Worksheet.Copy with no arguments creates a book containing this one sheet.
-                xlMethod(sourceSheet, "Copy", New Object() {}, Nothing)
+                If beforeCount <> 1 Then Throw New System.InvalidOperationException("New workbook must contain exactly one worksheet.")
+                reportSheet = xl(destinationSheets, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {1})
             End If
-
-            Dim activeCopyBook As Object = Nothing
-            Dim activeCopyBookName As String = String.Empty
-            Dim booksAfterCopy As Integer = System.Convert.ToInt32(xl(workbooks, "Count", Microsoft.VisualBasic.CallType.Get, New Object() {}))
-            currentStep = "Capture workbook after copy"
+            If reportSheet Is Nothing Then Throw New System.InvalidOperationException("Excel did not return the report worksheet.")
+            xl(reportSheet, "Visible", Microsoft.VisualBasic.CallType.Let, New Object() {-1})
+            Dim afterCount As Integer = System.Convert.ToInt32(xl(destinationSheets, "Count", Microsoft.VisualBasic.CallType.Get, New Object() {}))
+            If afterCount <> beforeCount + If(existed, 1, 0) Then Throw New System.InvalidOperationException("Unexpected worksheet count after creating the report sheet.")
+            Dim parent As Object = Nothing
             Try
-                activeCopyBook = xl(excel, "ActiveWorkbook", Microsoft.VisualBasic.CallType.Get, New Object() {})
-                If activeCopyBook IsNot Nothing Then
-                    activeCopyBookName = System.Convert.ToString(xl(activeCopyBook, "FullName", Microsoft.VisualBasic.CallType.Get, New Object() {}))
+                parent = xl(reportSheet, "Parent", Microsoft.VisualBasic.CallType.Get, New Object() {})
+                If Not String.Equals(System.Convert.ToString(xl(parent, "FullName", Microsoft.VisualBasic.CallType.Get, New Object() {})),
+                    System.Convert.ToString(xl(destinationBook, "FullName", Microsoft.VisualBasic.CallType.Get, New Object() {})),
+                    System.StringComparison.OrdinalIgnoreCase) Then
+                    Throw New System.InvalidOperationException("The report worksheet belongs to the wrong workbook.")
                 End If
-                If Not existed Then
-                    If activeCopyBook Is Nothing OrElse
-                       String.Equals(activeCopyBookName, sourcePath, System.StringComparison.OrdinalIgnoreCase) OrElse
-                       String.Equals(activeCopyBookName, groupsPath, System.StringComparison.OrdinalIgnoreCase) Then
-                        Throw New System.InvalidOperationException("Copy did not return a new workbook. ActiveWorkbook=" & activeCopyBookName &
-                            "; WorkbooksBefore=" & booksBeforeCopy.ToString() & "; WorkbooksAfter=" & booksAfterCopy.ToString())
+            Finally
+                releaseCom(parent)
+            End Try
+
+            currentStep = "Read the source group cells"
+            sourceSheets = xl(sourceBook, "Worksheets", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            sourceSheet = xl(sourceSheets, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {sourceSheetName})
+            If Not missingSource AndAlso System.Convert.ToBoolean(xl(sourceSheet, "FilterMode", Microsoft.VisualBasic.CallType.Get, New Object() {})) Then
+                Throw New System.IO.InvalidDataException("The group sheet still has an active filter. Finalize this group's data before export: " & groupName)
+            End If
+            sourceArea = xl(sourceSheet, "UsedRange", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            sourceAreaRows = xl(sourceArea, "Rows", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            sourceAreaColumns = xl(sourceArea, "Columns", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            Dim areaFirstRow As Integer = System.Convert.ToInt32(xl(sourceArea, "Row", Microsoft.VisualBasic.CallType.Get, New Object() {}))
+            Dim areaFirstColumn As Integer = System.Convert.ToInt32(xl(sourceArea, "Column", Microsoft.VisualBasic.CallType.Get, New Object() {}))
+            Dim areaRowCount As Integer = System.Convert.ToInt32(xl(sourceAreaRows, "Count", Microsoft.VisualBasic.CallType.Get, New Object() {}))
+            Dim areaColumnCount As Integer = System.Convert.ToInt32(xl(sourceAreaColumns, "Count", Microsoft.VisualBasic.CallType.Get, New Object() {}))
+            Dim lastColumn As Integer = areaFirstColumn + areaColumnCount - 1
+            Dim lastRow As Integer = headerRow
+            If missingSource Then
+                lastColumn = headerTemplateColumnCount
+                missingSheetCount += 1
+                log("MISSING_SOURCE_SHEET | Group=" & groupName & " | Action=HeadersOnly | HeaderTemplate=" & headerTemplateName)
+            Else
+                Dim rawContent As Object = xl(sourceArea, If(in_ValuesOnly, "Value2", "Formula"), Microsoft.VisualBasic.CallType.Get, New Object() {})
+                For rowOffset As Integer = 0 To areaRowCount - 1
+                    Dim rowHasContent As Boolean = False
+                    For columnOffset As Integer = 0 To areaColumnCount - 1
+                        If hasValue(valueAt(rawContent, rowOffset, columnOffset)) Then
+                            rowHasContent = True
+                            Exit For
+                        End If
+                    Next
+                    If rowHasContent Then lastRow = System.Math.Max(lastRow, areaFirstRow + rowOffset)
+                Next
+            End If
+            ' Read from A1 to keep the original title and header row positions.
+            Dim address As String = "A1:" & columnName(lastColumn) & lastRow.ToString()
+            sourceRange = xl(sourceSheet, "Range", Microsoft.VisualBasic.CallType.Get, New Object() {address})
+            destinationRange = xl(reportSheet, "Range", Microsoft.VisualBasic.CallType.Get, New Object() {address})
+            Dim sourceValues As Object = xl(sourceRange, "Value2", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            For rowOffset As Integer = headerRow To lastRow - 1
+                Dim populated As Boolean = False
+                For columnOffset As Integer = 0 To lastColumn - 1
+                    If hasValue(valueAt(sourceValues, rowOffset, columnOffset)) Then
+                        populated = True
+                        Exit For
                     End If
-                    destinationBook = activeCopyBook
-                    activeCopyBook = Nothing
-                End If
-            Finally
-                releaseCom(activeCopyBook)
-            End Try
-
-            currentStep = "Verify copied worksheet in destination"
-            destinationSheets = xl(destinationBook, "Worksheets", Microsoft.VisualBasic.CallType.Get, New Object() {})
-            Dim worksheetsAfterCopy As Integer = System.Convert.ToInt32(xl(destinationSheets, "Count", Microsoft.VisualBasic.CallType.Get, New Object() {}))
-            Dim namesAfterCopy As System.Collections.Generic.HashSet(Of String) = sheetNames(destinationBook)
-            Dim addedSheetNames As New System.Collections.Generic.List(Of String)()
-            For Each copiedName As String In namesAfterCopy
-                If Not namesBeforeCopy.Contains(copiedName) Then addedSheetNames.Add(copiedName)
+                Next
+                If populated Then sourceDataRows += 1
             Next
-            Dim destinationBookName As String = System.Convert.ToString(xl(destinationBook, "FullName", Microsoft.VisualBasic.CallType.Get, New Object() {}))
-            Dim copyDetails As String = "Group=" & groupName & " | Mode=" & copyMode &
-                " | Destination=" & destinationBookName & " | ActiveWorkbook=" & activeCopyBookName &
-                " | BeforeCount=" & worksheetsBeforeCopy.ToString() & " | AfterCount=" & worksheetsAfterCopy.ToString() &
-                " | BeforeNameCount=" & namesBeforeCopy.Count.ToString() & " | AfterNameCount=" & namesAfterCopy.Count.ToString() &
-                " | AddedCount=" & addedSheetNames.Count.ToString() &
-                " | WorkbooksBefore=" & booksBeforeCopy.ToString() & " | WorkbooksAfter=" & booksAfterCopy.ToString() &
-                " | BeforeSheets=" & String.Join(", ", (New System.Collections.Generic.List(Of String)(namesBeforeCopy)).ToArray()) &
-                " | AfterSheets=" & String.Join(", ", (New System.Collections.Generic.List(Of String)(namesAfterCopy)).ToArray())
-            log("COPY_RESULT | " & copyDetails)
-            If worksheetsAfterCopy <> worksheetsBeforeCopy + 1 OrElse
-               namesBeforeCopy.Count <> worksheetsBeforeCopy OrElse namesAfterCopy.Count <> worksheetsAfterCopy OrElse
-               addedSheetNames.Count <> 1 OrElse
-               booksAfterCopy <> booksBeforeCopy + If(existed, 0, 1) Then
-                Throw New System.InvalidOperationException("Copy verification failed. " & copyDetails)
-            End If
-            If Not existed AndAlso Not String.Equals(addedSheetNames(0), groupName, System.StringComparison.OrdinalIgnoreCase) Then
-                Throw New System.InvalidOperationException("New workbook contains the wrong group sheet. " & copyDetails)
-            End If
-            For Each beforeName As String In namesBeforeCopy
-                If Not namesAfterCopy.Contains(beforeName) Then
-                    Throw New System.InvalidOperationException("Copy removed an existing destination sheet. " & copyDetails)
-                End If
-            Next
-            If System.Convert.ToBoolean(xl(destinationBook, "ReadOnly", Microsoft.VisualBasic.CallType.Get, New Object() {})) Then
-                Throw New System.UnauthorizedAccessException("Staged output workbook was opened read-only: " & fileName)
-            End If
-            copiedSheet = xl(destinationSheets, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {addedSheetNames(0)})
-            Dim copiedParent As Object = Nothing
-            Try
-                copiedParent = xl(copiedSheet, "Parent", Microsoft.VisualBasic.CallType.Get, New Object() {})
-                If Not String.Equals(destinationBookName,
-                       System.Convert.ToString(xl(copiedParent, "FullName", Microsoft.VisualBasic.CallType.Get, New Object() {})),
-                       System.StringComparison.OrdinalIgnoreCase) Then
-                    Throw New System.InvalidOperationException("Copied sheet belongs to the wrong workbook. " & copyDetails)
-                End If
-            Finally
-                releaseCom(copiedParent)
-            End Try
-            xl(copiedSheet, "Visible", Microsoft.VisualBasic.CallType.Let, New Object() {-1}) ' xlSheetVisible
-            If System.Convert.ToInt32(xl(copiedSheet, "Visible", Microsoft.VisualBasic.CallType.Get, New Object() {})) <> -1 Then
-                Throw New System.InvalidOperationException("Copied destination sheet could not be made visible: " & groupName)
-            End If
 
-            currentStep = "Freeze copied formulas if requested"
+            currentStep = "Transfer cells to the explicit destination range"
+            log("TRANSFER_BEGIN | Group=" & groupName & " | SourceSheet=" & sourceSheetName &
+                " | Range=" & address & " | DataRows=" & sourceDataRows.ToString() & " | ExistingFile=" & existed.ToString())
+            xlMethod(sourceRange, "Copy", New Object() {destinationRange}, New String() {"Destination"})
             If in_ValuesOnly Then
-                ' Freeze the copied cells using Excel's PasteSpecial; no Select/Activate is used.
-                usedRange = xl(copiedSheet, "UsedRange", Microsoft.VisualBasic.CallType.Get, New Object() {})
-                Dim formulaState As Object = xl(usedRange, "HasFormula", Microsoft.VisualBasic.CallType.Get, New Object() {})
-                Dim noFormulas As Boolean = TypeOf formulaState Is Boolean AndAlso Not System.Convert.ToBoolean(formulaState)
-                If Not noFormulas Then
-                    If System.Convert.ToBoolean(xl(copiedSheet, "FilterMode", Microsoft.VisualBasic.CallType.Get, New Object() {})) Then
-                        Throw New System.IO.InvalidDataException("Cannot freeze formulas while an AutoFilter is actively hiding rows. Finalize the group data first: " & groupName)
-                    End If
-                    xl(usedRange, "Copy", Microsoft.VisualBasic.CallType.Method, New Object() {})
-                    xl(usedRange, "PasteSpecial", Microsoft.VisualBasic.CallType.Method, New Object() {-4163, -4142, False, False}) ' xlPasteValues, xlNone
-                    xl(excel, "CutCopyMode", Microsoft.VisualBasic.CallType.Let, New Object() {False})
-                End If
+                ' Write the source's saved values directly: no PasteSpecial or recalculation.
+                xl(destinationRange, "Value2", Microsoft.VisualBasic.CallType.Let, New Object() {sourceValues})
+                currentStep = "Verify every exported cell value"
+                Dim actualValues As Object = xl(destinationRange, "Value2", Microsoft.VisualBasic.CallType.Get, New Object() {})
+                Dim preservedTextCount As Integer = 0
+                For rowOffset As Integer = 0 To lastRow - 1
+                    For columnOffset As Integer = 0 To lastColumn - 1
+                        Dim expectedValue As Object = valueAt(sourceValues, rowOffset, columnOffset)
+                        Dim actualValue As Object = valueAt(actualValues, rowOffset, columnOffset)
+                        If Not valuesMatch(expectedValue, actualValue) Then
+                            ' Excel can coerce numeric-looking text under General formatting.
+                            ' Keep leading zeroes and literal text, then restore its original format.
+                            If TypeOf expectedValue Is String Then
+                                Dim textCell As Object = Nothing
+                                Try
+                                    textCell = xl(reportSheet, "Range", Microsoft.VisualBasic.CallType.Get,
+                                        New Object() {columnName(columnOffset + 1) & (rowOffset + 1).ToString()})
+                                    Dim originalFormat As Object = xl(textCell, "NumberFormat", Microsoft.VisualBasic.CallType.Get, New Object() {})
+                                    xl(textCell, "NumberFormat", Microsoft.VisualBasic.CallType.Let, New Object() {"@"})
+                                    xl(textCell, "Value2", Microsoft.VisualBasic.CallType.Let, New Object() {expectedValue})
+                                    xl(textCell, "NumberFormat", Microsoft.VisualBasic.CallType.Let, New Object() {originalFormat})
+                                    actualValue = xl(textCell, "Value2", Microsoft.VisualBasic.CallType.Get, New Object() {})
+                                    preservedTextCount += 1
+                                Finally
+                                    releaseCom(textCell)
+                                End Try
+                            End If
+                            If Not valuesMatch(expectedValue, actualValue) Then
+                                Throw New System.InvalidOperationException("Exported value differs from its source at " &
+                                    columnName(columnOffset + 1) & (rowOffset + 1).ToString() & " for group " & groupName)
+                            End If
+                        End If
+                    Next
+                Next
+                If preservedTextCount > 0 Then log("TEXT_VALUES_PRESERVED | Group=" & groupName & " | Cells=" & preservedTextCount.ToString())
             End If
-            If previousNames.Contains(reportName) Then
-                currentStep = "Replace existing report sheet"
-                oldSheet = xl(destinationSheets, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {reportName})
-                deleteSheetSafely(destinationBook, oldSheet, copiedSheet)
-            End If
-            currentStep = "Name copied report sheet"
-            xl(copiedSheet, "Name", Microsoft.VisualBasic.CallType.Let, New Object() {reportName})
+            xl(excel, "CutCopyMode", Microsoft.VisualBasic.CallType.Let, New Object() {False})
 
-            ' Report tabs remain ordered 1,2,3,4, including an out-of-order recovery run.
-            currentStep = "Order report sheets"
+            currentStep = "Preserve column widths and row heights"
+            sourceColumns = xl(sourceSheet, "Columns", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            destinationColumns = xl(reportSheet, "Columns", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            For index As Integer = 1 To lastColumn
+                Dim srcColumn As Object = Nothing
+                Dim dstColumn As Object = Nothing
+                Try
+                    srcColumn = xl(sourceColumns, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {index})
+                    dstColumn = xl(destinationColumns, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {index})
+                    xl(dstColumn, "ColumnWidth", Microsoft.VisualBasic.CallType.Let,
+                        New Object() {xl(srcColumn, "ColumnWidth", Microsoft.VisualBasic.CallType.Get, New Object() {})})
+                    xl(dstColumn, "Hidden", Microsoft.VisualBasic.CallType.Let,
+                        New Object() {xl(srcColumn, "Hidden", Microsoft.VisualBasic.CallType.Get, New Object() {})})
+                Finally
+                    releaseCom(dstColumn)
+                    releaseCom(srcColumn)
+                End Try
+            Next
+            sourceRows = xl(sourceSheet, "Rows", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            destinationRows = xl(reportSheet, "Rows", Microsoft.VisualBasic.CallType.Get, New Object() {})
+            For index As Integer = 1 To lastRow
+                Dim srcRow As Object = Nothing
+                Dim dstRow As Object = Nothing
+                Try
+                    srcRow = xl(sourceRows, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {index})
+                    dstRow = xl(destinationRows, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {index})
+                    xl(dstRow, "RowHeight", Microsoft.VisualBasic.CallType.Let,
+                        New Object() {xl(srcRow, "RowHeight", Microsoft.VisualBasic.CallType.Get, New Object() {})})
+                    xl(dstRow, "Hidden", Microsoft.VisualBasic.CallType.Let,
+                        New Object() {xl(srcRow, "Hidden", Microsoft.VisualBasic.CallType.Get, New Object() {})})
+                Finally
+                    releaseCom(dstRow)
+                    releaseCom(srcRow)
+                End Try
+            Next
+
+            If Not missingSource AndAlso repairEmptyHeaderRow AndAlso sourceHeaders(groupName)(0) = 0 Then
+                currentStep = "Restore the empty header row"
+                Dim templateSheet As Object = Nothing
+                Dim templateRange As Object = Nothing
+                Dim destinationHeader As Object = Nothing
+                Try
+                    templateSheet = xl(sourceSheets, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {headerTemplateName})
+                    Dim headerAddress As String = "A" & headerRow.ToString() & ":" & columnName(headerTemplateColumnCount) & headerRow.ToString()
+                    templateRange = xl(templateSheet, "Range", Microsoft.VisualBasic.CallType.Get, New Object() {headerAddress})
+                    destinationHeader = xl(reportSheet, "Range", Microsoft.VisualBasic.CallType.Get, New Object() {headerAddress})
+                    xlMethod(templateRange, "Copy", New Object() {destinationHeader}, New String() {"Destination"})
+                    If in_ValuesOnly Then
+                        xl(destinationHeader, "Value2", Microsoft.VisualBasic.CallType.Let,
+                            New Object() {xl(templateRange, "Value2", Microsoft.VisualBasic.CallType.Get, New Object() {})})
+                    End If
+                    repairedHeaderCount += 1
+                    log("HEADER_ROW_REPAIRED | Group=" & groupName & " | HeaderRow=" & headerRow.ToString() & " | Template=" & headerTemplateName)
+                Finally
+                    releaseCom(destinationHeader)
+                    releaseCom(templateRange)
+                    releaseCom(templateSheet)
+                End Try
+            End If
+            If missingSource Then
+                Dim warningCell As Object = Nothing
+                Try
+                    warningCell = xl(reportSheet, "Range", Microsoft.VisualBasic.CallType.Get, New Object() {"A1"})
+                    Dim originalTitle As String = System.Convert.ToString(xl(warningCell, "Value2", Microsoft.VisualBasic.CallType.Get, New Object() {}))
+                    xl(warningCell, "Value2", Microsoft.VisualBasic.CallType.Let,
+                        New Object() {originalTitle & " | SOURCE SHEET MISSING: " & groupName})
+                Finally
+                    releaseCom(warningCell)
+                End Try
+            ElseIf sourceDataRows = 0 Then
+                emptyGroupCount += 1
+                log("EMPTY_SOURCE_DATA | Group=" & groupName & " | Action=HeadersOnly")
+            End If
+
+            currentStep = "Replace and name the current report sheet"
+            If previousNames.Contains(reportName) Then
+                oldSheet = xl(destinationSheets, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {reportName})
+                deleteSheetSafely(destinationBook, oldSheet, reportSheet)
+            End If
+            xl(reportSheet, "Name", Microsoft.VisualBasic.CallType.Let, New Object() {reportName})
+            currentStep = "Order the report sheets"
             Dim namesNow As System.Collections.Generic.HashSet(Of String) = sheetNames(destinationBook)
             For number As Integer = 4 To 1 Step -1
                 Dim name As String = "Report " & number.ToString()
@@ -625,8 +815,8 @@ Try
                 Dim movingSheet As Object = Nothing
                 Try
                     firstSheet = xl(destinationSheets, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {1})
-                    If String.Equals(System.Convert.ToString(xl(firstSheet, "Name", Microsoft.VisualBasic.CallType.Get, New Object() {})), name,
-                                     System.StringComparison.OrdinalIgnoreCase) Then Continue For
+                    If String.Equals(System.Convert.ToString(xl(firstSheet, "Name", Microsoft.VisualBasic.CallType.Get, New Object() {})),
+                        name, System.StringComparison.OrdinalIgnoreCase) Then Continue For
                     movingSheet = xl(destinationSheets, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {name})
                     xlMethod(movingSheet, "Move", New Object() {firstSheet}, New String() {"Before"})
                 Finally
@@ -635,41 +825,40 @@ Try
                 End Try
             Next
             Dim resultNames As System.Collections.Generic.HashSet(Of String) = sheetNames(destinationBook)
-            If Not resultNames.Contains(reportName) Then
-                Throw New System.InvalidOperationException("Copied report sheet is missing before save: " & fileName)
-            End If
+            If Not resultNames.Contains(reportName) Then Throw New System.InvalidOperationException("The report worksheet is missing before save.")
+            Dim expectedCount As Integer = previousNames.Count + If(previousNames.Contains(reportName), 0, 1)
+            If resultNames.Count <> expectedCount Then Throw New System.InvalidOperationException("Unexpected final worksheet count: " & fileName)
             For Each previousName As String In previousNames
-                If Not resultNames.Contains(previousName) Then
-                    Throw New System.InvalidOperationException("An existing sheet would be lost: " & previousName)
-                End If
+                If Not resultNames.Contains(previousName) Then Throw New System.InvalidOperationException("An existing worksheet would be lost: " & previousName)
             Next
-
-            currentStep = "Save staged group workbook"
+            log("TRANSFER_VERIFIED | Group=" & groupName & " | Sheet=" & reportName & " | DataRows=" & sourceDataRows.ToString() &
+                " | MissingSource=" & missingSource.ToString() & " | FinalSheetCount=" & resultNames.Count.ToString())
+            currentStep = "Save the staged group workbook"
             If existed Then
                 xl(destinationBook, "Save", Microsoft.VisualBasic.CallType.Method, New Object() {})
             Else
-                xl(destinationBook, "SaveAs", Microsoft.VisualBasic.CallType.Method, New Object() {stagedPath, 51}) ' xlOpenXMLWorkbook .xlsx
+                xl(destinationBook, "SaveAs", Microsoft.VisualBasic.CallType.Method, New Object() {stagedPath, 51})
             End If
             xl(destinationBook, "Close", Microsoft.VisualBasic.CallType.Method, New Object() {False})
             releaseCom(destinationBook)
             destinationBook = Nothing
             If Not System.IO.File.Exists(stagedPath) OrElse (New System.IO.FileInfo(stagedPath)).Length = 0 Then
-                Throw New System.IO.IOException("Excel did not create a nonempty staged workbook: " & fileName)
+                Throw New System.IO.IOException("Excel did not create the staged workbook: " & fileName)
             End If
             log("STAGED | Group=" & groupName & " | Sheet=" & reportName)
         Finally
-            If restoreSourceVisibility AndAlso sourceSheet IsNot Nothing Then
-                Try
-                    ' Source is read-only and always closed without saving.
-                    xl(sourceSheet, "Visible", Microsoft.VisualBasic.CallType.Let, New Object() {originalSourceVisibility})
-                Catch
-                    ' Source file is never saved; do not replace the original export error.
-                End Try
-            End If
-            releaseCom(usedRange)
             releaseCom(oldSheet)
-            releaseCom(copiedSheet)
+            releaseCom(reportSheet)
             releaseCom(anchorSheet)
+            releaseCom(destinationRows)
+            releaseCom(sourceRows)
+            releaseCom(destinationColumns)
+            releaseCom(sourceColumns)
+            releaseCom(destinationRange)
+            releaseCom(sourceRange)
+            releaseCom(sourceAreaColumns)
+            releaseCom(sourceAreaRows)
+            releaseCom(sourceArea)
             releaseCom(sourceSheet)
             releaseCom(sourceSheets)
             releaseCom(destinationSheets)
@@ -723,8 +912,10 @@ Try
     out_UpdatedFiles = completedFiles.ToArray()
     out_Summary = "RunId=" & runId & " | Period=" & reportMonth & " | InputPeriod=" & periodInput & " | " & reportName &
                   " | UpdatedFiles=" & completedFiles.Count.ToString() &
-                  " | DuplicateNamesIgnored=" & duplicateCount.ToString()
-    log("SUCCESS | UpdatedFiles=" & completedFiles.Count.ToString())
+                  " | MissingSheets=" & missingSheetCount.ToString() & " | RepairedHeaders=" & repairedHeaderCount.ToString() &
+                  " | EmptyGroups=" & emptyGroupCount.ToString() & " | DuplicateNamesIgnored=" & duplicateCount.ToString()
+    log("SUCCESS | UpdatedFiles=" & completedFiles.Count.ToString() & " | MissingSheets=" & missingSheetCount.ToString() &
+        " | RepairedHeaders=" & repairedHeaderCount.ToString() & " | EmptyGroups=" & emptyGroupCount.ToString())
     success = True
 Catch ex As System.Exception
     Try

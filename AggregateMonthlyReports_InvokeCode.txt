@@ -1,17 +1,18 @@
-' MONTHLY CRM GROUP EXPORT — Compact4
+' MONTHLY CRM GROUP EXPORT — NamedReports5
 ' UiPath Windows-Legacy / Invoke Code / VBNet. Paste this complete body without Sub or Module.
 ' Inputs: .xls or .xlsx reports. Outputs: one .xlsx per CRM group under <root>\<year>\<MMM>.
-' Requires installed Excel. Keep the existing nine UiPath arguments shown below.
+' Requires installed Excel. Keep the existing arguments and add in_ReportName.
 
 ' in_SourceWorkbookPath As String        In
 ' in_CrmGroupFilePath As String          In
 ' in_CrmGroupSheetName As String         In; empty means first worksheet
 ' in_OutputRootFolder As String          In
-' in_ReportNumber As Int32              In; 1..4
+' in_ReportNumber As Int32              In; 1..4, legacy migration and logging only
+' in_ReportName As String               In; output worksheet name, e.g. CIB Book Report
 ' in_ReportPeriod As String             In; yyyy-MM-dd or yyyy-MM, business reporting date/month
 ' in_ValuesOnly As Boolean              In; recommended True for snapshots
-' out_Summary As String                 Out
-' out_UpdatedFiles As String()          Out
+' out_Summary As String                 Out; success summary for the caller's Log Message
+' out_UpdatedFiles As String()          Out; published full paths for attachments/next steps
 
 Dim invariant As System.Globalization.CultureInfo = System.Globalization.CultureInfo.InvariantCulture
 Dim ignoreCase As System.StringComparison = System.StringComparison.OrdinalIgnoreCase
@@ -40,6 +41,26 @@ If String.IsNullOrWhiteSpace(in_SourceWorkbookPath) OrElse
 End If
 
 If in_ReportNumber < 1 OrElse in_ReportNumber > 4 Then Throw New System.ArgumentOutOfRangeException("in_ReportNumber", "Use a report number from 1 to 4.")
+
+' The report title names the OUTPUT tab; CRM group names still select SOURCE tabs.
+' Reject invalid names instead of silently truncating/renaming a business report.
+Dim reportName As String = If(in_ReportName, String.Empty).Trim()
+Dim legacyReportName As String = "Report " & in_ReportNumber.ToString(invariant)
+If reportName.Length = 0 OrElse reportName.Length > 31 OrElse
+   reportName.IndexOfAny((":/\?*[]").ToCharArray()) >= 0 OrElse
+   reportName.StartsWith("'", System.StringComparison.Ordinal) OrElse
+   reportName.EndsWith("'", System.StringComparison.Ordinal) OrElse
+   String.Equals(reportName, "History", ignoreCase) Then
+    Throw New System.ArgumentException("in_ReportName must be a valid Excel worksheet name: 1 to 31 characters; no : / \ ? * [ ]; no leading/trailing apostrophe; not History.")
+End If
+For Each character As Char In reportName
+    If System.Char.IsControl(character) Then Throw New System.ArgumentException("in_ReportName cannot contain control characters.")
+Next
+' Do not allow a legacy title for a different process to replace that process's tab.
+If System.Text.RegularExpressions.Regex.IsMatch(reportName, "^Report [1-4]$", System.Text.RegularExpressions.RegexOptions.IgnoreCase) AndAlso
+   Not String.Equals(reportName, legacyReportName, ignoreCase) Then
+    Throw New System.ArgumentException("A legacy Report N title must match in_ReportNumber. Otherwise supply the actual report title.")
+End If
 
 ' Accept the existing report date unchanged, e.g. previousDate = "2026-09-30".
 ' Older callers may still pass the reporting month alone, e.g. "2026-09".
@@ -76,11 +97,11 @@ End If
 ' Save by reporting year and English abbreviated reporting month, e.g. Output\2026\Sep.
 Dim periodFolder As String = System.IO.Path.Combine(outputRoot, periodDate.ToString("yyyy", invariant), periodDate.ToString("MMM", invariant))
 Dim runId As String = System.Guid.NewGuid().ToString("N")
-Dim reportName As String = "Report " & in_ReportNumber.ToString(invariant)
 Dim stageFolder As String = System.IO.Path.Combine(periodFolder, "_work", runId)
 Dim backupFolder As String = System.IO.Path.Combine(periodFolder, "_backup", runId)
 Dim journalFolder As String = System.IO.Path.Combine(periodFolder, "_logs")
-Dim journalPath As String = System.IO.Path.Combine(journalFolder, reportName.Replace(" ", "") & "-" & runId & ".log")
+' Use the stable report number for log filenames; a valid tab title need not be a valid filename.
+Dim journalPath As String = System.IO.Path.Combine(journalFolder, legacyReportName.Replace(" ", "") & "-" & runId & ".log")
 
 For Each inputPath As String In New String() {sourcePath, groupsPath}
     If Not System.IO.File.Exists(inputPath) Then Throw New System.IO.FileNotFoundException("Required input workbook was not found.", inputPath)
@@ -112,7 +133,7 @@ Dim xl As System.Func(Of Object, String, Microsoft.VisualBasic.CallType, Object(
     Function(target As Object, member As String, kind As Microsoft.VisualBasic.CallType, args As Object()) As Object
         Return invokeCom(Function() Microsoft.VisualBasic.Interaction.CallByName(target, member, kind, args))
     End Function
-' Add, Move and Range.Copy need explicit argument names to bind the destination.
+' Add and Range.Copy need explicit argument names to bind the destination.
 Dim xlMethod As System.Func(Of Object, String, Object(), String(), Object) =
     Function(target As Object, member As String, args As Object(), names As String()) As Object
         Return invokeCom(Function() target.GetType().InvokeMember(member,
@@ -391,7 +412,8 @@ Try
     currentStep = "Create export work folders"
     System.IO.Directory.CreateDirectory(stageFolder)
     System.IO.Directory.CreateDirectory(journalFolder)
-    log("START | Build=2026-10-13-RangeExport3 | Revision=Compact4 | RunId=" & runId & " | Period=" & reportMonth & " | InputPeriod=" & periodInput & " | Report=" & in_ReportNumber.ToString())
+    log("START | Build=2026-10-14-NamedReports5 | RunId=" & runId & " | Period=" & reportMonth & " | InputPeriod=" & periodInput &
+        " | ReportNumber=" & in_ReportNumber.ToString() & " | ReportName=" & reportName)
 
     currentStep = "Wait for source workbook"
     waitForInput(sourcePath)
@@ -549,6 +571,7 @@ Try
         Dim missingSource As Boolean = Not sourceNames.Contains(groupName)
         Dim sourceSheetName As String = If(missingSource, headerTemplateName, groupName)
         Dim previousNames As New System.Collections.Generic.HashSet(Of String)(nameComparer)
+        Dim replacedNames As New System.Collections.Generic.HashSet(Of String)(nameComparer)
         Dim destinationSheets As Object = Nothing, sourceSheets As Object = Nothing, sourceSheet As Object = Nothing, sourceArea As Object = Nothing
         Dim sourceAreaRows As Object = Nothing, sourceAreaColumns As Object = Nothing, sourceRange As Object = Nothing, destinationRange As Object = Nothing
         Dim anchorSheet As Object = Nothing, reportSheet As Object = Nothing, oldSheet As Object = Nothing
@@ -590,20 +613,21 @@ Try
             Dim beforeCount As Integer = System.Convert.ToInt32(readProp(destinationSheets, "Count"))
             If existed Then
                 runMethod(destinationBook, "Activate")
-                For index As Integer = 1 To beforeCount
-                    Dim candidate As Object = itemAt(destinationSheets, index)
-                    Try
-                        If System.Convert.ToInt32(readProp(candidate, "Visible")) = -1 Then
-                            anchorSheet = candidate
-                            candidate = Nothing
-                            Exit For
-                        End If
-                    Finally
-                        releaseCom(candidate)
-                    End Try
-                Next
-                If anchorSheet Is Nothing Then Throw New System.IO.InvalidDataException("Output has no visible worksheet: " & fileName)
-                reportSheet = xlMethod(destinationSheets, "Add", New Object() {anchorSheet, 1, -4167}, New String() {"Before", "Count", "Type"})
+                ' Replace the named tab and its matching legacy Report N, if present.
+                ' The number identifies ONLY this process's old tab; other reports stay intact.
+                If previousNames.Contains(reportName) Then replacedNames.Add(reportName)
+                If previousNames.Contains(legacyReportName) Then replacedNames.Add(legacyReportName)
+                Dim existingName As String = If(previousNames.Contains(reportName), reportName,
+                    If(previousNames.Contains(legacyReportName), legacyReportName, String.Empty))
+                If existingName.Length > 0 Then
+                    ' Keep an updated report in its existing tab position.
+                    anchorSheet = itemAt(destinationSheets, existingName)
+                    reportSheet = xlMethod(destinationSheets, "Add", New Object() {anchorSheet, 1, -4167}, New String() {"Before", "Count", "Type"})
+                Else
+                    ' A newly added report goes last, in first-export order.
+                    anchorSheet = itemAt(destinationSheets, beforeCount)
+                    reportSheet = xlMethod(destinationSheets, "Add", New Object() {anchorSheet, 1, -4167}, New String() {"After", "Count", "Type"})
+                End If
             Else
                 If beforeCount <> 1 Then Throw New System.InvalidOperationException("New workbook must contain exactly one worksheet.")
                 reportSheet = itemAt(destinationSheets, 1)
@@ -744,34 +768,30 @@ Try
             End If
 
             ' F. Delete the old report only after its replacement is complete and visible.
-            ' Retain every other report and order Report 1, 2, 3, 4 even on recovery runs.
+            ' Migrate this process's Report N to its title without leaving a duplicate tab.
+            ' Titles are the identity for subsequent runs: keep each process's title stable.
             currentStep = "Replace and name the current report sheet"
-            If previousNames.Contains(reportName) Then
-                oldSheet = itemAt(destinationSheets, reportName)
-                deleteSheetSafely(destinationBook, oldSheet, reportSheet)
-            End If
-            writeProp(reportSheet, "Name", reportName)
-            currentStep = "Order the report sheets"
-            Dim namesNow As System.Collections.Generic.HashSet(Of String) = sheetNames(destinationBook)
-            For number As Integer = 4 To 1 Step -1
-                Dim name As String = "Report " & number.ToString()
-                If Not namesNow.Contains(name) Then Continue For
-                Dim firstSheet As Object = Nothing, movingSheet As Object = Nothing
+            For Each replacedName As String In replacedNames
                 Try
-                    firstSheet = itemAt(destinationSheets, 1)
-                    If String.Equals(System.Convert.ToString(readProp(firstSheet, "Name")), name, ignoreCase) Then Continue For
-                    movingSheet = itemAt(destinationSheets, name)
-                    xlMethod(movingSheet, "Move", New Object() {firstSheet}, New String() {"Before"})
+                    oldSheet = itemAt(destinationSheets, replacedName)
+                    deleteSheetSafely(destinationBook, oldSheet, reportSheet)
                 Finally
-                    releaseAll(New Object() {movingSheet, firstSheet})
+                    releaseCom(oldSheet)
+                    oldSheet = Nothing
                 End Try
             Next
+            writeProp(reportSheet, "Name", reportName)
+            If replacedNames.Contains(legacyReportName) AndAlso Not String.Equals(reportName, legacyReportName, ignoreCase) Then
+                log("LEGACY_REPORT_REPLACED | Group=" & groupName & " | OldSheet=" & legacyReportName & " | NewSheet=" & reportName)
+            End If
             Dim resultNames As System.Collections.Generic.HashSet(Of String) = sheetNames(destinationBook)
             If Not resultNames.Contains(reportName) Then Throw New System.InvalidOperationException("The report worksheet is missing before save.")
-            Dim expectedCount As Integer = previousNames.Count + If(previousNames.Contains(reportName), 0, 1)
+            Dim expectedCount As Integer = previousNames.Count - replacedNames.Count + 1
             If resultNames.Count <> expectedCount Then Throw New System.InvalidOperationException("Unexpected final worksheet count: " & fileName)
             For Each previousName As String In previousNames
-                If Not resultNames.Contains(previousName) Then Throw New System.InvalidOperationException("An existing worksheet would be lost: " & previousName)
+                If Not replacedNames.Contains(previousName) AndAlso Not resultNames.Contains(previousName) Then
+                    Throw New System.InvalidOperationException("An existing worksheet would be lost: " & previousName)
+                End If
             Next
             log("TRANSFER_VERIFIED | Group=" & groupName & " | Sheet=" & reportName & " | DataRows=" & sourceDataRows.ToString() &
                 " | MissingSource=" & missingSource.ToString() & " | FinalSheetCount=" & resultNames.Count.ToString())
@@ -836,7 +856,8 @@ Try
     Next
 
     out_UpdatedFiles = completedFiles.ToArray()
-    out_Summary = "RunId=" & runId & " | Period=" & reportMonth & " | InputPeriod=" & periodInput & " | " & reportName &
+    out_Summary = "RunId=" & runId & " | Period=" & reportMonth & " | InputPeriod=" & periodInput &
+                  " | ReportNumber=" & in_ReportNumber.ToString() & " | ReportName=" & reportName &
                   " | UpdatedFiles=" & completedFiles.Count.ToString() &
                   " | MissingSheets=" & missingSheetCount.ToString() & " | RepairedHeaders=" & repairedHeaderCount.ToString() &
                   " | EmptyGroups=" & emptyGroupCount.ToString() & " | DuplicateNamesIgnored=" & duplicateCount.ToString()

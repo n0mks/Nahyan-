@@ -1,0 +1,976 @@
+' MONTHLY CRM GROUP EXPORT - NamedSheets6
+' UiPath Windows-Legacy / Invoke Code / VBNet.
+' Paste this entire body into Edit Code, without Sub, Module, or Imports statements.
+' Requires installed Microsoft Excel. Uses the existing late-bound COM approach.
+'
+' REQUIRED ARGUMENTS (same names and directions as before):
+' in_SourceWorkbookPath As String       In
+' in_CrmGroupFilePath As String         In
+' in_CrmGroupSheetName As String        In; empty = first worksheet
+' in_OutputRootFolder As String        In
+' in_ReportName As String              In; stable process/report name = output tab name
+' in_ReportPeriod As String            In; yyyy-MM-dd or yyyy-MM
+' in_ValuesOnly As Boolean             In; True recommended
+' out_Summary As String                Out
+' out_UpdatedFiles As String()         Out
+'
+' in_ReportNumber is no longer used. Remove it from Edit Arguments, or leave it
+' mapped for compatibility; it has no effect on naming, replacement, or deletion.
+'
+' BEHAVIOR:
+' - Same monthly group workbook and same report name: update that tab IN PLACE.
+' - Different report name: append one tab; do not delete or rename old tabs.
+' - Missing source group or no data below headerRow: skip the group completely.
+'   An existing destination tab/file is left unchanged for a skipped group.
+' - No automatic migration/deletion of populated Report 1/2/etc. tabs. Their
+'   relationship to a named process cannot safely be inferred from a number.
+' - No _work or _backup directories are created. Temporary files and the stable
+'   monthly lock live inside _logs. Successful runs remove their temporary files.
+' - Existing files are staged and validated before publication. Publishing is
+'   per file, not one atomic transaction across all CRM groups.
+' - Use this same version in every caller sharing a monthly output folder.
+'
+Dim invariant As System.Globalization.CultureInfo = System.Globalization.CultureInfo.InvariantCulture
+Dim ignoreCase As System.StringComparison = System.StringComparison.OrdinalIgnoreCase
+Dim nameComparer As System.StringComparer = System.StringComparer.OrdinalIgnoreCase
+
+out_Summary = String.Empty
+out_UpdatedFiles = New String() {}
+
+' 1. SETTINGS
+Dim inputWaitTimeoutSeconds As Integer = 60
+Dim inputPollMilliseconds As Integer = 2000
+Dim headerRow As Integer = 2 ' Existing layout: title in row 1, labels in row 2, data from row 3.
+Dim repairEmptyHeaderRow As Boolean = True
+Dim verifyOtherSheetContents As Boolean = True
+
+' 2. VALIDATE INPUTS AND BUILD THE BUSINESS-MONTH OUTPUT PATH
+If System.Environment.OSVersion.Platform <> System.PlatformID.Win32NT Then
+    Throw New System.PlatformNotSupportedException("Excel COM automation requires Windows.")
+End If
+If String.IsNullOrWhiteSpace(in_SourceWorkbookPath) OrElse
+   String.IsNullOrWhiteSpace(in_CrmGroupFilePath) OrElse
+   String.IsNullOrWhiteSpace(in_OutputRootFolder) Then
+    Throw New System.ArgumentException("Source, CRM Group and output paths are required.")
+End If
+
+Dim reportName As String = If(in_ReportName, String.Empty).Trim()
+If reportName.Length = 0 OrElse reportName.Length > 31 OrElse
+   reportName.IndexOfAny((":/\?*[]").ToCharArray()) >= 0 OrElse
+   reportName.StartsWith("'", System.StringComparison.Ordinal) OrElse
+   reportName.EndsWith("'", System.StringComparison.Ordinal) OrElse
+   String.Equals(reportName, "History", ignoreCase) Then
+    Throw New System.ArgumentException("in_ReportName must be a valid Excel worksheet name: 1 to 31 characters; no : / \ ? * [ ]; no leading/trailing apostrophe; not History.")
+End If
+For Each character As Char In reportName
+    If System.Char.IsControl(character) Then Throw New System.ArgumentException("in_ReportName cannot contain control characters.")
+Next
+
+Dim periodInput As String = If(in_ReportPeriod, String.Empty).Trim()
+Dim periodDateText As String = periodInput
+Dim periodError As String = "in_ReportPeriod must be a valid business date in yyyy-MM-dd format or month in yyyy-MM format."
+If Not System.Text.RegularExpressions.Regex.IsMatch(periodInput, "^\d{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$") Then
+    Throw New System.ArgumentException(periodError)
+End If
+If periodInput.Length = 7 Then periodDateText = periodInput & "-01"
+Dim periodDate As System.DateTime
+If Not System.DateTime.TryParseExact(periodDateText, "yyyy-MM-dd", invariant,
+        System.Globalization.DateTimeStyles.None, periodDate) Then
+    Throw New System.ArgumentException(periodError)
+End If
+Dim reportMonth As String = periodDate.ToString("yyyy-MM", invariant)
+
+For Each suppliedPath As String In New String() {in_SourceWorkbookPath, in_CrmGroupFilePath, in_OutputRootFolder}
+    If Not System.IO.Path.IsPathRooted(suppliedPath) OrElse System.IO.Path.GetPathRoot(suppliedPath).Length < 3 Then
+        Throw New System.ArgumentException("Use absolute local paths or UNC paths, not relative or drive-relative paths.")
+    End If
+Next
+Dim sourcePath As String = System.IO.Path.GetFullPath(in_SourceWorkbookPath)
+Dim groupsPath As String = System.IO.Path.GetFullPath(in_CrmGroupFilePath)
+Dim outputRoot As String = System.IO.Path.GetFullPath(in_OutputRootFolder)
+If String.Equals(sourcePath, groupsPath, ignoreCase) Then
+    Throw New System.ArgumentException("The source report and CRM Group configuration must be different workbooks.")
+End If
+For Each inputPath As String In New String() {sourcePath, groupsPath}
+    If Not System.IO.File.Exists(inputPath) Then
+        Throw New System.IO.FileNotFoundException("Required input workbook was not found.", inputPath)
+    End If
+Next
+
+Dim periodFolder As String = System.IO.Path.Combine(outputRoot,
+    periodDate.ToString("yyyy", invariant), periodDate.ToString("MMM", invariant))
+Dim journalFolder As String = System.IO.Path.Combine(periodFolder, "_logs")
+Dim runId As String = System.Guid.NewGuid().ToString("N")
+Dim safeLogName As String = reportName
+For Each character As Char In System.IO.Path.GetInvalidFileNameChars()
+    safeLogName = safeLogName.Replace(character, "_"c)
+Next
+safeLogName = safeLogName.TrimEnd(" "c, "."c)
+If safeLogName.Length = 0 Then safeLogName = "Process"
+Dim journalPath As String = System.IO.Path.Combine(journalFolder,
+    "Export-" & safeLogName & "-" & runId & ".log")
+
+' 3. EXCEL COM ACCESS - preserve the original late-bound, Option Strict compatible style.
+' Retry only a rejected/busy Excel call, not arbitrary business/file exceptions.
+Dim invokeCom As System.Func(Of System.Func(Of Object), Object) =
+    Function(operation As System.Func(Of Object)) As Object
+        For attempt As Integer = 1 To 3
+            Try
+                Return operation()
+            Catch ex As System.Exception
+                Dim cause As System.Exception = ex
+                While TypeOf cause Is System.Reflection.TargetInvocationException AndAlso cause.InnerException IsNot Nothing
+                    cause = cause.InnerException
+                End While
+                Dim busy As System.Runtime.InteropServices.COMException = TryCast(cause, System.Runtime.InteropServices.COMException)
+                If busy Is Nothing OrElse
+                   (busy.ErrorCode <> -2147418111 AndAlso busy.ErrorCode <> -2147417846) OrElse attempt = 3 Then Throw
+                System.Threading.Thread.Sleep(250 * attempt)
+            End Try
+        Next
+        Throw New System.InvalidOperationException("Excel COM retry limit reached.")
+    End Function
+
+Dim xl As System.Func(Of Object, String, Microsoft.VisualBasic.CallType, Object(), Object) =
+    Function(target As Object, member As String, kind As Microsoft.VisualBasic.CallType, args As Object()) As Object
+        Return invokeCom(Function() Microsoft.VisualBasic.Interaction.CallByName(target, member, kind, args))
+    End Function
+Dim xlMethod As System.Func(Of Object, String, Object(), String(), Object) =
+    Function(target As Object, member As String, args As Object(), names As String()) As Object
+        Return invokeCom(Function() target.GetType().InvokeMember(member,
+            System.Reflection.BindingFlags.InvokeMethod Or System.Reflection.BindingFlags.Public Or
+            System.Reflection.BindingFlags.Instance Or System.Reflection.BindingFlags.OptionalParamBinding,
+            Nothing, target, args, Nothing, System.Globalization.CultureInfo.GetCultureInfo("en-US"), names))
+    End Function
+Dim readProp As System.Func(Of Object, String, Object) =
+    Function(obj As Object, name As String) xl(obj, name, Microsoft.VisualBasic.CallType.Get, New Object() {})
+Dim itemAt As System.Func(Of Object, Object, Object) =
+    Function(collection As Object, index As Object) xl(collection, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {index})
+Dim rangeAt As System.Func(Of Object, String, Object) =
+    Function(sheet As Object, address As String) xl(sheet, "Range", Microsoft.VisualBasic.CallType.Get, New Object() {address})
+Dim writeProp As System.Action(Of Object, String, Object) =
+    Sub(obj As Object, name As String, value As Object)
+        xl(obj, name, Microsoft.VisualBasic.CallType.Let, New Object() {value})
+    End Sub
+Dim runMethod As System.Action(Of Object, String) =
+    Sub(obj As Object, name As String)
+        xl(obj, name, Microsoft.VisualBasic.CallType.Method, New Object() {})
+    End Sub
+Dim closeBook As System.Action(Of Object) =
+    Sub(book As Object)
+        xl(book, "Close", Microsoft.VisualBasic.CallType.Method, New Object() {False})
+    End Sub
+Dim releaseCom As System.Action(Of Object) =
+    Sub(obj As Object)
+        If obj IsNot Nothing AndAlso System.Runtime.InteropServices.Marshal.IsComObject(obj) Then
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(obj)
+        End If
+    End Sub
+Dim releaseAll As System.Action(Of Object()) =
+    Sub(objects As Object())
+        For Each obj As Object In objects
+            releaseCom(obj)
+        Next
+    End Sub
+Dim openBook As System.Func(Of Object, String, Boolean, Object) =
+    Function(books As Object, path As String, openReadOnly As Boolean) As Object
+        Return xl(books, "Open", Microsoft.VisualBasic.CallType.Method,
+            New Object() {path, 0, openReadOnly, System.Type.Missing, "", "", True,
+                System.Type.Missing, System.Type.Missing, False, False, System.Type.Missing, False, True, 0})
+    End Function
+Dim sheetNames As System.Func(Of Object, System.Collections.Generic.HashSet(Of String)) =
+    Function(book As Object) As System.Collections.Generic.HashSet(Of String)
+        Dim names As New System.Collections.Generic.HashSet(Of String)(nameComparer)
+        Dim sheets As Object = Nothing
+        Try
+            sheets = readProp(book, "Worksheets")
+            Dim count As Integer = System.Convert.ToInt32(readProp(sheets, "Count"))
+            For index As Integer = 1 To count
+                Dim sheet As Object = Nothing
+                Try
+                    sheet = itemAt(sheets, index)
+                    names.Add(System.Convert.ToString(readProp(sheet, "Name")))
+                Finally
+                    releaseCom(sheet)
+                End Try
+            Next
+        Finally
+            releaseCom(sheets)
+        End Try
+        Return names
+    End Function
+Dim copyLayout As System.Action(Of Object, Object, String, String, Integer) =
+    Sub(source As Object, target As Object, axis As String, sizeProperty As String, count As Integer)
+        Dim sourceAxis As Object = Nothing, targetAxis As Object = Nothing
+        Try
+            sourceAxis = readProp(source, axis)
+            targetAxis = readProp(target, axis)
+            For index As Integer = 1 To count
+                Dim sourceItem As Object = Nothing, targetItem As Object = Nothing
+                Try
+                    sourceItem = itemAt(sourceAxis, index)
+                    targetItem = itemAt(targetAxis, index)
+                    writeProp(targetItem, sizeProperty, readProp(sourceItem, sizeProperty))
+                    writeProp(targetItem, "Hidden", readProp(sourceItem, "Hidden"))
+                Finally
+                    releaseAll(New Object() {targetItem, sourceItem})
+                End Try
+            Next
+        Finally
+            releaseAll(New Object() {targetAxis, sourceAxis})
+        End Try
+    End Sub
+
+' 4. CELL DATA HELPERS
+Dim columnName As System.Func(Of Integer, String) =
+    Function(columnNumber As Integer) As String
+        Dim name As String = String.Empty
+        Do While columnNumber > 0
+            columnNumber -= 1
+            name = System.Convert.ToChar(65 + (columnNumber Mod 26)).ToString() & name
+            columnNumber = columnNumber \ 26
+        Loop
+        Return name
+    End Function
+Dim valueAt As System.Func(Of Object, Integer, Integer, Object) =
+    Function(raw As Object, rowOffset As Integer, columnOffset As Integer) As Object
+        Dim matrix As System.Array = TryCast(raw, System.Array)
+        If matrix IsNot Nothing Then
+            If matrix.Rank <> 2 Then Throw New System.InvalidOperationException("Excel returned an unexpected value array.")
+            Return matrix.GetValue(matrix.GetLowerBound(0) + rowOffset, matrix.GetLowerBound(1) + columnOffset)
+        End If
+        If rowOffset = 0 AndAlso columnOffset = 0 Then Return raw
+        Return Nothing
+    End Function
+Dim hasValue As System.Func(Of Object, Boolean) =
+    Function(value As Object) As Boolean
+        If value Is Nothing OrElse value Is System.DBNull.Value Then Return False
+        If TypeOf value Is String Then Return Not String.IsNullOrWhiteSpace(DirectCast(value, String))
+        Return True ' Zero, False, and Excel error values are not blank.
+    End Function
+Dim populatedRow As System.Func(Of Object, Integer, Integer, Boolean) =
+    Function(values As Object, rowOffset As Integer, columnCount As Integer) As Boolean
+        For columnOffset As Integer = 0 To columnCount - 1
+            If hasValue(valueAt(values, rowOffset, columnOffset)) Then Return True
+        Next
+        Return False
+    End Function
+Dim valuesMatch As System.Func(Of Object, Object, Boolean) =
+    Function(left As Object, right As Object) As Boolean
+        ' Excel can store a frozen formula result of "" as an empty cell.
+        ' Treat only an empty string/null as equivalent; preserve real whitespace.
+        Dim leftBlank As Boolean = left Is Nothing OrElse left Is System.DBNull.Value OrElse
+            (TypeOf left Is String AndAlso DirectCast(left, String).Length = 0)
+        Dim rightBlank As Boolean = right Is Nothing OrElse right Is System.DBNull.Value OrElse
+            (TypeOf right Is String AndAlso DirectCast(right, String).Length = 0)
+        If leftBlank OrElse rightBlank Then Return leftBlank AndAlso rightBlank
+        Dim leftError As System.Runtime.InteropServices.ErrorWrapper = TryCast(left, System.Runtime.InteropServices.ErrorWrapper)
+        Dim rightError As System.Runtime.InteropServices.ErrorWrapper = TryCast(right, System.Runtime.InteropServices.ErrorWrapper)
+        If leftError IsNot Nothing OrElse rightError IsNot Nothing Then
+            Return leftError IsNot Nothing AndAlso rightError IsNot Nothing AndAlso leftError.ErrorCode = rightError.ErrorCode
+        End If
+        Return System.Object.Equals(left, right)
+    End Function
+Dim headerInfo As System.Func(Of Object, Integer()) =
+    Function(sheet As Object) As Integer()
+        Dim area As Object = Nothing, areaColumns As Object = Nothing, headers As Object = Nothing
+        Try
+            area = readProp(sheet, "UsedRange")
+            areaColumns = readProp(area, "Columns")
+            Dim lastColumn As Integer = System.Convert.ToInt32(readProp(area, "Column")) +
+                System.Convert.ToInt32(readProp(areaColumns, "Count")) - 1
+            headers = rangeAt(sheet, "A" & headerRow.ToString(invariant) & ":" & columnName(lastColumn) & headerRow.ToString(invariant))
+            Dim raw As Object = readProp(headers, "Value2")
+            Dim labelCount As Integer = 0
+            For columnOffset As Integer = 0 To lastColumn - 1
+                Dim label As Object = valueAt(raw, 0, columnOffset)
+                If TypeOf label Is String AndAlso Not String.IsNullOrWhiteSpace(DirectCast(label, String)) Then labelCount += 1
+            Next
+            Return New Integer() {labelCount, lastColumn}
+        Finally
+            releaseAll(New Object() {headers, areaColumns, area})
+        End Try
+    End Function
+Dim hashStream As System.Func(Of System.IO.Stream, String) =
+    Function(stream As System.IO.Stream) As String
+        stream.Position = 0
+        Using sha As System.Security.Cryptography.SHA256 = System.Security.Cryptography.SHA256.Create()
+            Return System.Convert.ToBase64String(sha.ComputeHash(stream))
+        End Using
+    End Function
+
+' Fingerprint every other worksheet's constants/formulas and visibility before and
+' after the transfer. No writes are made to those worksheets. Use Formula so a
+' dependent formula's new result is not mistaken for a rewritten formula.
+Dim sheetSignature As System.Func(Of Object, String) =
+    Function(sheet As Object) As String
+        Dim area As Object = Nothing, areaRows As Object = Nothing, areaColumns As Object = Nothing
+        Try
+            area = readProp(sheet, "UsedRange")
+            areaRows = readProp(area, "Rows")
+            areaColumns = readProp(area, "Columns")
+            Dim raw As Object = readProp(area, "Formula")
+            Dim rowCount As Integer = System.Convert.ToInt32(readProp(areaRows, "Count"))
+            Dim columnCount As Integer = System.Convert.ToInt32(readProp(areaColumns, "Count"))
+            Using sha As System.Security.Cryptography.SHA256 = System.Security.Cryptography.SHA256.Create()
+                Dim appendToken As System.Action(Of String) =
+                    Sub(token As String)
+                        Dim bytes As Byte() = System.Text.Encoding.UTF8.GetBytes(token)
+                        Dim prefix As Byte() = System.BitConverter.GetBytes(bytes.Length)
+                        sha.TransformBlock(prefix, 0, prefix.Length, prefix, 0)
+                        If bytes.Length > 0 Then sha.TransformBlock(bytes, 0, bytes.Length, bytes, 0)
+                    End Sub
+                appendToken(System.Convert.ToString(readProp(sheet, "Name"), invariant))
+                appendToken(System.Convert.ToString(readProp(sheet, "Visible"), invariant))
+                appendToken(System.Convert.ToString(readProp(area, "Row"), invariant))
+                appendToken(System.Convert.ToString(readProp(area, "Column"), invariant))
+                appendToken(rowCount.ToString(invariant))
+                appendToken(columnCount.ToString(invariant))
+                For rowOffset As Integer = 0 To rowCount - 1
+                    For columnOffset As Integer = 0 To columnCount - 1
+                        Dim value As Object = valueAt(raw, rowOffset, columnOffset)
+                        If value Is Nothing OrElse value Is System.DBNull.Value Then
+                            appendToken("EMPTY")
+                        Else
+                            appendToken(value.GetType().FullName)
+                            Dim errorValue As System.Runtime.InteropServices.ErrorWrapper =
+                                TryCast(value, System.Runtime.InteropServices.ErrorWrapper)
+                            If errorValue IsNot Nothing Then
+                                appendToken(errorValue.ErrorCode.ToString(invariant))
+                            Else
+                                appendToken(System.Convert.ToString(value, invariant))
+                            End If
+                        End If
+                    Next
+                Next
+                sha.TransformFinalBlock(New Byte() {}, 0, 0)
+                Return System.Convert.ToBase64String(sha.Hash)
+            End Using
+        Finally
+            releaseAll(New Object() {areaColumns, areaRows, area})
+        End Try
+    End Function
+
+' 5. RUN STATE, JOURNAL, AND READINESS
+System.IO.Directory.CreateDirectory(journalFolder)
+Dim lockStream As System.IO.FileStream = Nothing
+Dim excel As Object = Nothing, workbooks As Object = Nothing
+Dim groupsBook As Object = Nothing, sourceBook As Object = Nothing, destinationBook As Object = Nothing
+Dim groups As New System.Collections.Generic.List(Of String)()
+Dim pendingGroups As New System.Collections.Generic.List(Of String)()
+Dim stagedPaths As New System.Collections.Generic.Dictionary(Of String, String)(nameComparer)
+Dim expectedHashes As New System.Collections.Generic.Dictionary(Of String, String)(nameComparer)
+Dim completedFiles As New System.Collections.Generic.List(Of String)()
+Dim backupPaths As New System.Collections.Generic.Dictionary(Of String, String)(nameComparer)
+Dim cleanupWarnings As New System.Collections.Generic.List(Of String)()
+Dim duplicateCount As Integer = 0, missingSheetCount As Integer = 0, emptyGroupCount As Integer = 0
+Dim repairedHeaderCount As Integer = 0, addedSheetCount As Integer = 0, replacedSheetCount As Integer = 0
+Dim currentGroup As String = String.Empty, currentStep As String = "Initialize export"
+Dim success As Boolean = False
+Dim log As System.Action(Of String) =
+    Sub(message As String)
+        System.IO.File.AppendAllText(journalPath,
+            System.DateTime.UtcNow.ToString("o", invariant) & " | " & message & System.Environment.NewLine,
+            System.Text.Encoding.UTF8)
+    End Sub
+Dim waitForInput As System.Action(Of String) =
+    Sub(lockedInputPath As String)
+        Dim timer As System.Diagnostics.Stopwatch = System.Diagnostics.Stopwatch.StartNew()
+        Dim loggedWait As Boolean = False
+        Do
+            Try
+                Using probe As New System.IO.FileStream(lockedInputPath,
+                    System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read)
+                    If probe.Length = 0 Then
+                        Throw New System.IO.InvalidDataException("Input workbook is empty: " & System.IO.Path.GetFileName(lockedInputPath))
+                    End If
+                End Using
+                If loggedWait Then log("INPUT_READY | File=" & System.IO.Path.GetFileName(lockedInputPath))
+                Exit Do
+            Catch ex As System.IO.IOException
+                Dim nativeError As Integer = ex.HResult And &HFFFF
+                If nativeError <> 32 AndAlso nativeError <> 33 Then Throw
+                Dim remainingMilliseconds As Double =
+                    CDbl(inputWaitTimeoutSeconds) * 1000.0 - CDbl(timer.ElapsedMilliseconds)
+                If remainingMilliseconds <= 0 Then
+                    Throw New System.IO.IOException("Input workbook is still locked after " &
+                        inputWaitTimeoutSeconds.ToString(invariant) & " seconds: " & lockedInputPath &
+                        ". Save and close it first. Run this Invoke Code outside any Excel scope using either input.")
+                End If
+                If Not loggedWait Then
+                    log("WAITING_FOR_INPUT | File=" & System.IO.Path.GetFileName(lockedInputPath))
+                    loggedWait = True
+                End If
+                System.Threading.Thread.Sleep(CInt(System.Math.Min(CDbl(inputPollMilliseconds),
+                    System.Math.Ceiling(remainingMilliseconds))))
+            End Try
+        Loop
+    End Sub
+
+' 6. LOCK AND START OUR OWN EXCEL INSTANCE
+Try
+    currentStep = "Acquire monthly output lock"
+    Try
+        ' This stable file stays inside _logs. Never delete it: exclusion is the
+        ' open handle, not whether the pathname exists. Every new caller uses it.
+        lockStream = New System.IO.FileStream(
+            System.IO.Path.Combine(journalFolder, ".monthly-report-aggregation.lock"),
+            System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite, System.IO.FileShare.None)
+    Catch ex As System.IO.IOException
+        Throw New System.IO.IOException("Cannot acquire the monthly export lock. Another export may be running, or the folder is unavailable.", ex)
+    End Try
+    log("START | Build=2026-10-28-NamedSheets6 | RunId=" & runId & " | Period=" & reportMonth &
+        " | InputPeriod=" & periodInput & " | ReportName=" & reportName)
+
+    currentStep = "Wait for source workbook"
+    waitForInput(sourcePath)
+    currentStep = "Wait for CRM Group workbook"
+    waitForInput(groupsPath)
+
+    currentStep = "Start export Excel instance"
+    Dim excelType As System.Type = System.Type.GetTypeFromProgID("Excel.Application")
+    If excelType Is Nothing Then Throw New System.InvalidOperationException("Microsoft Excel is not installed or its COM registration is unavailable.")
+    excel = System.Activator.CreateInstance(excelType)
+    writeProp(excel, "Visible", False)
+    writeProp(excel, "DisplayAlerts", False)
+    writeProp(excel, "EnableEvents", False)
+    writeProp(excel, "ScreenUpdating", False)
+    writeProp(excel, "AskToUpdateLinks", False)
+    writeProp(excel, "AutomationSecurity", 3)
+    workbooks = readProp(excel, "Workbooks")
+    currentStep = "Open CRM Group workbook"
+    groupsBook = openBook(workbooks, groupsPath, True)
+    writeProp(excel, "Calculation", -4135)
+    writeProp(excel, "CalculateBeforeSave", False)
+
+    ' 7. READ CRM GROUPS FROM A2 DOWNWARD
+    currentStep = "Read CRM group list"
+    Dim groupSheets As Object = Nothing, groupSheet As Object = Nothing
+    Dim rows As Object = Nothing, cells As Object = Nothing
+    Dim bottomCell As Object = Nothing, lastCell As Object = Nothing, listRange As Object = Nothing
+    Try
+        groupSheets = readProp(groupsBook, "Worksheets")
+        If String.IsNullOrWhiteSpace(in_CrmGroupSheetName) Then
+            groupSheet = itemAt(groupSheets, 1)
+        Else
+            Dim configSheetName As String = in_CrmGroupSheetName.Trim()
+            If Not sheetNames(groupsBook).Contains(configSheetName) Then
+                Throw New System.IO.InvalidDataException("CRM Group worksheet was not found: " & configSheetName)
+            End If
+            groupSheet = itemAt(groupSheets, configSheetName)
+        End If
+        rows = readProp(groupSheet, "Rows")
+        cells = readProp(groupSheet, "Cells")
+        Dim maxRow As Integer = System.Convert.ToInt32(readProp(rows, "Count"))
+        bottomCell = xl(cells, "Item", Microsoft.VisualBasic.CallType.Get, New Object() {maxRow, 1})
+        lastCell = xl(bottomCell, "End", Microsoft.VisualBasic.CallType.Get, New Object() {-4162})
+        Dim lastRow As Integer = System.Convert.ToInt32(readProp(lastCell, "Row"))
+        If lastRow < 2 Then Throw New System.IO.InvalidDataException("CRM Group column A contains no groups from A2 onward.")
+        listRange = rangeAt(groupSheet, "A2:A" & lastRow.ToString(invariant))
+        Dim raw As Object = readProp(listRange, "Value2")
+        Dim seen As New System.Collections.Generic.HashSet(Of String)(nameComparer)
+        Dim invalidChars As Char() = ("<>:""/\|?*[]").ToCharArray()
+        For offset As Integer = 0 To lastRow - 2
+            Dim value As Object = valueAt(raw, offset, 0)
+            If value Is Nothing Then Continue For
+            If Not TypeOf value Is String Then
+                Throw New System.IO.InvalidDataException("CRM Group A" & (offset + 2).ToString(invariant) & " must contain a text group name.")
+            End If
+            Dim groupName As String = DirectCast(value, String).Trim()
+            If groupName.Length = 0 Then Continue For
+            Dim invalid As Boolean = groupName.Length > 31 OrElse groupName.IndexOfAny(invalidChars) >= 0 OrElse
+                groupName.StartsWith("'", System.StringComparison.Ordinal) OrElse
+                groupName.EndsWith("'", System.StringComparison.Ordinal)
+            For Each character As Char In groupName
+                If System.Char.IsControl(character) Then invalid = True
+            Next
+            If invalid Then
+                Throw New System.IO.InvalidDataException("Invalid group/sheet/file name in CRM Group A" &
+                    (offset + 2).ToString(invariant) & ": " & groupName)
+            End If
+            If seen.Add(groupName) Then
+                groups.Add(groupName)
+            Else
+                duplicateCount += 1
+            End If
+        Next
+        If groups.Count = 0 Then Throw New System.IO.InvalidDataException("CRM Group contains no nonblank valid groups.")
+    Finally
+        releaseAll(New Object() {listRange, lastCell, bottomCell, cells, rows, groupSheet, groupSheets})
+    End Try
+
+    currentStep = "Open source workbook"
+    sourceBook = openBook(workbooks, sourcePath, True)
+    Dim sourceNames As System.Collections.Generic.HashSet(Of String) = sheetNames(sourceBook)
+    Dim sourceDate1904 As Boolean = System.Convert.ToBoolean(readProp(sourceBook, "Date1904"))
+    Dim headerTemplateName As String = String.Empty
+    Dim headerTemplateColumnCount As Integer = 0, bestHeaderCount As Integer = 0
+    Dim sourceHeaders As New System.Collections.Generic.Dictionary(Of String, Integer())(nameComparer)
+    Dim templateSheets As Object = Nothing
+    currentStep = "Validate output paths and inspect available headers"
+    Try
+        templateSheets = readProp(sourceBook, "Worksheets")
+        For Each groupName As String In groups
+            Dim finalPath As String = System.IO.Path.Combine(periodFolder, "New Report - " & groupName & ".xlsx")
+            If String.Equals(finalPath, sourcePath, ignoreCase) OrElse String.Equals(finalPath, groupsPath, ignoreCase) Then
+                Throw New System.ArgumentException("An output path must not overwrite an input workbook.")
+            End If
+            If Not sourceNames.Contains(groupName) Then Continue For
+            Dim candidate As Object = Nothing
+            Try
+                candidate = itemAt(templateSheets, groupName)
+                Dim info As Integer() = headerInfo(candidate)
+                sourceHeaders.Add(groupName, info)
+                If info(0) > bestHeaderCount Then
+                    bestHeaderCount = info(0)
+                    headerTemplateName = groupName
+                    headerTemplateColumnCount = info(1)
+                End If
+            Finally
+                releaseCom(candidate)
+            End Try
+        Next
+    Finally
+        releaseCom(templateSheets)
+    End Try
+    log("VALIDATED | Groups=" & groups.Count.ToString(invariant) &
+        " | HeaderTemplate=" & headerTemplateName & " | DuplicateNamesIgnored=" & duplicateCount.ToString(invariant))
+
+    ' 8. READ EACH SOURCE FIRST. NEVER CREATE/MODIFY A DESTINATION FOR AN EMPTY GROUP.
+    For Each groupName As String In groups
+        currentGroup = groupName
+        If Not sourceNames.Contains(groupName) Then
+            missingSheetCount += 1
+            log("SKIPPED_MISSING_SOURCE | Group=" & groupName & " | ReportName=" & reportName & " | ExistingOutput=Unchanged")
+            Continue For
+        End If
+
+        Dim fileName As String = "New Report - " & groupName & ".xlsx"
+        Dim finalPath As String = System.IO.Path.Combine(periodFolder, fileName)
+        Dim stagedPath As String = System.IO.Path.Combine(journalFolder,
+            ".stage-" & runId & "-" & pendingGroups.Count.ToString(invariant) & ".xlsx")
+        Dim sourceSheets As Object = Nothing, sourceSheet As Object = Nothing
+        Dim sourceArea As Object = Nothing, sourceAreaRows As Object = Nothing, sourceAreaColumns As Object = Nothing
+        Dim sourceRange As Object = Nothing, destinationRange As Object = Nothing
+        Dim destinationSheets As Object = Nothing, anchorSheet As Object = Nothing, reportSheet As Object = Nothing
+        Dim oldArea As Object = Nothing
+        Try
+            currentStep = "Read source group content"
+            sourceSheets = readProp(sourceBook, "Worksheets")
+            sourceSheet = itemAt(sourceSheets, groupName)
+            sourceArea = readProp(sourceSheet, "UsedRange")
+            sourceAreaRows = readProp(sourceArea, "Rows")
+            sourceAreaColumns = readProp(sourceArea, "Columns")
+            Dim areaFirstRow As Integer = System.Convert.ToInt32(readProp(sourceArea, "Row"))
+            Dim areaFirstColumn As Integer = System.Convert.ToInt32(readProp(sourceArea, "Column"))
+            Dim areaRowCount As Integer = System.Convert.ToInt32(readProp(sourceAreaRows, "Count"))
+            Dim areaColumnCount As Integer = System.Convert.ToInt32(readProp(sourceAreaColumns, "Count"))
+            Dim lastColumn As Integer = areaFirstColumn + areaColumnCount - 1
+            Dim rawValues As Object = readProp(sourceArea, "Value2")
+            Dim sourceDataRows As Integer = 0, lastDataRow As Integer = headerRow
+            For rowOffset As Integer = 0 To areaRowCount - 1
+                Dim absoluteRow As Integer = areaFirstRow + rowOffset
+                If absoluteRow > headerRow AndAlso populatedRow(rawValues, rowOffset, areaColumnCount) Then
+                    sourceDataRows += 1
+                    lastDataRow = absoluteRow
+                End If
+            Next
+            If sourceDataRows = 0 Then
+                emptyGroupCount += 1
+                log("SKIPPED_EMPTY_SOURCE | Group=" & groupName & " | ReportName=" & reportName &
+                    " | DataRows=0 | ExistingOutput=Unchanged")
+                Continue For
+            End If
+            If System.Convert.ToBoolean(readProp(sourceSheet, "FilterMode")) Then
+                Throw New System.IO.InvalidDataException("Source group still has an active filter. Finalize its data before export: " & groupName)
+            End If
+            If repairEmptyHeaderRow AndAlso sourceHeaders(groupName)(0) = 0 AndAlso headerTemplateName.Length = 0 Then
+                Throw New System.IO.InvalidDataException("A nonempty source group has no column headers and no same-report header template: " & groupName)
+            End If
+
+            Dim lastRow As Integer = lastDataRow
+            If Not in_ValuesOnly Then
+                Dim rawFormulas As Object = readProp(sourceArea, "Formula")
+                For rowOffset As Integer = 0 To areaRowCount - 1
+                    If populatedRow(rawFormulas, rowOffset, areaColumnCount) Then
+                        lastRow = System.Math.Max(lastRow, areaFirstRow + rowOffset)
+                    End If
+                Next
+            End If
+            Dim address As String = "A1:" & columnName(lastColumn) & lastRow.ToString(invariant)
+            sourceRange = rangeAt(sourceSheet, address)
+            Dim sourceValues As Object = readProp(sourceRange, "Value2")
+
+            ' Only now is the destination opened/staged.
+            currentStep = "Prepare destination workbook"
+            Dim existed As Boolean = System.IO.File.Exists(finalPath)
+            Dim previousNames As New System.Collections.Generic.HashSet(Of String)(nameComparer)
+            Dim previousOrder As New System.Collections.Generic.List(Of String)()
+            Dim previousSignatures As New System.Collections.Generic.Dictionary(Of String, String)(nameComparer)
+            stagedPaths.Add(finalPath, stagedPath) ' Include even partially written staging in cleanup.
+            If existed Then
+                If (System.IO.File.GetAttributes(finalPath) And System.IO.FileAttributes.ReadOnly) <> 0 Then
+                    Throw New System.UnauthorizedAccessException("Output workbook is read-only: " & fileName)
+                End If
+                Using existing As New System.IO.FileStream(finalPath, System.IO.FileMode.Open,
+                        System.IO.FileAccess.Read, System.IO.FileShare.None)
+                    expectedHashes.Add(finalPath, hashStream(existing))
+                    existing.Position = 0
+                    Using staged As New System.IO.FileStream(stagedPath, System.IO.FileMode.CreateNew,
+                            System.IO.FileAccess.Write, System.IO.FileShare.None)
+                        existing.CopyTo(staged)
+                        staged.Flush(True)
+                    End Using
+                End Using
+                destinationBook = openBook(workbooks, stagedPath, False)
+                previousNames = sheetNames(destinationBook)
+                If System.Convert.ToBoolean(readProp(destinationBook, "Date1904")) <> sourceDate1904 Then
+                    Throw New System.IO.InvalidDataException("Source and output workbook date systems differ: " & fileName)
+                End If
+            Else
+                expectedHashes.Add(finalPath, Nothing)
+                destinationBook = xl(workbooks, "Add", Microsoft.VisualBasic.CallType.Method, New Object() {-4167})
+                writeProp(destinationBook, "Date1904", sourceDate1904)
+            End If
+            If System.Convert.ToBoolean(readProp(destinationBook, "ReadOnly")) Then
+                Throw New System.UnauthorizedAccessException("Staged workbook is read-only: " & fileName)
+            End If
+            destinationSheets = readProp(destinationBook, "Worksheets")
+            Dim beforeCount As Integer = System.Convert.ToInt32(readProp(destinationSheets, "Count"))
+            Dim reportExists As Boolean = previousNames.Contains(reportName)
+            If existed Then
+                For sheetIndex As Integer = 1 To beforeCount
+                    Dim previousSheet As Object = Nothing
+                    Try
+                        previousSheet = itemAt(destinationSheets, sheetIndex)
+                        Dim previousName As String = System.Convert.ToString(readProp(previousSheet, "Name"))
+                        previousOrder.Add(previousName)
+                        If verifyOtherSheetContents AndAlso Not String.Equals(previousName, reportName, ignoreCase) Then
+                            previousSignatures.Add(previousName, sheetSignature(previousSheet))
+                        End If
+                    Finally
+                        releaseCom(previousSheet)
+                    End Try
+                Next
+            End If
+
+            ' 9. SELECT THE SAME TAB OR APPEND A NEW ONE. NEVER DELETE EXISTING TABS.
+            currentStep = "Select or append the named report worksheet"
+            If reportExists Then
+                reportSheet = itemAt(destinationSheets, reportName)
+                If System.Convert.ToBoolean(readProp(reportSheet, "ProtectContents")) Then
+                    Throw New System.IO.InvalidDataException("The report worksheet is protected: " & reportName)
+                End If
+                ' Refuse table-backed targets: clearing table headers can rename columns
+                ' and rewrite structured references on other sheets. Handle those in a
+                ' separate, explicit table-aware implementation.
+                Dim tables As Object = Nothing
+                Try
+                    tables = readProp(reportSheet, "ListObjects")
+                    If System.Convert.ToInt32(readProp(tables, "Count")) > 0 Then
+                        Throw New System.IO.InvalidDataException("The target report contains an Excel Table. A table-aware update is required: " & reportName)
+                    End If
+                Finally
+                    releaseCom(tables)
+                End Try
+                oldArea = readProp(reportSheet, "UsedRange")
+                ' Remove obsolete trailing values when the new report has fewer rows.
+                ' Unmerge only this target tab, so a changed source layout can be copied.
+                runMethod(oldArea, "UnMerge")
+                runMethod(oldArea, "ClearContents")
+            ElseIf existed Then
+                If System.Convert.ToBoolean(readProp(destinationBook, "ProtectStructure")) Then
+                    Throw New System.IO.InvalidDataException("Cannot append a report: workbook structure is protected: " & fileName)
+                End If
+                runMethod(destinationBook, "Activate")
+                ' Sheets includes chart sheets; append after the actual last tab.
+                Dim allSheets As Object = Nothing
+                Try
+                    allSheets = readProp(destinationBook, "Sheets")
+                    anchorSheet = itemAt(allSheets, System.Convert.ToInt32(readProp(allSheets, "Count")))
+                    reportSheet = xlMethod(destinationSheets, "Add", New Object() {anchorSheet, 1, -4167},
+                        New String() {"After", "Count", "Type"})
+                Finally
+                    releaseCom(allSheets)
+                End Try
+                writeProp(reportSheet, "Name", reportName)
+            Else
+                If beforeCount <> 1 Then Throw New System.InvalidOperationException("New workbook must contain exactly one worksheet.")
+                reportSheet = itemAt(destinationSheets, 1)
+                writeProp(reportSheet, "Name", reportName)
+            End If
+            If reportSheet Is Nothing Then Throw New System.InvalidOperationException("Excel did not return the target worksheet.")
+            Dim parent As Object = Nothing
+            Try
+                parent = readProp(reportSheet, "Parent")
+                If Not String.Equals(System.Convert.ToString(readProp(parent, "FullName")),
+                        System.Convert.ToString(readProp(destinationBook, "FullName")), ignoreCase) Then
+                    Throw New System.InvalidOperationException("The report worksheet belongs to the wrong workbook.")
+                End If
+            Finally
+                releaseCom(parent)
+            End Try
+            ' Preserve an existing report's visibility; new tabs are visible.
+            If Not reportExists Then writeProp(reportSheet, "Visible", -1)
+
+            ' 10. TRANSFER THE FINALIZED SAVED CELLS, FORMATTING, AND LAYOUT
+            currentStep = "Transfer cells to the named report"
+            destinationRange = rangeAt(reportSheet, address)
+            log("TRANSFER_BEGIN | Group=" & groupName & " | Sheet=" & reportName &
+                " | Action=" & If(reportExists, "ReplaceValuesInPlace", "AppendSheet") &
+                " | DataRows=" & sourceDataRows.ToString(invariant) & " | Range=" & address)
+            xlMethod(sourceRange, "Copy", New Object() {destinationRange}, New String() {"Destination"})
+            If in_ValuesOnly Then
+                writeProp(destinationRange, "Value2", sourceValues)
+                currentStep = "Verify every exported cell value"
+                Dim actualValues As Object = readProp(destinationRange, "Value2")
+                Dim preservedTextCount As Integer = 0
+                For rowOffset As Integer = 0 To lastRow - 1
+                    For columnOffset As Integer = 0 To lastColumn - 1
+                        Dim expectedValue As Object = valueAt(sourceValues, rowOffset, columnOffset)
+                        Dim actualValue As Object = valueAt(actualValues, rowOffset, columnOffset)
+                        If Not valuesMatch(expectedValue, actualValue) Then
+                            If TypeOf expectedValue Is String Then
+                                Dim textCell As Object = Nothing
+                                Try
+                                    textCell = rangeAt(reportSheet, columnName(columnOffset + 1) & (rowOffset + 1).ToString(invariant))
+                                    Dim originalFormat As Object = readProp(textCell, "NumberFormat")
+                                    writeProp(textCell, "NumberFormat", "@")
+                                    writeProp(textCell, "Value2", expectedValue)
+                                    writeProp(textCell, "NumberFormat", originalFormat)
+                                    actualValue = readProp(textCell, "Value2")
+                                    preservedTextCount += 1
+                                Finally
+                                    releaseCom(textCell)
+                                End Try
+                            End If
+                            If Not valuesMatch(expectedValue, actualValue) Then
+                                Throw New System.InvalidOperationException("Exported value differs from its source at " &
+                                    columnName(columnOffset + 1) & (rowOffset + 1).ToString(invariant) & " for group " & groupName)
+                            End If
+                        End If
+                    Next
+                Next
+                If preservedTextCount > 0 Then
+                    log("TEXT_VALUES_PRESERVED | Group=" & groupName & " | Cells=" & preservedTextCount.ToString(invariant))
+                End If
+            End If
+            writeProp(excel, "CutCopyMode", False)
+            currentStep = "Preserve source layout"
+            copyLayout(sourceSheet, reportSheet, "Columns", "ColumnWidth", lastColumn)
+            copyLayout(sourceSheet, reportSheet, "Rows", "RowHeight", lastRow)
+
+            If repairEmptyHeaderRow AndAlso sourceHeaders(groupName)(0) = 0 Then
+                currentStep = "Restore a wholly blank header row"
+                Dim templateSheet As Object = Nothing, templateRange As Object = Nothing, destinationHeader As Object = Nothing
+                Try
+                    templateSheet = itemAt(sourceSheets, headerTemplateName)
+                    Dim headerAddress As String = "A" & headerRow.ToString(invariant) & ":" &
+                        columnName(headerTemplateColumnCount) & headerRow.ToString(invariant)
+                    templateRange = rangeAt(templateSheet, headerAddress)
+                    destinationHeader = rangeAt(reportSheet, headerAddress)
+                    xlMethod(templateRange, "Copy", New Object() {destinationHeader}, New String() {"Destination"})
+                    If in_ValuesOnly Then writeProp(destinationHeader, "Value2", readProp(templateRange, "Value2"))
+                    repairedHeaderCount += 1
+                    log("HEADER_ROW_REPAIRED | Group=" & groupName & " | Template=" & headerTemplateName)
+                Finally
+                    releaseAll(New Object() {destinationHeader, templateRange, templateSheet})
+                End Try
+            End If
+
+            ' 11. VERIFY ALL OLD WORKSHEETS STILL EXIST, IN THE SAME ORDER.
+            currentStep = "Verify old worksheet preservation"
+            Dim resultNames As System.Collections.Generic.HashSet(Of String) = sheetNames(destinationBook)
+            Dim expectedCount As Integer = If(existed, previousNames.Count + If(reportExists, 0, 1), 1)
+            If Not resultNames.Contains(reportName) OrElse resultNames.Count <> expectedCount Then
+                Throw New System.InvalidOperationException("Unexpected final worksheet names/count: " & fileName)
+            End If
+            For sheetIndex As Integer = 0 To previousOrder.Count - 1
+                Dim previousSheet As Object = Nothing
+                Try
+                    previousSheet = itemAt(destinationSheets, sheetIndex + 1)
+                    Dim actualName As String = System.Convert.ToString(readProp(previousSheet, "Name"))
+                    If Not String.Equals(actualName, previousOrder(sheetIndex), System.StringComparison.Ordinal) Then
+                        Throw New System.InvalidOperationException("An old worksheet was removed, renamed, or reordered: " & previousOrder(sheetIndex))
+                    End If
+                    If previousSignatures.ContainsKey(actualName) AndAlso
+                       Not String.Equals(previousSignatures(actualName), sheetSignature(previousSheet), System.StringComparison.Ordinal) Then
+                        Throw New System.InvalidOperationException("Another worksheet's contents or visibility changed; output will not be published: " & actualName)
+                    End If
+                Finally
+                    releaseCom(previousSheet)
+                End Try
+            Next
+
+            currentStep = "Save temporary workbook"
+            If existed Then
+                runMethod(destinationBook, "Save")
+            Else
+                xl(destinationBook, "SaveAs", Microsoft.VisualBasic.CallType.Method, New Object() {stagedPath, 51})
+            End If
+            closeBook(destinationBook)
+            ' Release the worksheet/range references in Finally before the book RCW.
+            If Not System.IO.File.Exists(stagedPath) OrElse (New System.IO.FileInfo(stagedPath)).Length = 0 Then
+                Throw New System.IO.IOException("Excel did not create the temporary workbook: " & fileName)
+            End If
+            pendingGroups.Add(groupName)
+            If reportExists Then
+                replacedSheetCount += 1
+            Else
+                addedSheetCount += 1
+            End If
+            log("STAGED | Group=" & groupName & " | Sheet=" & reportName &
+                " | DataRows=" & sourceDataRows.ToString(invariant) & " | OtherSheets=Preserved")
+        Finally
+            releaseAll(New Object() {oldArea, reportSheet, anchorSheet, destinationRange, sourceRange,
+                sourceAreaColumns, sourceAreaRows, sourceArea, sourceSheet, sourceSheets, destinationSheets})
+            If destinationBook IsNot Nothing Then
+                Try
+                    closeBook(destinationBook)
+                Catch
+                    ' Closed successfully on the main path; on failure discard the temporary edits.
+                Finally
+                    releaseCom(destinationBook)
+                    destinationBook = Nothing
+                End Try
+            End If
+        End Try
+    Next
+
+    ' 12. CLOSE ONLY OUR EXCEL INSTANCE BEFORE PUBLICATION
+    currentStep = "Close export Excel instance"
+    closeBook(sourceBook)
+    releaseCom(sourceBook)
+    sourceBook = Nothing
+    closeBook(groupsBook)
+    releaseCom(groupsBook)
+    groupsBook = Nothing
+    runMethod(excel, "Quit")
+    releaseCom(workbooks)
+    workbooks = Nothing
+    releaseCom(excel)
+    excel = Nothing
+
+    ' 13. PUBLISH ONLY NONEMPTY GROUPS. TEMPORARY RECOVERY COPIES STAY IN _logs.
+    ' No delete-then-overwrite fallback is used for an unsupported network share.
+    currentStep = "Publish group workbooks"
+    For Each groupName As String In pendingGroups
+        currentGroup = groupName
+        Dim fileName As String = "New Report - " & groupName & ".xlsx"
+        Dim finalPath As String = System.IO.Path.Combine(periodFolder, fileName)
+        Dim stagedPath As String = stagedPaths(finalPath)
+        Dim originalHash As String = expectedHashes(finalPath)
+        If originalHash Is Nothing Then
+            System.IO.File.Move(stagedPath, finalPath) ' No overwrite if another file appeared.
+        Else
+            If Not System.IO.File.Exists(finalPath) Then
+                Throw New System.IO.IOException("Output workbook disappeared during export: " & fileName)
+            End If
+            Dim recoveryPath As String = System.IO.Path.Combine(journalFolder,
+                ".recovery-" & runId & "-" & completedFiles.Count.ToString(invariant) & ".xlsx")
+            backupPaths.Add(finalPath, recoveryPath)
+            ' Permit read/delete so Windows ReplaceFile can replace the name while
+            ' this guard still denies content writers during validation/publication.
+            Using guard As New System.IO.FileStream(finalPath, System.IO.FileMode.Open,
+                    System.IO.FileAccess.Read, System.IO.FileShare.Read Or System.IO.FileShare.Delete)
+                If Not String.Equals(hashStream(guard), originalHash, System.StringComparison.Ordinal) Then
+                    Throw New System.IO.IOException("Output workbook changed during export. Resolve the concurrent edit, then rerun: " & fileName)
+                End If
+                System.IO.File.Replace(stagedPath, finalPath, recoveryPath, False)
+            End Using
+        End If
+        completedFiles.Add(finalPath)
+        out_UpdatedFiles = completedFiles.ToArray()
+        log("COMMITTED | Group=" & groupName & " | Sheet=" & reportName)
+    Next
+    out_UpdatedFiles = completedFiles.ToArray()
+    out_Summary = "RunId=" & runId & " | Period=" & reportMonth & " | InputPeriod=" & periodInput &
+        " | ReportName=" & reportName & " | UpdatedFiles=" & completedFiles.Count.ToString(invariant) &
+        " | AddedSheets=" & addedSheetCount.ToString(invariant) & " | ReplacedSheets=" & replacedSheetCount.ToString(invariant) &
+        " | SkippedMissing=" & missingSheetCount.ToString(invariant) & " | SkippedEmpty=" & emptyGroupCount.ToString(invariant) &
+        " | RepairedHeaders=" & repairedHeaderCount.ToString(invariant) & " | DuplicateNamesIgnored=" & duplicateCount.ToString(invariant)
+    log("SUCCESS | " & out_Summary)
+    success = True
+Catch ex As System.Exception
+    out_UpdatedFiles = completedFiles.ToArray()
+    Try
+        log("FAILED | Group=" & currentGroup & " | Step=" & currentStep & " | Type=" & ex.GetType().FullName &
+            " | Message=" & ex.Message.Replace(System.Environment.NewLine, " ") &
+            " | CommittedFiles=" & completedFiles.Count.ToString(invariant))
+    Catch
+    End Try
+    Throw
+Finally
+    ' 14. CLEANUP: NEVER KILL AN EXCEL PROCESS OWNED BY THE CALLER/USER.
+    For Each book As Object In New Object() {destinationBook, sourceBook, groupsBook}
+        If book Is Nothing Then Continue For
+        Try
+            closeBook(book)
+        Catch
+        Finally
+            Try
+                releaseCom(book)
+            Catch
+            End Try
+        End Try
+    Next
+    If excel IsNot Nothing Then
+        Try
+            runMethod(excel, "Quit")
+        Catch
+        End Try
+    End If
+    Try
+        releaseCom(workbooks)
+    Catch
+    End Try
+    Try
+        releaseCom(excel)
+    Catch
+    End Try
+
+    ' A failed Replace can need its temporary recovery copy. Restore an absent
+    ' final file if possible; retain the recovery copy if its outcome is uncertain.
+    For Each entry As System.Collections.Generic.KeyValuePair(Of String, String) In backupPaths
+        Dim finalPath As String = entry.Key, recoveryPath As String = entry.Value
+        If Not System.IO.File.Exists(recoveryPath) Then Continue For
+        Try
+            If completedFiles.Contains(finalPath) Then
+                System.IO.File.Delete(recoveryPath)
+            ElseIf Not System.IO.File.Exists(finalPath) Then
+                System.IO.File.Move(recoveryPath, finalPath)
+                log("RECOVERED_ORIGINAL | File=" & System.IO.Path.GetFileName(finalPath))
+            Else
+                ' Preserve data rather than deleting a potentially needed original.
+                cleanupWarnings.Add("Recovery copy retained: " & System.IO.Path.GetFileName(recoveryPath))
+            End If
+        Catch cleanupEx As System.Exception
+            cleanupWarnings.Add("Recovery cleanup failed: " & System.IO.Path.GetFileName(recoveryPath) & " | " & cleanupEx.GetType().Name)
+        End Try
+    Next
+    For Each entry As System.Collections.Generic.KeyValuePair(Of String, String) In stagedPaths
+        Try
+            ' If Replace failed and removed the final pathname, retain this copy too.
+            If Not System.IO.File.Exists(entry.Key) AndAlso expectedHashes.ContainsKey(entry.Key) AndAlso
+               expectedHashes(entry.Key) IsNot Nothing Then
+                If System.IO.File.Exists(entry.Value) Then
+                    cleanupWarnings.Add("Temporary output retained for recovery: " & System.IO.Path.GetFileName(entry.Value))
+                End If
+            ElseIf System.IO.File.Exists(entry.Value) Then
+                System.IO.File.Delete(entry.Value)
+            End If
+        Catch cleanupEx As System.Exception
+            cleanupWarnings.Add("Temporary cleanup failed: " & System.IO.Path.GetFileName(entry.Value) & " | " & cleanupEx.GetType().Name)
+        End Try
+    Next
+    For Each warning As String In cleanupWarnings
+        Try
+            log("CLEANUP_WARNING | " & warning)
+        Catch
+        End Try
+    Next
+    If success AndAlso cleanupWarnings.Count > 0 Then
+        out_Summary &= " | CleanupWarnings=" & cleanupWarnings.Count.ToString(invariant)
+    End If
+    If lockStream IsNot Nothing Then lockStream.Dispose()
+End Try

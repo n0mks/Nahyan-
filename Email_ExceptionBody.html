@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang='en' dir='ltr' xmlns:o='urn:schemas-microsoft-com:office:office'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<meta name='x-apple-disable-message-reformatting'>
+<title>{{REPORT_NAME}} | Automation notification</title>
+<style>
+  table { mso-table-lspace:0pt; mso-table-rspace:0pt; }
+  td { mso-line-height-rule:at-least; }
+  a[x-apple-data-detectors] { color:inherit !important; text-decoration:none !important; }
+  @media screen and (max-width:480px) {
+    .canvas-pad { padding:20px 10px !important; }
+    .header-pad { padding:20px 22px !important; }
+    .content-pad { padding:24px 22px 28px !important; }
+    .footer-pad { padding:14px 22px !important; }
+    .report-title { font-size:25px !important; line-height:33px !important; }
+    .header-note { font-size:11px !important; line-height:17px !important; }
+    .meta-cell { padding:12px 14px !important; }
+    .meta-value { font-size:14px !important; line-height:22px !important; }
+    .detail-pad { padding:14px 16px !important; }
+  }
+</style>
+<!--[if mso]>
+<noscript>
+<xml>
+<o:OfficeDocumentSettings>
+<o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings>
+</xml>
+</noscript>
+<![endif]-->
+</head>
+<body id='email-body' style='margin:0;padding:0;width:100%;background-color:#EEF2F7;color:#24364B;font-family:Segoe UI,Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;'>
+<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0' bgcolor='#EEF2F7' style='width:100%;background-color:#EEF2F7;border-collapse:collapse;table-layout:fixed;'>
+<tr>
+<td class='canvas-pad' align='center' style='padding:36px 16px;'>
+
+<!--[if mso]>
+<table role='presentation' width='620' cellpadding='0' cellspacing='0' border='0' align='center'>
+<tr><td>
+<![endif]-->
+
+<div style='max-width:620px;margin:0 auto;'>
+<!-- Main Card -->
+<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0' align='center' bgcolor='#FFFFFF' style='width:100%;max-width:620px;margin:0 auto;background-color:#FFFFFF;border:1px solid #DCE4EE;border-collapse:separate;border-spacing:0;table-layout:fixed;border-radius:16px;box-shadow:0 12px 32px rgba(24,42,67,0.08);'>
+
+<!-- Accent Line -->
+<tr>
+<td height='5' bgcolor='#D64250' style='height:5px;font-size:1px;line-height:5px;background-color:#D64250;border-radius:15px 15px 0 0;'>&nbsp;</td>
+</tr>
+
+<!-- Header -->
+<tr>
+<td class='header-pad' bgcolor='#23374D' style='padding:23px 32px;background-color:#23374D;'>
+<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0' style='width:100%;border-collapse:collapse;table-layout:fixed;'>
+<tr>
+<td width='42%' valign='middle' style='font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:23px;line-height:29px;font-weight:700;letter-spacing:2px;color:#FFFFFF;'>ROBO</td>
+<td class='header-note' width='58%' align='right' valign='middle' style='padding-left:12px;text-align:right;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;letter-spacing:0.2px;color:#D7E2EE;'>UiPath automation</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<!-- Body -->
+<tr>
+<td class='content-pad' bgcolor='#FFFFFF' style='padding:28px 32px 32px;background-color:#FFFFFF;'>
+<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0' style='width:100%;border-collapse:collapse;table-layout:fixed;'>
+
+<!-- Status -->
+<tr>
+<td align='left'>
+<table role='presentation' cellpadding='0' cellspacing='0' border='0' style='border-collapse:separate;border-spacing:0;'>
+<tr>
+<td bgcolor='#FDEDF0' style='padding:7px 12px;background-color:#FDEDF0;border:1px solid #F3CDD5;border-radius:6px;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:11px;line-height:16px;font-weight:700;letter-spacing:1px;color:#AF263B;'>ACTION REQUIRED</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<!-- Report Title: original wording retained -->
+<tr>
+<td style='padding-top:16px;'>
+<h1 class='report-title' style='margin:0;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:29px;line-height:37px;font-weight:700;letter-spacing:-0.5px;color:#23374D;overflow-wrap:anywhere;word-wrap:break-word;'>{{REPORT_NAME}} report</h1>
+</td>
+</tr>
+<tr>
+<td style='padding:8px 0 24px;border-bottom:1px solid #E5EAF1;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:14px;line-height:22px;color:#607189;overflow-wrap:anywhere;word-wrap:break-word;'>{{RESULT_TEXT}}</td>
+</tr>
+
+<!-- Message -->
+<tr>
+<td style='padding:24px 0 8px;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#24364B;'>Dear All,</td>
+</tr>
+<tr>
+<td style='padding:0 0 24px;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:15px;line-height:25px;color:#24364B;overflow-wrap:anywhere;word-wrap:break-word;'>
+<div style='margin:0;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:15px;line-height:25px;color:#24364B;'>{{MESSAGE_HTML}}</div>
+</td>
+</tr>
+
+<!-- Date and Time -->
+<tr>
+<td>
+<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0' bgcolor='#F3F6FA' style='width:100%;background-color:#F3F6FA;border:1px solid #E2E8F0;border-collapse:separate;border-spacing:0;table-layout:fixed;border-radius:10px;'>
+<tr>
+<td class='meta-cell' width='50%' valign='top' style='padding:15px 18px;font-family:Segoe UI,Arial,Helvetica,sans-serif;'>
+<span style='font-size:10px;line-height:16px;font-weight:700;letter-spacing:1.2px;color:#62728A;'>DATE</span><br>
+<span class='meta-value' style='font-size:16px;line-height:27px;font-weight:600;color:#23374D;overflow-wrap:anywhere;word-wrap:break-word;'>{{RUN_DATE}}</span>
+</td>
+<td class='meta-cell' width='50%' valign='top' style='padding:15px 18px;border-left:1px solid #DCE4EE;font-family:Segoe UI,Arial,Helvetica,sans-serif;'>
+<span style='font-size:10px;line-height:16px;font-weight:700;letter-spacing:1.2px;color:#62728A;'>TIME</span><br>
+<span class='meta-value' style='font-size:16px;line-height:27px;font-weight:600;color:#23374D;overflow-wrap:anywhere;word-wrap:break-word;'>{{RUN_TIME}}</span>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<!-- Exception Details -->
+<tr>
+<td style='padding:24px 0 10px;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:11px;line-height:17px;font-weight:700;letter-spacing:1.2px;color:#AF263B;'>EXCEPTION DETAILS</td>
+</tr>
+<tr>
+<td>
+<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0' style='width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;'>
+
+<!-- Failed Stage -->
+<tr>
+<td class='detail-pad' bgcolor='#FFF8F9' style='padding:16px 18px;background-color:#FFF8F9;border:1px solid #F0D6DC;border-left:4px solid #D64250;border-radius:0 10px 10px 0;'>
+<p style='margin:0 0 6px;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;font-weight:600;color:#8D3A4B;'>Failed Stage</p>
+<p dir='ltr' style='margin:0;text-align:left;font-family:Consolas,Courier New,monospace;font-size:13px;line-height:21px;color:#24364B;overflow-wrap:anywhere;word-wrap:break-word;word-break:break-all;'>{{FAILED_STAGE}}</p>
+</td>
+</tr>
+<tr>
+<td height='10' style='height:10px;font-size:1px;line-height:10px;'>&nbsp;</td>
+</tr>
+
+<!-- Exception Type -->
+<tr>
+<td class='detail-pad' bgcolor='#FFF8F9' style='padding:16px 18px;background-color:#FFF8F9;border:1px solid #F0D6DC;border-left:4px solid #D64250;border-radius:0 10px 10px 0;'>
+<p style='margin:0 0 6px;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;font-weight:600;color:#8D3A4B;'>Exception Type</p>
+<p dir='ltr' style='margin:0;text-align:left;font-family:Consolas,Courier New,monospace;font-size:13px;line-height:21px;color:#24364B;overflow-wrap:anywhere;word-wrap:break-word;word-break:break-all;'>{{EXCEPTION_TYPE}}</p>
+</td>
+</tr>
+<tr>
+<td height='10' style='height:10px;font-size:1px;line-height:10px;'>&nbsp;</td>
+</tr>
+
+<!-- Exception Message -->
+<tr>
+<td class='detail-pad' bgcolor='#FFF8F9' style='padding:16px 18px;background-color:#FFF8F9;border:1px solid #F0D6DC;border-left:4px solid #D64250;border-radius:0 10px 10px 0;'>
+<p style='margin:0 0 6px;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;font-weight:600;color:#8D3A4B;'>Exception Details</p>
+<p dir='ltr' style='margin:0;text-align:left;font-family:Consolas,Courier New,monospace;font-size:13px;line-height:21px;color:#24364B;overflow-wrap:anywhere;word-wrap:break-word;word-break:break-all;'>{{EXCEPTION_MESSAGE}}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<!-- Regards -->
+<tr>
+<td style='padding-top:24px;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:14px;line-height:23px;color:#52657D;'>
+Regards,<br>
+<strong style='font-size:15px;font-weight:700;letter-spacing:0.6px;color:#23374D;'>ROBO</strong>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<!-- Footer -->
+<tr>
+<td class='footer-pad' bgcolor='#F7F9FC' style='padding:15px 32px;background-color:#F7F9FC;border-top:1px solid #E5EAF1;border-radius:0 0 15px 15px;font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:11px;line-height:18px;color:#62728A;'>Automated notification &nbsp;&bull;&nbsp; UiPath</td>
+</tr>
+</table>
+
+</div>
+<!--[if mso]>
+</td></tr>
+</table>
+<![endif]-->
+
+</td>
+</tr>
+</table>
+</body>
+</html>

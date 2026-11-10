@@ -51,39 +51,178 @@
       <AssemblyReference>System.Xaml</AssemblyReference>
     </scg:List>
   </TextExpression.ReferencesForImplementation>
-  <Flowchart DisplayName="MAIN - Business Report Distribution" sap2010:WorkflowViewState.IdRef="FlowchartMain_1" sap:VirtualizedContainerService.HintSize="840,540">
+  <Flowchart DisplayName="MAIN - Business Report Distribution" sap2010:WorkflowViewState.IdRef="FlowchartMain_1" sap:VirtualizedContainerService.HintSize="1030,865" sap2010:Annotation.AnnotationText="Fill exactly three empty sequences: Close Applications, Initialize Config, and Exception Email. Each operational stage catches its failure and routes it to the shared exception-email node. The original process failure is thrown after the notification section.">
     <Flowchart.Variables>
       <Variable x:TypeArguments="scg:Dictionary(x:String, x:Object)" Name="Config"/>
+      <Variable x:TypeArguments="s:Exception" Name="processException"/>
+      <Variable x:TypeArguments="x:String" Name="failedStage"/>
     </Flowchart.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
-        <av:Point x:Key="ShapeLocation">375,25</av:Point>
+        <av:Point x:Key="ShapeLocation">305,20</av:Point>
         <av:Size x:Key="ShapeSize">50,50</av:Size>
-        <av:PointCollection x:Key="ConnectorLocation">400,75 400,135</av:PointCollection>
+        <av:PointCollection x:Key="ConnectorLocation">330,70 330,105</av:PointCollection>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
     <Flowchart.StartNode>
-      <x:Reference>MainExecution</x:Reference>
+      <x:Reference>CloseApplications</x:Reference>
     </Flowchart.StartNode>
-    <FlowStep x:Name="MainExecution">
+    <FlowStep x:Name="CloseApplications">
       <sap:WorkflowViewStateService.ViewState>
         <scg:Dictionary x:TypeArguments="x:String, x:Object">
-          <av:Point x:Key="ShapeLocation">325,135</av:Point>
-          <av:Size x:Key="ShapeSize">150,70</av:Size>
+          <av:Point x:Key="ShapeLocation">260,105</av:Point>
+          <av:Size x:Key="ShapeSize">140,70</av:Size>
+          <av:PointCollection x:Key="ConnectorLocation">330,175 330,215</av:PointCollection>
         </scg:Dictionary>
       </sap:WorkflowViewStateService.ViewState>
-      <TryCatch DisplayName="MAIN - Initialize and Dispatch">
+      <TryCatch DisplayName="MAIN - Close Applications">
         <TryCatch.Try>
-          <Sequence DisplayName="MAIN - Execution Steps">
+          <Sequence DisplayName="MAIN - Close Applications Steps">
             <ui:LogMessage DisplayName="MAIN - Log Start" Level="Info" Message="[&quot;[BusinessMailMain] Started | Frequency=&quot; &amp; in_Frequency &amp; &quot; | Period=&quot; &amp; in_ReportPeriod]"/>
-            <Sequence DisplayName="MAIN - Initialize Config" sap2010:Annotation.AnnotationText="ADD YOUR EXISTING CONFIG INITIALIZATION ACTIVITIES INSIDE THIS SEQUENCE. Populate the Flowchart variable Config as System.Collections.Generic.Dictionary(Of String, Object). If invoking your initializer, map its out_Config argument to Config."/>
+            <Sequence DisplayName="MAIN - Close Applications - Add Here" sap2010:Annotation.AnnotationText="EMPTY SLOT 1 OF 3. Add your Close Applications activities inside this sequence. The surrounding Try Catch and failure route are already configured." sap:VirtualizedContainerService.HintSize="430,95"/>
+            <ui:LogMessage DisplayName="MAIN - Log Close Applications Completed" Level="Info" Message="[&quot;[BusinessMailMain] Close applications section completed.&quot;]"/>
+          </Sequence>
+        </TryCatch.Try>
+        <TryCatch.Catches>
+          <Catch x:TypeArguments="s:Exception">
+            <ActivityAction x:TypeArguments="s:Exception">
+              <ActivityAction.Argument>
+                <DelegateInArgument x:TypeArguments="s:Exception" Name="exClose"/>
+              </ActivityAction.Argument>
+              <Sequence DisplayName="MAIN - Handle Close Applications Error">
+                <Assign DisplayName="MAIN - Capture Close Applications Error">
+                  <Assign.To>
+                    <OutArgument x:TypeArguments="s:Exception">[processException]</OutArgument>
+                  </Assign.To>
+                  <Assign.Value>
+                    <InArgument x:TypeArguments="s:Exception">[exClose.GetBaseException()]</InArgument>
+                  </Assign.Value>
+                </Assign>
+                <Assign DisplayName="MAIN - Set Failed Stage - Close Applications">
+                  <Assign.To>
+                    <OutArgument x:TypeArguments="x:String">[failedStage]</OutArgument>
+                  </Assign.To>
+                  <Assign.Value>
+                    <InArgument x:TypeArguments="x:String">["Close Applications"]</InArgument>
+                  </Assign.Value>
+                </Assign>
+                <ui:LogMessage DisplayName="MAIN - Log Close Applications Error" Level="Error" Message="[&quot;[BusinessMailMain] Failed | Stage=&quot; &amp; failedStage &amp; &quot; | Category=&quot; &amp; If(TypeOf processException Is UiPath.Core.BusinessRuleException OrElse TypeOf processException Is System.IO.InvalidDataException, &quot;Business&quot;, &quot;System&quot;) &amp; &quot; | Type=&quot; &amp; processException.GetType().FullName &amp; &quot; | &quot; &amp; processException.Message]"/>
+              </Sequence>
+            </ActivityAction>
+          </Catch>
+        </TryCatch.Catches>
+      </TryCatch>
+      <FlowStep.Next>
+        <x:Reference>CheckCloseApplications</x:Reference>
+      </FlowStep.Next>
+    </FlowStep>
+    <FlowDecision x:Name="CheckCloseApplications" DisplayName="MAIN - Close Applications OK?">
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+          <av:Point x:Key="ShapeLocation">300,215</av:Point>
+          <av:Size x:Key="ShapeSize">60,60</av:Size>
+          <av:PointCollection x:Key="TrueConnector">330,275 330,315</av:PointCollection>
+          <av:PointCollection x:Key="FalseConnector">360,245 780,245 780,420</av:PointCollection>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+      <FlowDecision.Condition>
+        <VisualBasicValue x:TypeArguments="x:Boolean" ExpressionText="processException Is Nothing"/>
+      </FlowDecision.Condition>
+      <FlowDecision.True>
+        <x:Reference>Initialize</x:Reference>
+      </FlowDecision.True>
+      <FlowDecision.False>
+        <x:Reference>ExceptionEmail</x:Reference>
+      </FlowDecision.False>
+    </FlowDecision>
+    <FlowStep x:Name="Initialize">
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <av:Point x:Key="ShapeLocation">260,315</av:Point>
+          <av:Size x:Key="ShapeSize">140,70</av:Size>
+          <av:PointCollection x:Key="ConnectorLocation">330,385 330,425</av:PointCollection>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+      <TryCatch DisplayName="MAIN - Initialization">
+        <TryCatch.Try>
+          <Sequence DisplayName="MAIN - Initialization Steps">
+            <ui:LogMessage DisplayName="MAIN - Log Initialization Started" Level="Info" Message="[&quot;[BusinessMailMain] Initialization started.&quot;]"/>
+            <Sequence DisplayName="MAIN - Initialize Config" sap2010:Annotation.AnnotationText="EMPTY SLOT 2 OF 3. Add your existing Config initialization activities inside this sequence. Populate the Flowchart variable Config as System.Collections.Generic.Dictionary(Of String, Object). If your initializer is an invoked workflow, map its out_Config argument to Config. The Config guard, error logging and failure route are already configured."/>
             <If DisplayName="MAIN - Check Config Loaded" Condition="[Config Is Nothing OrElse Config.Count = 0]">
               <If.Then>
                 <Throw DisplayName="MAIN - Throw Config Missing" Exception="[New UiPath.Core.BusinessRuleException(&quot;Config is not loaded. Populate Config (Dictionary(Of String, Object)) inside MAIN - Initialize Config.&quot;)]"/>
               </If.Then>
             </If>
             <ui:LogMessage DisplayName="MAIN - Log Initialized" Level="Info" Message="[&quot;[BusinessMailMain] Config loaded | Settings=&quot; &amp; Config.Count.ToString()]"/>
+          </Sequence>
+        </TryCatch.Try>
+        <TryCatch.Catches>
+          <Catch x:TypeArguments="s:Exception">
+            <ActivityAction x:TypeArguments="s:Exception">
+              <ActivityAction.Argument>
+                <DelegateInArgument x:TypeArguments="s:Exception" Name="exInit"/>
+              </ActivityAction.Argument>
+              <Sequence DisplayName="MAIN - Handle Initialization Error">
+                <Assign DisplayName="MAIN - Capture Initialization Error">
+                  <Assign.To>
+                    <OutArgument x:TypeArguments="s:Exception">[processException]</OutArgument>
+                  </Assign.To>
+                  <Assign.Value>
+                    <InArgument x:TypeArguments="s:Exception">[exInit.GetBaseException()]</InArgument>
+                  </Assign.Value>
+                </Assign>
+                <Assign DisplayName="MAIN - Set Failed Stage - Initialization">
+                  <Assign.To>
+                    <OutArgument x:TypeArguments="x:String">[failedStage]</OutArgument>
+                  </Assign.To>
+                  <Assign.Value>
+                    <InArgument x:TypeArguments="x:String">["Initialization"]</InArgument>
+                  </Assign.Value>
+                </Assign>
+                <ui:LogMessage DisplayName="MAIN - Log Initialization Error" Level="Error" Message="[&quot;[BusinessMailMain] Failed | Stage=&quot; &amp; failedStage &amp; &quot; | Category=&quot; &amp; If(TypeOf processException Is UiPath.Core.BusinessRuleException OrElse TypeOf processException Is System.IO.InvalidDataException, &quot;Business&quot;, &quot;System&quot;) &amp; &quot; | Type=&quot; &amp; processException.GetType().FullName &amp; &quot; | &quot; &amp; processException.Message]"/>
+              </Sequence>
+            </ActivityAction>
+          </Catch>
+        </TryCatch.Catches>
+      </TryCatch>
+      <FlowStep.Next>
+        <x:Reference>CheckInitialization</x:Reference>
+      </FlowStep.Next>
+    </FlowStep>
+    <FlowDecision x:Name="CheckInitialization" DisplayName="MAIN - Initialization OK?">
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+          <av:Point x:Key="ShapeLocation">300,425</av:Point>
+          <av:Size x:Key="ShapeSize">60,60</av:Size>
+          <av:PointCollection x:Key="TrueConnector">330,485 330,525</av:PointCollection>
+          <av:PointCollection x:Key="FalseConnector">360,455 700,455</av:PointCollection>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+      <FlowDecision.Condition>
+        <VisualBasicValue x:TypeArguments="x:Boolean" ExpressionText="processException Is Nothing"/>
+      </FlowDecision.Condition>
+      <FlowDecision.True>
+        <x:Reference>DispatchReports</x:Reference>
+      </FlowDecision.True>
+      <FlowDecision.False>
+        <x:Reference>ExceptionEmail</x:Reference>
+      </FlowDecision.False>
+    </FlowDecision>
+    <FlowStep x:Name="DispatchReports">
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <av:Point x:Key="ShapeLocation">260,525</av:Point>
+          <av:Size x:Key="ShapeSize">140,70</av:Size>
+          <av:PointCollection x:Key="ConnectorLocation">330,595 330,635</av:PointCollection>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+      <TryCatch DisplayName="MAIN - Send Business Reports">
+        <TryCatch.Try>
+          <Sequence DisplayName="MAIN - Send Business Reports Steps">
+            <ui:LogMessage DisplayName="MAIN - Log Report Distribution Started" Level="Info" Message="[&quot;[BusinessMailMain] Report distribution started.&quot;]"/>
             <ui:InvokeWorkflowFile DisplayName="MAIL - Dispatch Business Reports" WorkflowFileName="SendBusinessReports.xaml" ContinueOnError="False" UnSafe="False">
               <ui:InvokeWorkflowFile.Arguments>
                 <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_Config">[Config]</InArgument>
@@ -91,23 +230,111 @@
                 <InArgument x:TypeArguments="x:String" x:Key="in_Frequency">[in_Frequency]</InArgument>
               </ui:InvokeWorkflowFile.Arguments>
             </ui:InvokeWorkflowFile>
-            <ui:LogMessage DisplayName="MAIN - Log Completed" Level="Info" Message="[&quot;[BusinessMailMain] Completed | Frequency=&quot; &amp; in_Frequency &amp; &quot; | Period=&quot; &amp; in_ReportPeriod]"/>
           </Sequence>
         </TryCatch.Try>
         <TryCatch.Catches>
           <Catch x:TypeArguments="s:Exception">
             <ActivityAction x:TypeArguments="s:Exception">
               <ActivityAction.Argument>
-                <DelegateInArgument x:TypeArguments="s:Exception" Name="exMain"/>
+                <DelegateInArgument x:TypeArguments="s:Exception" Name="exDispatch"/>
               </ActivityAction.Argument>
-              <Sequence DisplayName="MAIN - Handle Error">
-                <ui:LogMessage DisplayName="MAIN - Log Failure" Level="Error" Message="[&quot;[BusinessMailMain] Failed | Type=&quot; &amp; exMain.GetType().FullName &amp; &quot; | &quot; &amp; exMain.Message]"/>
-                <Rethrow DisplayName="MAIN - Rethrow Error"/>
+              <Sequence DisplayName="MAIN - Handle Send Business Reports Error">
+                <Assign DisplayName="MAIN - Capture Send Business Reports Error">
+                  <Assign.To>
+                    <OutArgument x:TypeArguments="s:Exception">[processException]</OutArgument>
+                  </Assign.To>
+                  <Assign.Value>
+                    <InArgument x:TypeArguments="s:Exception">[exDispatch.GetBaseException()]</InArgument>
+                  </Assign.Value>
+                </Assign>
+                <Assign DisplayName="MAIN - Set Failed Stage - Send Business Reports">
+                  <Assign.To>
+                    <OutArgument x:TypeArguments="x:String">[failedStage]</OutArgument>
+                  </Assign.To>
+                  <Assign.Value>
+                    <InArgument x:TypeArguments="x:String">["Send Business Reports"]</InArgument>
+                  </Assign.Value>
+                </Assign>
+                <ui:LogMessage DisplayName="MAIN - Log Send Business Reports Error" Level="Error" Message="[&quot;[BusinessMailMain] Failed | Stage=&quot; &amp; failedStage &amp; &quot; | Category=&quot; &amp; If(TypeOf processException Is UiPath.Core.BusinessRuleException OrElse TypeOf processException Is System.IO.InvalidDataException, &quot;Business&quot;, &quot;System&quot;) &amp; &quot; | Type=&quot; &amp; processException.GetType().FullName &amp; &quot; | &quot; &amp; processException.Message]"/>
               </Sequence>
             </ActivityAction>
           </Catch>
         </TryCatch.Catches>
       </TryCatch>
+      <FlowStep.Next>
+        <x:Reference>CheckDispatch</x:Reference>
+      </FlowStep.Next>
+    </FlowStep>
+    <FlowDecision x:Name="CheckDispatch" DisplayName="MAIN - Report Distribution OK?">
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+          <av:Point x:Key="ShapeLocation">300,635</av:Point>
+          <av:Size x:Key="ShapeSize">60,60</av:Size>
+          <av:PointCollection x:Key="TrueConnector">330,695 330,735</av:PointCollection>
+            <av:PointCollection x:Key="FalseConnector">360,665 940,665 940,455 860,455</av:PointCollection>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+      <FlowDecision.Condition>
+        <VisualBasicValue x:TypeArguments="x:Boolean" ExpressionText="processException Is Nothing"/>
+      </FlowDecision.Condition>
+      <FlowDecision.True>
+        <x:Reference>CompletedProcess</x:Reference>
+      </FlowDecision.True>
+      <FlowDecision.False>
+        <x:Reference>ExceptionEmail</x:Reference>
+      </FlowDecision.False>
+    </FlowDecision>
+    <FlowStep x:Name="ExceptionEmail">
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <av:Point x:Key="ShapeLocation">700,420</av:Point>
+          <av:Size x:Key="ShapeSize">160,70</av:Size>
+          <av:PointCollection x:Key="ConnectorLocation">780,490 780,570</av:PointCollection>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+      <TryCatch DisplayName="MAIN - Send Exception Email">
+        <TryCatch.Try>
+          <Sequence DisplayName="MAIN - Exception Notification Steps">
+            <ui:LogMessage DisplayName="MAIN - Log Exception Notification Started" Level="Info" Message="[&quot;[BusinessMailMain] Exception notification section started | FailedStage=&quot; &amp; failedStage]"/>
+            <Sequence DisplayName="MAIN - Exception Email - Add Here" sap2010:Annotation.AnnotationText="EMPTY SLOT 3 OF 3. Add your exception-email sequence or invoke it here. Available Flowchart variables: processException (System.Exception), failedStage (String), and Config (Dictionary(Of String, Object)). Config may be Nothing if initialization failed. Use processException.Message and processException.GetType().FullName for error details. Do not clear processException. The original process error is thrown after this node." sap:VirtualizedContainerService.HintSize="430,95"/>
+            <ui:LogMessage DisplayName="MAIN - Log Exception Notification Completed" Level="Info" Message="[&quot;[BusinessMailMain] Exception notification section completed | FailedStage=&quot; &amp; failedStage]"/>
+          </Sequence>
+        </TryCatch.Try>
+        <TryCatch.Catches>
+          <Catch x:TypeArguments="s:Exception">
+            <ActivityAction x:TypeArguments="s:Exception">
+              <ActivityAction.Argument>
+                <DelegateInArgument x:TypeArguments="s:Exception" Name="exNotification"/>
+              </ActivityAction.Argument>
+              <Sequence DisplayName="MAIN - Handle Exception Email Error">
+                <ui:LogMessage DisplayName="MAIN - Log Exception Email Failure" Level="Error" Message="[&quot;[BusinessMailMain] Exception notification failed; original process error retained | FailedStage=&quot; &amp; failedStage &amp; &quot; | NotificationErrorType=&quot; &amp; exNotification.GetBaseException().GetType().FullName &amp; &quot; | &quot; &amp; exNotification.GetBaseException().Message]"/>
+              </Sequence>
+            </ActivityAction>
+          </Catch>
+        </TryCatch.Catches>
+      </TryCatch>
+      <FlowStep.Next>
+        <x:Reference>FailProcess</x:Reference>
+      </FlowStep.Next>
+    </FlowStep>
+    <FlowStep x:Name="FailProcess">
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <av:Point x:Key="ShapeLocation">700,570</av:Point>
+          <av:Size x:Key="ShapeSize">160,70</av:Size>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+      <Throw DisplayName="MAIN - Throw Process Error" Exception="[If(TypeOf processException Is System.IO.InvalidDataException, CType(New UiPath.Core.BusinessRuleException(processException.Message), System.Exception), processException)]"/>
+    </FlowStep>
+    <FlowStep x:Name="CompletedProcess">
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <av:Point x:Key="ShapeLocation">260,735</av:Point>
+          <av:Size x:Key="ShapeSize">140,70</av:Size>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+      <ui:LogMessage DisplayName="MAIN - Log Completed" Level="Info" Message="[&quot;[BusinessMailMain] Completed | Frequency=&quot; &amp; in_Frequency &amp; &quot; | Period=&quot; &amp; in_ReportPeriod]"/>
     </FlowStep>
   </Flowchart>
 </Activity>

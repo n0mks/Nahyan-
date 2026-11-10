@@ -1,0 +1,473 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Activity xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="SendBusinessReports" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:sd="clr-namespace:System.Data;assembly=System.Data" xmlns:sio="clr-namespace:System.IO;assembly=mscorlib">
+  <x:Members>
+    <x:Property Name="in_Config" Type="InArgument(scg:Dictionary(x:String, x:String))" />
+    <x:Property Name="in_ReportPeriod" Type="InArgument(x:String)" />
+    <x:Property Name="in_Frequency" Type="InArgument(x:String)" />
+  </x:Members>
+  <VisualBasic.Settings>
+    <x:Null />
+  </VisualBasic.Settings>
+  <TextExpression.NamespacesForImplementation>
+    <scg:List x:TypeArguments="x:String">
+      <x:String>System</x:String>
+      <x:String>System.IO</x:String>
+      <x:String>System.Data</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Globalization</x:String>
+      <x:String>Microsoft.VisualBasic</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </scg:List>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <scg:List x:TypeArguments="AssemblyReference">
+      <AssemblyReference>mscorlib</AssemblyReference>
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Core</AssemblyReference>
+      <AssemblyReference>System.Data</AssemblyReference>
+      <AssemblyReference>System.Xml</AssemblyReference>
+      <AssemblyReference>System.Activities</AssemblyReference>
+      <AssemblyReference>Microsoft.VisualBasic</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Mail.Activities</AssemblyReference>
+    </scg:List>
+  </TextExpression.ReferencesForImplementation>
+  <Flowchart DisplayName="MAIL - Send Business Reports">
+    <Flowchart.Variables>
+      <Variable x:TypeArguments="sd:DataTable" Name="dtMailPlan" />
+      <Variable x:TypeArguments="s:Exception" Name="processException" />
+    </Flowchart.Variables>
+    <Flowchart.StartNode>
+      <x:Reference>Reset</x:Reference>
+    </Flowchart.StartNode>
+    <Flowchart.Nodes>
+      <FlowStep x:Name="Reset" Next="{x:Reference Dispatch}">
+        <FlowStep.Action>
+          <Sequence DisplayName="MAIL - Reset State">
+            <Assign DisplayName="MAIL - Clear Previous Error">
+              <Assign.To>
+                <OutArgument x:TypeArguments="s:Exception">[processException]</OutArgument>
+              </Assign.To>
+              <Assign.Value>
+                <InArgument x:TypeArguments="s:Exception">[Nothing]</InArgument>
+              </Assign.Value>
+            </Assign>
+            <Assign DisplayName="MAIL - Clear Previous Plan">
+              <Assign.To>
+                <OutArgument x:TypeArguments="sd:DataTable">[dtMailPlan]</OutArgument>
+              </Assign.To>
+              <Assign.Value>
+                <InArgument x:TypeArguments="sd:DataTable">[Nothing]</InArgument>
+              </Assign.Value>
+            </Assign>
+          </Sequence>
+        </FlowStep.Action>
+      </FlowStep>
+      <FlowStep x:Name="Dispatch" Next="{x:Reference Completed}">
+        <FlowStep.Action>
+          <TryCatch DisplayName="MAIL - Handle Report Distribution">
+            <TryCatch.Try>
+              <Sequence DisplayName="MAIL - Distribution Steps">
+                <ui:LogMessage DisplayName="MAIL - Log Start" Level="Info" Message="[&quot;[BusinessMail] Started | Frequency=&quot; &amp; in_Frequency &amp; &quot; | Period=&quot; &amp; in_ReportPeriod]" />
+                <ui:InvokeCode DisplayName="MAIL - Prepare Business Emails" Language="VBNet" ContinueOnError="False">
+                  <ui:InvokeCode.Code>' Paste this entire file into ONE Invoke Code activity (Language: VBNet).
+' In : in_Config       Dictionary(Of String, String)
+' In : in_ReportPeriod String (yyyy-MM or yyyy-MM-dd)
+' In : in_Frequency    String (Monthly or Daily)
+' Out: out_MailPlan    System.Data.DataTable
+' Email submission remains in Send Outlook Mail Message, after this code.
+
+out_MailPlan = Nothing
+Dim inv As System.Globalization.CultureInfo = System.Globalization.CultureInfo.InvariantCulture
+Dim cmp As System.StringComparer = System.StringComparer.OrdinalIgnoreCase
+Dim comparison As System.StringComparison = System.StringComparison.OrdinalIgnoreCase
+
+If in_Config Is Nothing Then Throw New System.IO.InvalidDataException("Config is Nothing.")
+For Each key As String In New String() {"OutputRootFolder", "CrmGroupFilePath", "FileNamePrefix", "EmailSubject", "EmailBodyHtml"}
+    If Not in_Config.ContainsKey(key) OrElse String.IsNullOrWhiteSpace(in_Config(key)) Then
+        Throw New System.IO.InvalidDataException("Missing Config value: " &amp; key)
+    End If
+Next
+
+Dim frequency As String = If(in_Frequency, String.Empty).Trim()
+If Not String.Equals(frequency, "Monthly", comparison) AndAlso Not String.Equals(frequency, "Daily", comparison) Then
+    Throw New System.IO.InvalidDataException("in_Frequency must be Monthly or Daily.")
+End If
+Dim isDaily As Boolean = String.Equals(frequency, "Daily", comparison)
+Dim periodText As String = If(in_ReportPeriod, String.Empty).Trim()
+Dim periodDate As System.DateTime
+Dim periodFormats As String() = If(isDaily, New String() {"yyyy-MM-dd"}, New String() {"yyyy-MM", "yyyy-MM-dd"})
+If Not System.DateTime.TryParseExact(periodText, periodFormats, inv,
+    System.Globalization.DateTimeStyles.None, periodDate) Then
+    Throw New System.IO.InvalidDataException(If(isDaily, "Daily in_ReportPeriod must be yyyy-MM-dd.", "Monthly in_ReportPeriod must be yyyy-MM or yyyy-MM-dd."))
+End If
+Dim periodLabel As String = periodDate.ToString(If(isDaily, "dd MMMM yyyy", "MMMM yyyy"), inv)
+Dim prefix As String = in_Config("FileNamePrefix").Trim()
+If prefix.IndexOfAny(("&lt;&gt;:""/\|?*").ToCharArray()) &gt;= 0 Then
+    Throw New System.IO.InvalidDataException("FileNamePrefix contains an invalid filename character.")
+End If
+For Each ch As Char In prefix
+    If Char.IsControl(ch) Then Throw New System.IO.InvalidDataException("FileNamePrefix contains a control character.")
+Next
+For Each key As String In New String() {"OutputRootFolder", "CrmGroupFilePath"}
+    Dim pathValue As String = in_Config(key).Trim()
+    If Not System.IO.Path.IsPathRooted(pathValue) OrElse
+       (System.Environment.OSVersion.Platform = System.PlatformID.Win32NT AndAlso
+        System.IO.Path.GetPathRoot(pathValue).Length &lt; 3) Then
+        Throw New System.IO.InvalidDataException(key &amp; " must be an absolute local or UNC path.")
+    End If
+Next
+Dim crmPath As String = System.IO.Path.GetFullPath(in_Config("CrmGroupFilePath").Trim())
+Dim periodFolder As String = System.IO.Path.Combine(System.IO.Path.GetFullPath(in_Config("OutputRootFolder").Trim()),
+    periodDate.ToString("yyyy", inv), periodDate.ToString("MMM", inv))
+If isDaily Then periodFolder = System.IO.Path.Combine(periodFolder, periodDate.ToString("dd", inv))
+If Not System.IO.File.Exists(crmPath) Then Throw New System.IO.InvalidDataException("CRM Group workbook does not exist: " &amp; crmPath)
+If Not System.IO.Directory.Exists(periodFolder) Then Throw New System.IO.InvalidDataException("Reporting period folder does not exist: " &amp; periodFolder)
+
+Dim headerMap As System.Func(Of System.Array, System.Collections.Generic.Dictionary(Of String, Integer)) =
+    Function(values As System.Array) As System.Collections.Generic.Dictionary(Of String, Integer)
+        If values Is Nothing OrElse values.Rank &lt;&gt; 2 Then
+            Throw New System.IO.InvalidDataException("CRM must have headers in row 1 and data below them.")
+        End If
+        Dim headers As New System.Collections.Generic.Dictionary(Of String, Integer)(cmp)
+        For c As Integer = values.GetLowerBound(1) To values.GetUpperBound(1)
+            Dim label As String = System.Text.RegularExpressions.Regex.Replace(
+                System.Convert.ToString(values.GetValue(values.GetLowerBound(0), c), inv).Trim(), "\s+", " ")
+            If Not String.Equals(label, "Group Name", comparison) AndAlso
+               Not String.Equals(label, "Business Emails", comparison) Then Continue For
+            If headers.ContainsKey(label) Then Throw New System.IO.InvalidDataException("Duplicate CRM header: " &amp; label)
+            headers.Add(label, c - values.GetLowerBound(1) + 1)
+        Next
+        For Each label As String In New String() {"Group Name", "Business Emails"}
+            If Not headers.ContainsKey(label) Then Throw New System.IO.InvalidDataException("Missing CRM header in row 1: " &amp; label)
+        Next
+        Return headers
+    End Function
+
+Dim readCrm As System.Func(Of System.Array) =
+    Function() As System.Array
+        Dim held As New System.Collections.Generic.List(Of Object)()
+        Dim app As Object = Nothing
+        Dim book As Object = Nothing
+        Dim readFailed As Boolean = False
+        Dim cleanupFailure As System.Exception = Nothing
+        Dim xl As System.Func(Of Object, String, Microsoft.VisualBasic.CallType, Object(), Object) =
+            Function(target As Object, member As String, kind As Microsoft.VisualBasic.CallType, args As Object()) As Object
+                Dim value As Object = Microsoft.VisualBasic.Interaction.CallByName(target, member, kind, args)
+                If value IsNot Nothing AndAlso System.Runtime.InteropServices.Marshal.IsComObject(value) Then held.Add(value)
+                Return value
+            End Function
+        Dim getKind As Microsoft.VisualBasic.CallType = Microsoft.VisualBasic.CallType.Get
+        Dim letKind As Microsoft.VisualBasic.CallType = Microsoft.VisualBasic.CallType.Let
+        Dim methodKind As Microsoft.VisualBasic.CallType = Microsoft.VisualBasic.CallType.Method
+        Try
+            app = Microsoft.VisualBasic.Interaction.CreateObject("Excel.Application")
+            held.Add(app)
+            xl(app, "Visible", letKind, New Object() {False})
+            xl(app, "DisplayAlerts", letKind, New Object() {False})
+            xl(app, "EnableEvents", letKind, New Object() {False})
+            xl(app, "AskToUpdateLinks", letKind, New Object() {False})
+            xl(app, "AutomationSecurity", letKind, New Object() {3})
+            Dim books As Object = xl(app, "Workbooks", getKind, New Object() {})
+            book = xl(books, "Open", methodKind, New Object() {crmPath, 0, True, System.Type.Missing,
+                "", "", True, System.Type.Missing, System.Type.Missing, False, False, System.Type.Missing, False, False, 0})
+            Dim sheets As Object = xl(book, "Worksheets", getKind, New Object() {})
+            Dim sheetName As String = If(in_Config.ContainsKey("CrmGroupSheetName"), If(in_Config("CrmGroupSheetName"), String.Empty).Trim(), String.Empty)
+            Dim sheet As Object = Nothing
+            If sheetName.Length = 0 Then
+                sheet = xl(sheets, "Item", getKind, New Object() {1})
+            Else
+                Dim sheetCount As Integer = System.Convert.ToInt32(xl(sheets, "Count", getKind, New Object() {}), inv)
+                For i As Integer = 1 To sheetCount
+                    Dim candidate As Object = xl(sheets, "Item", getKind, New Object() {i})
+                    If String.Equals(System.Convert.ToString(xl(candidate, "Name", getKind, New Object() {}), inv), sheetName, comparison) Then
+                        sheet = candidate
+                        Exit For
+                    End If
+                Next
+                If sheet Is Nothing Then Throw New System.IO.InvalidDataException("CRM worksheet does not exist: " &amp; sheetName)
+            End If
+            Dim firstRow As Object = xl(sheet, "Range", getKind, New Object() {"1:1"})
+            Dim headers As System.Collections.Generic.Dictionary(Of String, Integer) = headerMap(
+                TryCast(xl(firstRow, "Value2", getKind, New Object() {}), System.Array))
+            Dim cells As Object = xl(sheet, "Cells", getKind, New Object() {})
+            Dim rows As Object = xl(sheet, "Rows", getKind, New Object() {})
+            Dim rowLimit As Integer = System.Convert.ToInt32(xl(rows, "Count", getKind, New Object() {}), inv)
+            Dim lastRow As Integer = 1
+            For Each col As Integer In New Integer() {headers("Group Name"), headers("Business Emails")}
+                Dim bottom As Object = xl(cells, "Item", getKind, New Object() {rowLimit, col})
+                Dim lastCell As Object = xl(bottom, "End", getKind, New Object() {-4162})
+                lastRow = System.Math.Max(lastRow, System.Convert.ToInt32(xl(lastCell, "Row", getKind, New Object() {}), inv))
+            Next
+            If lastRow &lt; 2 Then Throw New System.IO.InvalidDataException("CRM contains headers but no routing rows.")
+            Dim lastCol As Integer = System.Math.Max(headers("Group Name"), headers("Business Emails"))
+            Dim firstCell As Object = xl(cells, "Item", getKind, New Object() {1, 1})
+            Dim finalCell As Object = xl(cells, "Item", getKind, New Object() {lastRow, lastCol})
+            Dim dataRange As Object = xl(sheet, "Range", getKind, New Object() {firstCell, finalCell})
+            Return TryCast(xl(dataRange, "Value2", getKind, New Object() {}), System.Array)
+        Catch
+            readFailed = True
+            Throw
+        Finally
+            If book IsNot Nothing Then
+                Try
+                    Microsoft.VisualBasic.Interaction.CallByName(book, "Close", methodKind, False)
+                Catch ex As System.Exception
+                    cleanupFailure = ex
+                End Try
+            End If
+            If app IsNot Nothing Then
+                Try
+                    Microsoft.VisualBasic.Interaction.CallByName(app, "Quit", methodKind)
+                Catch ex As System.Exception
+                    If cleanupFailure Is Nothing Then cleanupFailure = ex
+                End Try
+            End If
+            For i As Integer = held.Count - 1 To 0 Step -1
+                Try
+                    If System.Runtime.InteropServices.Marshal.IsComObject(held(i)) Then
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(held(i))
+                    End If
+                Catch ex As System.Exception
+                    If cleanupFailure Is Nothing Then cleanupFailure = ex
+                End Try
+            Next
+            If Not readFailed AndAlso cleanupFailure IsNot Nothing Then
+                Throw New System.IO.IOException("The CRM Excel instance could not close cleanly.", cleanupFailure)
+            End If
+        End Try
+    End Function
+
+Dim raw As System.Array = readCrm()
+Dim columns As System.Collections.Generic.Dictionary(Of String, Integer) = headerMap(raw)
+Dim groupColumn As Integer = raw.GetLowerBound(1) + columns("Group Name") - 1
+Dim emailColumn As Integer = raw.GetLowerBound(1) + columns("Business Emails") - 1
+Dim groupRows As New System.Collections.Generic.Dictionary(Of String, System.Collections.Generic.List(Of Integer))(cmp)
+For r As Integer = raw.GetLowerBound(0) + 1 To raw.GetUpperBound(0)
+    Dim groupValue As Object = raw.GetValue(r, groupColumn)
+    Dim group As String = System.Convert.ToString(groupValue, inv).Trim()
+    Dim emails As String = System.Convert.ToString(raw.GetValue(r, emailColumn), inv).Trim()
+    Dim excelRow As Integer = r - raw.GetLowerBound(0) + 1
+    If group.Length = 0 Then
+        If emails.Length &gt; 0 Then Throw New System.IO.InvalidDataException("CRM row " &amp; excelRow.ToString(inv) &amp; ": Business Emails has a value but Group Name is empty.")
+        Continue For
+    End If
+    If Not TypeOf groupValue Is String Then Throw New System.IO.InvalidDataException("CRM row " &amp; excelRow.ToString(inv) &amp; ": Group Name must be text.")
+    If Not groupRows.ContainsKey(group) Then groupRows.Add(group, New System.Collections.Generic.List(Of Integer)())
+    groupRows(group).Add(r)
+Next
+If groupRows.Count = 0 Then Throw New System.IO.InvalidDataException("CRM contains no group names.")
+
+Dim subjectTemplate As String = in_Config("EmailSubject").Trim()
+If subjectTemplate.IndexOfAny(New Char() {ChrW(13), ChrW(10)}) &gt;= 0 Then
+    Throw New System.IO.InvalidDataException("EmailSubject must be one line.")
+End If
+Dim bodyTemplate As String = in_Config("EmailBodyHtml")
+Dim html As System.Func(Of String, String) = Function(value As String) System.Net.WebUtility.HtmlEncode(value)
+Dim plan As New System.Data.DataTable("MailPlan")
+For Each name As String In New String() {"GroupName", "To", "AttachmentPath", "Subject", "BodyHtml", "StatePath", "Status"}
+    plan.Columns.Add(name, GetType(String))
+Next
+Dim stateFolder As String = System.IO.Path.Combine(periodFolder, "_logs", "EmailDispatch")
+Dim candidates As New System.Collections.Generic.List(Of String)()
+For Each filePath As String In System.IO.Directory.GetFiles(periodFolder, "*", System.IO.SearchOption.TopDirectoryOnly)
+    Dim fileName As String = System.IO.Path.GetFileName(filePath)
+    If fileName.StartsWith("~$", System.StringComparison.Ordinal) Then Continue For
+    If String.Equals(System.IO.Path.GetExtension(filePath), ".xlsx", comparison) AndAlso
+       fileName.StartsWith(prefix &amp; " - ", comparison) Then candidates.Add(filePath)
+Next
+candidates.Sort(cmp)
+If candidates.Count = 0 Then Throw New System.IO.InvalidDataException("No matching group .xlsx files exist in: " &amp; periodFolder)
+Dim matched As New System.Collections.Generic.HashSet(Of String)(cmp)
+Dim alreadySubmitted As Integer = 0
+For Each filePath As String In candidates
+    Dim stem As String = System.IO.Path.GetFileNameWithoutExtension(filePath)
+    Dim group As String = stem.Substring(prefix.Length + 3)
+    If group.Length = 0 OrElse Not groupRows.ContainsKey(group) Then
+        Throw New System.IO.InvalidDataException("Output file has no exact CRM Group Name match: " &amp; System.IO.Path.GetFileName(filePath))
+    End If
+    If Not matched.Add(group) Then Throw New System.IO.InvalidDataException("More than one output workbook matches group: " &amp; group)
+    For Each ch As Char In group
+        If Char.IsControl(ch) Then Throw New System.IO.InvalidDataException("A group filename contains a control character.")
+    Next
+    Dim recipients As New System.Collections.Generic.HashSet(Of String)(cmp)
+    For Each r As Integer In groupRows(group)
+        Dim cell As Object = raw.GetValue(r, emailColumn)
+        Dim value As String = System.Convert.ToString(cell, inv).Trim()
+        If value.Length = 0 Then Continue For
+        Dim excelRow As Integer = r - raw.GetLowerBound(0) + 1
+        If Not TypeOf cell Is String Then Throw New System.IO.InvalidDataException("CRM row " &amp; excelRow.ToString(inv) &amp; ": Business Emails must contain text addresses.")
+        For Each part As String In System.Text.RegularExpressions.Regex.Split(value, "[;,\r\n]+")
+            Dim email As String = part.Trim()
+            If email.Length = 0 Then Continue For
+            Try
+                Dim address As New System.Net.Mail.MailAddress(email)
+                If address.DisplayName.Length &gt; 0 OrElse Not String.Equals(address.Address, email, comparison) Then Throw New System.FormatException()
+                recipients.Add(address.Address)
+            Catch ex As System.FormatException
+                Throw New System.IO.InvalidDataException("CRM row " &amp; excelRow.ToString(inv) &amp; ": invalid Business Emails; use email addresses separated by semicolons.")
+            End Try
+        Next
+    Next
+    If recipients.Count = 0 Then Throw New System.IO.InvalidDataException("Business Emails is empty for output group: " &amp; group)
+    Dim statePath As String = System.IO.Path.Combine(stateFolder, "mail-" &amp; group &amp; ".status")
+    If System.IO.File.Exists(statePath) Then
+        If String.Equals(System.IO.File.ReadAllText(statePath).Trim(), "Submitted", System.StringComparison.Ordinal) Then
+            alreadySubmitted += 1
+            Continue For
+        End If
+        Throw New System.IO.InvalidDataException("A previous email attempt needs review before rerun: " &amp; System.IO.Path.GetFileName(statePath))
+    End If
+    Using stream As New System.IO.FileStream(filePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read)
+        If stream.Length = 0 Then Throw New System.IO.InvalidDataException("Output workbook is empty: " &amp; System.IO.Path.GetFileName(filePath))
+    End Using
+    Dim addresses As New System.Collections.Generic.List(Of String)(recipients)
+    addresses.Sort(cmp)
+    Dim subject As String = subjectTemplate.Replace("{{GROUP_NAME}}", group).Replace("{{REPORT_PERIOD}}", periodLabel)
+    Dim body As String = bodyTemplate.Replace("{{GROUP_NAME}}", html(group)).Replace("{{REPORT_PERIOD}}", html(periodLabel))
+    If subject.Contains("{{") OrElse subject.Contains("}}") OrElse body.Contains("{{") OrElse body.Contains("}}") Then
+        Throw New System.IO.InvalidDataException("EmailSubject / EmailBodyHtml contains an unsupported or misspelled placeholder.")
+    End If
+    plan.Rows.Add(New Object() {group, String.Join(";", addresses.ToArray()), filePath, subject, body, statePath, "Ready"})
+Next
+System.IO.Directory.CreateDirectory(stateFolder)
+plan.ExtendedProperties("AlreadySubmitted") = alreadySubmitted
+plan.ExtendedProperties("PeriodFolder") = periodFolder
+out_MailPlan = plan
+</ui:InvokeCode.Code>
+                  <ui:InvokeCode.Arguments>
+                    <InArgument x:TypeArguments="scg:Dictionary(x:String, x:String)" x:Key="in_Config">[in_Config]</InArgument>
+                    <InArgument x:TypeArguments="x:String" x:Key="in_ReportPeriod">[in_ReportPeriod]</InArgument>
+                    <InArgument x:TypeArguments="x:String" x:Key="in_Frequency">[in_Frequency]</InArgument>
+                    <OutArgument x:TypeArguments="sd:DataTable" x:Key="out_MailPlan">[dtMailPlan]</OutArgument>
+                  </ui:InvokeCode.Arguments>
+                </ui:InvokeCode>
+                <ui:LogMessage DisplayName="MAIL - Log Plan" Level="Info" Message="[&quot;[BusinessMail] Plan ready | ToSend=&quot; &amp; dtMailPlan.Rows.Count.ToString() &amp; &quot; | AlreadySubmitted=&quot; &amp; dtMailPlan.ExtendedProperties(&quot;AlreadySubmitted&quot;).ToString()]" />
+                <ForEach x:TypeArguments="sd:DataRow" DisplayName="MAIL - Send Each Group" Values="[dtMailPlan.Select()]">
+                  <ForEach.Body>
+                    <ActivityAction x:TypeArguments="sd:DataRow">
+                      <ActivityAction.Argument>
+                        <DelegateInArgument x:TypeArguments="sd:DataRow" Name="CurrentRow" />
+                      </ActivityAction.Argument>
+                      <Sequence DisplayName="MAIL - Send Group Report">
+                        <Sequence.Variables>
+                          <Variable x:TypeArguments="sio:FileStream" Name="claimStream" />
+                        </Sequence.Variables>
+                        <TryCatch DisplayName="MAIL - Handle Group Email">
+                          <TryCatch.Try>
+                            <Sequence DisplayName="MAIL - Group Email Steps">
+                              <ui:LogMessage DisplayName="MAIL - Log Group Start" Level="Info" Message="[&quot;[BusinessMail] Sending | Group=&quot; &amp; CurrentRow(&quot;GroupName&quot;).ToString() &amp; &quot; | File=&quot; &amp; System.IO.Path.GetFileName(CurrentRow(&quot;AttachmentPath&quot;).ToString())]" />
+                              <InvokeMethod DisplayName="MAIL - Reserve Group Email" MethodName="Open" TargetType="{x:Type sio:File}">
+                                <InvokeMethod.Parameters>
+                                  <InArgument x:TypeArguments="x:String">[CurrentRow("StatePath").ToString()]</InArgument>
+                                  <InArgument x:TypeArguments="sio:FileMode">[System.IO.FileMode.CreateNew]</InArgument>
+                                  <InArgument x:TypeArguments="sio:FileAccess">[System.IO.FileAccess.Write]</InArgument>
+                                  <InArgument x:TypeArguments="sio:FileShare">[System.IO.FileShare.None]</InArgument>
+                                </InvokeMethod.Parameters>
+                                <InvokeMethod.Result>
+                                  <OutArgument x:TypeArguments="sio:FileStream">[claimStream]</OutArgument>
+                                </InvokeMethod.Result>
+                              </InvokeMethod>
+                              <InvokeMethod DisplayName="MAIL - Close Reservation File" MethodName="Dispose">
+                                <InvokeMethod.TargetObject>
+                                  <InArgument x:TypeArguments="x:Object">[claimStream]</InArgument>
+                                </InvokeMethod.TargetObject>
+                              </InvokeMethod>
+                              <ui:SendOutlookMail DisplayName="MAIL - Send Outlook Group Report" To="[CurrentRow(&quot;To&quot;).ToString()]" Subject="[CurrentRow(&quot;Subject&quot;).ToString()]" Body="[CurrentRow(&quot;BodyHtml&quot;).ToString()]" AttachmentsCollection="[New String() {CurrentRow(&quot;AttachmentPath&quot;).ToString()}]" Account="[If(in_Config.ContainsKey(&quot;OutlookAccount&quot;), in_Config(&quot;OutlookAccount&quot;), String.Empty)]" IsBodyHtml="True" IsDraft="False" TimeoutMS="60000" ContinueOnError="False" />
+                              <ui:WriteTextFile DisplayName="MAIL - Mark Email Submitted" FileName="[CurrentRow(&quot;StatePath&quot;).ToString()]" Text="Submitted" Encoding="utf-8" ContinueOnError="False" />
+                              <Assign DisplayName="MAIL - Set Submitted Status">
+                                <Assign.To>
+                                  <OutArgument x:TypeArguments="x:Object">[CurrentRow("Status")]</OutArgument>
+                                </Assign.To>
+                                <Assign.Value>
+                                  <InArgument x:TypeArguments="x:Object">["Submitted"]</InArgument>
+                                </Assign.Value>
+                              </Assign>
+                              <ui:LogMessage DisplayName="MAIL - Log Group Submitted" Level="Info" Message="[&quot;[BusinessMail] Submitted to Outlook | Group=&quot; &amp; CurrentRow(&quot;GroupName&quot;).ToString()]" />
+                            </Sequence>
+                          </TryCatch.Try>
+                          <TryCatch.Catches>
+                            <Catch x:TypeArguments="s:Exception">
+                              <ActivityAction x:TypeArguments="s:Exception">
+                                <ActivityAction.Argument>
+                                  <DelegateInArgument x:TypeArguments="s:Exception" Name="exGroup" />
+                                </ActivityAction.Argument>
+                                <Sequence DisplayName="MAIL - Handle Group Error">
+                                  <Assign DisplayName="MAIL - Set Group Error Status">
+                                    <Assign.To>
+                                      <OutArgument x:TypeArguments="x:Object">[CurrentRow("Status")]</OutArgument>
+                                    </Assign.To>
+                                    <Assign.Value>
+                                      <InArgument x:TypeArguments="x:Object">[If(CurrentRow("Status").ToString() = "Submitted", "Submitted", "Review")]</InArgument>
+                                    </Assign.Value>
+                                  </Assign>
+                                  <Assign DisplayName="MAIL - Keep First Group Error">
+                                    <Assign.To>
+                                      <OutArgument x:TypeArguments="s:Exception">[processException]</OutArgument>
+                                    </Assign.To>
+                                    <Assign.Value>
+                                      <InArgument x:TypeArguments="s:Exception">[If(processException, New System.InvalidOperationException("Group dispatch failed; review the email state before retrying. Group=" &amp; CurrentRow("GroupName").ToString() &amp; " | Type=" &amp; exGroup.GetBaseException().GetType().FullName))]</InArgument>
+                                    </Assign.Value>
+                                  </Assign>
+                                  <ui:LogMessage DisplayName="MAIL - Log Group Error" Level="Error" Message="[&quot;[BusinessMail] Group dispatch needs review | Group=&quot; &amp; CurrentRow(&quot;GroupName&quot;).ToString() &amp; &quot; | Type=&quot; &amp; exGroup.GetBaseException().GetType().FullName &amp; &quot; | HResult=&quot; &amp; exGroup.GetBaseException().HResult.ToString()]" />
+                                </Sequence>
+                              </ActivityAction>
+                            </Catch>
+                          </TryCatch.Catches>
+                          <TryCatch.Finally>
+                            <If DisplayName="MAIL - Release Reservation Handle" Condition="[claimStream IsNot Nothing]">
+                              <If.Then>
+                                <InvokeMethod DisplayName="MAIL - Dispose Reservation Handle" MethodName="Dispose">
+                                  <InvokeMethod.TargetObject>
+                                    <InArgument x:TypeArguments="x:Object">[claimStream]</InArgument>
+                                  </InvokeMethod.TargetObject>
+                                </InvokeMethod>
+                              </If.Then>
+                            </If>
+                          </TryCatch.Finally>
+                        </TryCatch>
+                      </Sequence>
+                    </ActivityAction>
+                  </ForEach.Body>
+                </ForEach>
+                <ui:LogMessage DisplayName="MAIL - Log Attempt Summary" Level="Info" Message="[&quot;[BusinessMail] Attempts finished | Submitted=&quot; &amp; dtMailPlan.Select(&quot;Status = 'Submitted'&quot;).Length.ToString() &amp; &quot; | Review=&quot; &amp; dtMailPlan.Select(&quot;Status = 'Review'&quot;).Length.ToString()]" />
+              </Sequence>
+            </TryCatch.Try>
+            <TryCatch.Catches>
+              <Catch x:TypeArguments="s:Exception">
+                <ActivityAction x:TypeArguments="s:Exception">
+                  <ActivityAction.Argument>
+                    <DelegateInArgument x:TypeArguments="s:Exception" Name="exProcess" />
+                  </ActivityAction.Argument>
+                  <Sequence DisplayName="MAIL - Handle Process Error">
+                    <Assign DisplayName="MAIL - Set Process Error">
+                      <Assign.To>
+                        <OutArgument x:TypeArguments="s:Exception">[processException]</OutArgument>
+                      </Assign.To>
+                      <Assign.Value>
+                        <InArgument x:TypeArguments="s:Exception">[exProcess.GetBaseException()]</InArgument>
+                      </Assign.Value>
+                    </Assign>
+                    <ui:LogMessage DisplayName="MAIL - Log Process Error" Level="Error" Message="[&quot;[BusinessMail] Workflow failed | Type=&quot; &amp; processException.GetType().FullName &amp; &quot; | &quot; &amp; processException.Message]" />
+                  </Sequence>
+                </ActivityAction>
+              </Catch>
+            </TryCatch.Catches>
+          </TryCatch>
+        </FlowStep.Action>
+      </FlowStep>
+      <FlowDecision x:Name="Completed" DisplayName="MAIL - Completed Without Errors?" Condition="[processException Is Nothing]" True="{x:Reference Success}" False="{x:Reference Failure}" />
+      <FlowStep x:Name="Success">
+        <FlowStep.Action>
+          <ui:LogMessage DisplayName="MAIL - Log Success" Level="Info" Message="[&quot;[BusinessMail] Completed | Frequency=&quot; &amp; in_Frequency &amp; &quot; | Period=&quot; &amp; in_ReportPeriod &amp; &quot; | Submitted=&quot; &amp; dtMailPlan.Select(&quot;Status = 'Submitted'&quot;).Length.ToString() &amp; &quot; | AlreadySubmitted=&quot; &amp; dtMailPlan.ExtendedProperties(&quot;AlreadySubmitted&quot;).ToString()]" />
+        </FlowStep.Action>
+      </FlowStep>
+      <FlowStep x:Name="Failure">
+        <FlowStep.Action>
+          <Throw DisplayName="MAIL - Throw Distribution Error" Exception="[If(TypeOf processException Is System.IO.InvalidDataException, CType(New UiPath.Core.BusinessRuleException(processException.Message), System.Exception), processException)]" />
+        </FlowStep.Action>
+      </FlowStep>
+    </Flowchart.Nodes>
+  </Flowchart>
+</Activity>

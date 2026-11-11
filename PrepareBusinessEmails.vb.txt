@@ -9,9 +9,10 @@
 ' out_MailPlan    | Out | System.Data.DataTable (map to dtMailPlan)
 '
 ' Required Config keys:
-' OutputRootFolder, CrmGroupFilePath, FileNamePrefix, EmailSubject, EmailBodyHtml,
+' groupOutputRoot_Folder, CrmGroupFilePath, FileNamePrefix, EmailSubject, EmailBodyHtml,
 ' Email_SuccessMessage, Email_PrimaryColor, Email_AccentColor,
 ' Email_DateFormat, Email_TimeFormat.
+' groupOutputRoot_Folder is the FINAL GROUP workbook root, not the source-report folder.
 ' Optional Config keys: CrmGroupSheetName (blank = first worksheet),
 ' OutlookAccount (used by Send Outlook Mail Message outside this code).
 '
@@ -22,6 +23,20 @@
 ' Monthly folder: <root>/<yyyy>/<MMM>; Daily folder: <root>/<yyyy>/<MMM>/<dd>.
 ' Native Outlook submission, state reservation, logs and Try Catch remain in the XAML.
 ' This code prepares and validates the complete plan BEFORE any email is submitted.
+' Keep the current SendBusinessReports.xaml Try Catch, For Each and reservation activities.
+' Send Outlook Mail Message mappings inside For Each CurrentRow As System.Data.DataRow:
+' To                    = CurrentRow("To").ToString()
+' Subject               = CurrentRow("Subject").ToString()
+' Body                  = CurrentRow("BodyHtml").ToString()
+' AttachmentsCollection = New String() {CurrentRow("AttachmentPath").ToString()}
+' IsBodyHtml = True | IsDraft = False | ContinueOnError = False | TimeoutMS = 60000
+' Account = If(in_Config.ContainsKey("OutlookAccount"),
+'   System.Convert.ToString(in_Config("OutlookAccount"), System.Globalization.CultureInfo.InvariantCulture).Trim(), String.Empty)
+' Keep state files under _logs/EmailDispatch; never retry an uncertain send automatically.
+' Submitted means the Outlook activity returned successfully; it is not delivery confirmation.
+' Read BOTH Settings and Constants into the same Dictionary(Of String, Object) during Initialization.
+' OutputRootFolder is retained in Config for the producer process; this code does not read it.
+' Exception Assign expressions are supplied separately as ExceptionMail_Expressions.txt.
 
 out_MailPlan = Nothing
 Dim inv As System.Globalization.CultureInfo = System.Globalization.CultureInfo.InvariantCulture
@@ -40,7 +55,7 @@ Dim configText As System.Func(Of String, String) =
     End Function
 
 For Each key As String In New String() {
-    "OutputRootFolder", "CrmGroupFilePath", "FileNamePrefix", "EmailSubject", "EmailBodyHtml",
+    "groupOutputRoot_Folder", "CrmGroupFilePath", "FileNamePrefix", "EmailSubject", "EmailBodyHtml",
     "Email_SuccessMessage", "Email_PrimaryColor", "Email_AccentColor",
     "Email_DateFormat", "Email_TimeFormat"
 }
@@ -48,6 +63,19 @@ For Each key As String In New String() {
         Throw New System.IO.InvalidDataException("Missing Config value: " & key)
     End If
 Next
+
+For Each key As String In New String() {"Email_PrimaryColor", "Email_AccentColor"}
+    If Not System.Text.RegularExpressions.Regex.IsMatch(configText(key), "^#[0-9A-Fa-f]{6}$") Then
+        Throw New System.IO.InvalidDataException(key & " must be a six-digit HTML hex color, for example #003B70.")
+    End If
+Next
+Try
+    For Each key As String In New String() {"Email_DateFormat", "Email_TimeFormat"}
+        System.DateTime.Now.ToString(configText(key), inv)
+    Next
+Catch ex As System.FormatException
+    Throw New System.IO.InvalidDataException("Email_DateFormat or Email_TimeFormat is not a valid .NET date/time format.", ex)
+End Try
 
 Dim frequency As String = If(in_Frequency, String.Empty).Trim()
 If Not String.Equals(frequency, "Monthly", comparison) AndAlso Not String.Equals(frequency, "Daily", comparison) Then
@@ -69,7 +97,7 @@ End If
 For Each ch As Char In prefix
     If Char.IsControl(ch) Then Throw New System.IO.InvalidDataException("FileNamePrefix contains a control character.")
 Next
-For Each key As String In New String() {"OutputRootFolder", "CrmGroupFilePath"}
+For Each key As String In New String() {"groupOutputRoot_Folder", "CrmGroupFilePath"}
     Dim pathValue As String = configText(key).Trim()
     If Not System.IO.Path.IsPathRooted(pathValue) OrElse
        (System.Environment.OSVersion.Platform = System.PlatformID.Win32NT AndAlso
@@ -78,7 +106,7 @@ For Each key As String In New String() {"OutputRootFolder", "CrmGroupFilePath"}
     End If
 Next
 Dim crmPath As String = System.IO.Path.GetFullPath(configText("CrmGroupFilePath").Trim())
-Dim periodFolder As String = System.IO.Path.Combine(System.IO.Path.GetFullPath(configText("OutputRootFolder").Trim()),
+Dim periodFolder As String = System.IO.Path.Combine(System.IO.Path.GetFullPath(configText("groupOutputRoot_Folder").Trim()),
     periodDate.ToString("yyyy", inv), periodDate.ToString("MMM", inv))
 If isDaily Then periodFolder = System.IO.Path.Combine(periodFolder, periodDate.ToString("dd", inv))
 If Not System.IO.File.Exists(crmPath) Then Throw New System.IO.InvalidDataException("CRM Group workbook does not exist: " & crmPath)
@@ -284,17 +312,21 @@ For Each filePath As String In candidates
     End Using
     Dim addresses As New System.Collections.Generic.List(Of String)(recipients)
     addresses.Sort(cmp)
-    Dim subject As String = subjectTemplate.Replace("{{GROUP_NAME}}", group).Replace("{{REPORT_PERIOD}}", periodLabel)
+    Dim reportName As String = System.IO.Path.GetFileNameWithoutExtension(filePath)
+    Dim subject As String = subjectTemplate.
+        Replace("{{GROUP_NAME}}", group).
+        Replace("{{REPORT_PERIOD}}", periodLabel).
+        Replace("{{REPORT_NAME}}", reportName)
     Dim body As String = bodyTemplate.
         Replace("{{STATUS_TEXT}}", "COMPLETED").
-        Replace("{{RESULT_TEXT}}", "Download completed successfully").
+        Replace("{{RESULT_TEXT}}", "Report prepared successfully").
         Replace("{{MESSAGE_HTML}}", configText("Email_SuccessMessage")).
         Replace("{{PRIMARY_COLOR}}", configText("Email_PrimaryColor")).
         Replace("{{ACCENT_COLOR}}", configText("Email_AccentColor")).
-        Replace("{{RUN_DATE}}", RunTimestamp.ToString(configText("Email_DateFormat"), inv)).
-        Replace("{{RUN_TIME}}", RunTimestamp.ToString(configText("Email_TimeFormat"), inv)).
+        Replace("{{RUN_DATE}}", html(RunTimestamp.ToString(configText("Email_DateFormat"), inv))).
+        Replace("{{RUN_TIME}}", html(RunTimestamp.ToString(configText("Email_TimeFormat"), inv))).
         Replace("{{FOLDER_1}}", html(filePath)).
-        Replace("{{REPORT_NAME}}", html(System.IO.Path.GetFileNameWithoutExtension(filePath))).
+        Replace("{{REPORT_NAME}}", html(reportName)).
         Replace("{{GROUP_NAME}}", html(group)).
         Replace("{{REPORT_PERIOD}}", html(periodLabel))
     If subject.Contains("{{") OrElse subject.Contains("}}") OrElse body.Contains("{{") OrElse body.Contains("}}") Then

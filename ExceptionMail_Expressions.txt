@@ -1,0 +1,99 @@
+Use inside the existing MAIN - Exception Email - Add Here sequence.
+Keep it inside MAIN - Send Exception Email Try Catch.
+Config type: System.Collections.Generic.Dictionary(Of String, Object)
+Read BOTH Settings and Constants during Initialization.
+
+Create these variables in the exception sequence:
+RunTimestamp | System.DateTime
+mailSubject  | System.String
+mailBody     | System.String
+
+These variables/arguments already exist in Main:
+Config | Dictionary(Of String, Object)
+in_ReportPeriod | String
+failedStage | String
+processException | System.Exception
+
+1. Assign
+DisplayName: MAIL - Set Exception Timestamp
+Save to: RunTimestamp
+Value to save:
+System.DateTime.Now
+
+2. Assign
+DisplayName: MAIL - Build Exception Subject
+Save to: mailSubject
+Value to save:
+System.Convert.ToString(Config("Email_ExceptionBodySubject")).
+    Replace("{{REPORT_NAME}}", System.Convert.ToString(Config("FileNamePrefix"))).
+    Replace("{{REPORT_PERIOD}}", If(String.IsNullOrWhiteSpace(in_ReportPeriod), "Not supplied", in_ReportPeriod))
+
+3. Assign
+DisplayName: MAIL - Build Exception Body
+Save to: mailBody
+Value to save (copy the complete expression below):
+System.Convert.ToString(Config("Email_ExceptionBody")).
+    Replace("{{RESULT_TEXT}}", "Report distribution requires attention").
+    Replace("{{MESSAGE_HTML}}", System.Convert.ToString(Config("Email_ExceptionMessage"))).
+    Replace("{{REPORT_NAME}}", System.Net.WebUtility.HtmlEncode(System.Convert.ToString(Config("FileNamePrefix")))).
+    Replace("{{REPORT_PERIOD}}", System.Net.WebUtility.HtmlEncode(If(String.IsNullOrWhiteSpace(in_ReportPeriod), "Not supplied", in_ReportPeriod))).
+    Replace("{{RUN_DATE}}", System.Net.WebUtility.HtmlEncode(RunTimestamp.ToString(System.Convert.ToString(Config("Email_DateFormat")), System.Globalization.CultureInfo.InvariantCulture))).
+    Replace("{{RUN_TIME}}", System.Net.WebUtility.HtmlEncode(RunTimestamp.ToString(System.Convert.ToString(Config("Email_TimeFormat")), System.Globalization.CultureInfo.InvariantCulture))).
+    Replace("{{FAILED_STAGE}}", System.Net.WebUtility.HtmlEncode(If(failedStage, String.Empty))).
+    Replace("{{EXCEPTION_TYPE}}", System.Net.WebUtility.HtmlEncode(If(processException Is Nothing, "Not available", processException.GetType().FullName))).
+    Replace("{{EXCEPTION_MESSAGE}}", System.Net.WebUtility.HtmlEncode(If(processException Is Nothing, "No exception details were provided.", processException.Message)).Replace(vbCrLf, "<br>").Replace(vbCr, "<br>").Replace(vbLf, "<br>"))
+
+4. If
+DisplayName: MAIL - Check Exception Recipient
+Condition:
+String.IsNullOrWhiteSpace(System.Convert.ToString(Config("Email_ExceptionTo")))
+Then: Throw
+DisplayName: MAIL - Throw Missing Exception Recipient
+Exception:
+New System.IO.InvalidDataException("Fill Email_ExceptionTo in Config before sending exception notifications.")
+Else: leave empty.
+
+5. Send Outlook Mail Message
+DisplayName: MAIL - Send Exception Notification
+To:
+System.Convert.ToString(Config("Email_ExceptionTo")).Trim()
+Subject:
+mailSubject
+Body:
+mailBody
+Account:
+If(Config.ContainsKey("OutlookAccount"), System.Convert.ToString(Config("OutlookAccount"), System.Globalization.CultureInfo.InvariantCulture).Trim(), String.Empty)
+IsBodyHtml: True
+IsDraft: False
+ContinueOnError: False
+TimeoutMS: 60000
+Cc, Bcc and attachment fields: empty.
+
+6. Log Message
+DisplayName: MAIL - Log Exception Notification Submitted
+Log Level: Info
+Message:
+"[BusinessMail] Exception notification submitted to Outlook | Stage=" & failedStage
+
+Catch (existing MAIN - Send Exception Email Try Catch):
+Type: System.Exception
+Name: exNotification
+Log Message:
+DisplayName: MAIN - Log Notification Failure
+Log Level: Error
+Message:
+"[BusinessMail] Exception notification failed | Stage=" & failedStage & " | Type=" & exNotification.GetBaseException().GetType().FullName & " | " & exNotification.GetBaseException().Message
+
+Do not overwrite processException or failedStage in this Catch.
+Keep Main's final Throw to preserve the original process failure.
+Do not wrap mail sending in Retry Scope.
+If Config could not load during Initialization, the notification Catch logs the
+secondary failure; no template-based notification can be prepared without Config.
+
+Before running:
+- Fill Constants > Email_ExceptionTo with actual support addresses separated by semicolons.
+- Leave OutlookAccount blank for the default account, or enter an existing configured account.
+- Leave success and exception HTML documents exactly as supplied in the updated Config.
+- Email_ExceptionBodySubject is the existing Config key; do not use Email_ExceptionSubject.
+- The success Send activity still uses CurrentRow("BodyHtml").ToString().
+- mailBody is the exception HTML String variable; BodyHtml is the success MailPlan column.

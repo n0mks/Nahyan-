@@ -15,7 +15,7 @@
 #rc-root .rc-total{display:flex;align-items:center;gap:12px;padding:12px 18px;border:1px solid #ffffff30;border-radius:16px;background:#ffffff0c;white-space:nowrap}
 #rc-root .rc-total strong{font-size:28px;line-height:1;font-weight:650;font-variant-numeric:tabular-nums}
 #rc-root .rc-total span{max-width:66px;white-space:normal;color:#d6e6f0;font-size:12px;line-height:1.3}
-#rc-root .rc-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:22px 24px 18px}
+#rc-root .rc-tabs{display:grid;grid-template-columns:repeat(var(--rc-tab-columns,2),minmax(0,1fr));gap:12px;padding:22px 24px 18px}
 #rc-root .rc-tab{display:flex;align-items:center;gap:12px;padding:17px 15px;border:1px solid var(--rc-line);border-radius:15px;background:#fff;color:#425c70;text-align:left;transition:background .2s,border-color .2s,box-shadow .2s,transform .2s}
 #rc-root .rc-tab:hover:not(:disabled){border-color:#a4c9de;transform:translateY(-2px);box-shadow:0 8px 20px #0a35580d}
 #rc-root .rc-tab[aria-selected=true]{background:var(--rc-navy);border-color:var(--rc-navy);color:#fff;box-shadow:0 7px 18px #0a355821}
@@ -78,11 +78,11 @@
 </style>
 <div id="rc-root" dir="ltr" data-config-xlsx="https://banki/Compliance/Test%20CBO/CBO%20New%20Page/CBO_Circulars_Config.xlsx" data-sheetjs-src="https://banki/Compliance/Test%20CBO/CBO%20New%20Page/xlsx.full.min.js" data-sheet-one="CBO Circulars" data-sheet-two="Laws &amp; Royal Decrees" data-sharepoint-base="https://banki/Compliance/Test%20CBO/CBO%20Circulars/" data-sharepoint-site="https://banki/Compliance/Test%20CBO">
 <div class="rc-shell">
-<header class="rc-header"><div><div class="rc-eyebrow">COMPLIANCE</div><h2>CBO Regulatory Library</h2><p>Circulars and legislation.</p></div><div class="rc-total"><strong id="rcTotal">—</strong><span>Total records</span></div></header>
+<header class="rc-header"><div><div id="rcSectionLabel" class="rc-eyebrow">COMPLIANCE</div><h2 id="rcHeading">CBO Regulatory Library</h2><p id="rcSubtitle">Circulars and legislation.</p></div><div class="rc-total"><strong id="rcTotal">—</strong><span>Total records</span></div></header>
 <div id="rcTabs" class="rc-tabs" role="tablist" aria-label="Document sections"></div>
 <div id="rcPanel" role="tabpanel" aria-labelledby="rcTab-one" tabindex="0" aria-busy="true">
 <div class="rc-toolbar"><div class="rc-search-field"><label class="rc-label" for="rcSearch">Search this section</label><div class="rc-search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg><input id="rcSearch" class="rc-input" type="search" placeholder="Search by date, reference or subject" autocomplete="off" aria-controls="rcTable"></div></div><div class="rc-actions"><button id="rcClear" class="rc-btn" type="button">Clear search</button><button id="rcRefresh" class="rc-btn rc-btn-primary" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17"></path></svg><span>Refresh</span></button></div></div>
-<div id="rcMessage" hidden></div>
+<div id="rcMessage" class="rc-message" role="status" aria-live="polite" hidden></div>
 <div class="rc-results"><span id="rcResults" role="status" aria-live="polite">Loading records...</span><label class="rc-size" for="rcPageSize">Rows per page<select id="rcPageSize"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label></div>
 <div id="rcTableWrap" class="rc-table-wrap" role="region" aria-label="Document table" tabindex="0"><table id="rcTable" class="rc-table" aria-label="CBO Circulars"><thead><tr id="rcHead"></tr></thead><tbody id="rcBody"><tr><td colspan="3" class="rc-empty">Loading records...</td></tr></tbody></table></div>
 <footer class="rc-footer"><span id="rcUpdated">Loading records...</span><nav class="rc-pagination" aria-label="Table pages"><button id="rcPrev" class="rc-btn" type="button" disabled>Previous</button><span id="rcPage" class="rc-page" role="status" aria-live="polite">Page 1 of 1</span><button id="rcNext" class="rc-btn" type="button" disabled>Next</button></nav></footer>
@@ -94,13 +94,57 @@ const root=document.getElementById('rc-root');
 if(!root||root.dataset.ready)return;
 root.dataset.ready='true';
 const $=id=>root.querySelector('#'+id),attr=(name,fallback='')=>root.getAttribute(name)||fallback;
-const ui={tabs:$('rcTabs'),panel:$('rcPanel'),search:$('rcSearch'),clear:$('rcClear'),refresh:$('rcRefresh'),message:$('rcMessage'),results:$('rcResults'),size:$('rcPageSize'),head:$('rcHead'),body:$('rcBody'),table:$('rcTable'),wrap:$('rcTableWrap'),total:$('rcTotal'),updated:$('rcUpdated'),prev:$('rcPrev'),next:$('rcNext'),page:$('rcPage')};
+const ui={sectionLabel:$('rcSectionLabel'),heading:$('rcHeading'),subtitle:$('rcSubtitle'),tabs:$('rcTabs'),panel:$('rcPanel'),search:$('rcSearch'),clear:$('rcClear'),refresh:$('rcRefresh'),message:$('rcMessage'),results:$('rcResults'),size:$('rcPageSize'),head:$('rcHead'),body:$('rcBody'),table:$('rcTable'),wrap:$('rcTableWrap'),total:$('rcTotal'),updated:$('rcUpdated'),prev:$('rcPrev'),next:$('rcNext'),page:$('rcPage')};
 const paths={file:'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z M14 3v6h6 M8 13h8 M8 17h5',law:'M12 3v17 M5 21h14 M4 7h16 M6 7l-4 8h8L6 7 M18 7l-4 8h8l-4-8',search:'M16 16l5 5 M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0'};
 const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+paths[name]+'"></path></svg>';
 const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const defs=[['one','CBO Circulars','Circular / Regulation','file'],['two','Laws & Royal Decrees','Law / Royal Decree','law']];
-const sections=defs.map(d=>({key:d[0],name:attr('data-sheet-'+d[0],d[1]),label:d[2],icon:d[3],base:attr('data-folder-'+d[0],attr('data-sharepoint-base')),rows:[],loaded:false,updated:'',error:'',failedLinks:[],query:'',sort:'stamp',direction:-1,page:1}));
-let active=0,busy=false,timer=0,loadError='',sheetTask=null;
+const SETTINGS_FILE = 'CBO_Page_Settings.xlsx';
+const DEFAULT_SETTINGS = {
+  page: {
+    pageTitle: 'CBO Circulars Library',
+    sectionLabel: 'COMPLIANCE',
+    mainHeading: 'CBO Regulatory Library',
+    subtitle: 'Circulars and legislation.',
+    footerLabel: 'Last loaded'
+  },
+  tabs: [
+    {
+      key: 'one',
+      sheetName: attr('data-sheet-one', 'CBO Circulars'),
+      icon: 'file',
+      columns: { date: 'Date', title: 'Circular Reference', subject: 'Subject' }
+    },
+    {
+      key: 'two',
+      sheetName: attr('data-sheet-two', 'Laws & Royal Decrees'),
+      icon: 'law',
+      columns: { date: 'Date', title: 'Law Reference', subject: 'Subject' }
+    }
+  ]
+};
+const PAGE_FIELDS = {
+  pagetitle: 'pageTitle',
+  sectionlabel: 'sectionLabel',
+  mainheading: 'mainHeading',
+  subtitle: 'subtitle',
+  footerlabel: 'footerLabel'
+};
+const TAB_HEADERS = {
+  sheetName: 'Excel Sheet Name',
+  tabName: 'Tab Name',
+  date: 'Date Column',
+  title: 'Reference Column',
+  subject: 'Subject Column'
+};
+const DATA_FIELDS = ['date', 'title', 'subject'];
+let settings = DEFAULT_SETTINGS;
+let sections = [];
+let active = 0;
+let busy = false;
+let timer = 0;
+let loadError = '';
+let settingsError = '';
+let sheetTask = null;
 const current=()=>sections[active],digits=s=>String(s).replace(/[٠-٩۰-۹]/g,c=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(c)>=0?'٠١٢٣٤٥٦٧٨٩'.indexOf(c):'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)));
 function repair(value){
 let text=String(value==null?'':value),cp='€\u0081‚ƒ„…†‡ˆ‰Š‹Œ\u008dŽ\u008f\u0090‘’“”•–—˜™š›œ\u009džŸ';
@@ -146,18 +190,206 @@ const stamp=Date.UTC(y,m-1,d),date=new Date(stamp);
 if(!y||date.getUTCFullYear()!==y||date.getUTCMonth()!==m-1||date.getUTCDate()!==d)return {text:original,stamp:null,file:original,original:original};
 return {text:String(d).padStart(2,'0')+' '+months[m-1]+' '+y,stamp:stamp,file:String(d).padStart(2,'0')+'-'+String(m).padStart(2,'0')+'-'+y,original:original};
 }
-const aliases={date:['date','issuedate','circulardate','التاريخ','تاريخ'],title:['circularregulation','circular','circularno','circularnumber','regulation','lawroyaldecree','lawsroyaldecrees','lawsdecisions','law','royaldecree','royaldecrees','reference','referenceno','referencenumber','documentreference','document','letter','letterno','التعميم','رقمالتعميم','المرجع'],subject:['subject','description','title','الموضوع'],link:['url','link','hyperlink','documentlink','documenturl','filepath','الرابط']};
-function parseSheet(workbook,section){
-const sheetName=workbook.SheetNames.find(n=>clean(n).toLowerCase()===section.name.toLowerCase()),ws=workbook.Sheets[sheetName];
-if(!ws)throw Error('Worksheet "'+section.name+'" was not found.');
-if(!ws['!ref'])return [];
-const range=window.XLSX.utils.decode_range(ws['!ref']),cell=(r,c)=>c==null?null:ws[window.XLSX.utils.encode_cell({r:r,c:c})];
-let header=null;
-for(let r=range.s.r;r<=Math.min(range.e.r,range.s.r+49);r++){const map={};for(let c=range.s.c;c<=Math.min(range.e.c,range.s.c+99);c++){const key=headerKey(cellText(cell(r,c)));Object.keys(aliases).forEach(k=>{if(map[k]==null&&aliases[k].includes(key))map[k]=c;});}if(map.date!=null&&map.title!=null&&map.subject!=null){header={row:r,map:map};break;}}
-if(!header)throw Error('Check the Date, reference and Subject headers in "'+section.name+'".');
-const map=header.map,rowNumbers=Array.from(new Set(Object.keys(ws).filter(k=>/^[A-Z]+\d+$/.test(k)).map(k=>Number(k.match(/\d+$/)[0])-1).filter(r=>r>header.row))).sort((a,b)=>a-b),rows=[];
-rowNumbers.forEach(r=>{const dc=cell(r,map.date),tc=cell(r,map.title),sc=cell(r,map.subject),lc=cell(r,map.link);const title=cellText(tc),subject=cellText(sc),date=dateInfo(dc,workbook);if(!date.text&&!title&&!subject)return;if(aliases.date.includes(headerKey(date.text))&&aliases.subject.includes(headerKey(subject)))return;const raw=cellLink(ws,tc)||cellLink(ws,lc)||(lc?String(lc.v||'').trim():'')||cellLink(ws,sc);rows.push({date:date.text,stamp:date.stamp,fileDate:date.file,title:title,subject:subject,raw:raw,link:directUrl(raw),order:rows.length,search:norm([date.text,date.file,date.original,title,subject].join(' '))});});
-return rows;
+const aliases = {
+  date: ['date', 'issuedate', 'circulardate', 'lawdate', 'التاريخ', 'تاريخ'],
+  title: [
+    'circularreference', 'lawreference', 'circularregulation', 'circular', 'circularno',
+    'circularnumber', 'regulation', 'lawroyaldecree', 'lawsroyaldecrees',
+    'lawsdecisions', 'law', 'royaldecree', 'royaldecrees', 'reference',
+    'referenceno', 'referencenumber', 'documentreference', 'document',
+    'letter', 'letterno', 'التعميم', 'رقمالتعميم', 'المرجع'
+  ],
+  subject: ['subject', 'description', 'title', 'الموضوع'],
+  link: ['url', 'link', 'hyperlink', 'documentlink', 'documenturl', 'filepath', 'الرابط']
+};
+
+function worksheetKey(value) {
+  return clean(value).normalize('NFC').toLowerCase();
+}
+
+function getWorksheet(workbook, name) {
+  const exact = workbook.SheetNames.find(sheetName => sheetName === name);
+  const matches = workbook.SheetNames.filter(sheetName => worksheetKey(sheetName) === worksheetKey(name));
+  const actualName = exact || (matches.length === 1 ? matches[0] : '');
+  if (!actualName || !Object.prototype.hasOwnProperty.call(workbook.Sheets, actualName)) {
+    throw Error('Worksheet "' + name + '" was not found.');
+  }
+  return workbook.Sheets[actualName];
+}
+
+function sheetCell(sheet, row, column) {
+  if (column == null) return undefined;
+  return sheet[window.XLSX.utils.encode_cell({ r: row, c: column })];
+}
+
+function exactHeaders(columns) {
+  return Object.fromEntries(Object.entries(columns).map(([field, label]) => [field, [worksheetKey(label)]]));
+}
+
+function findTableHeader(sheet, acceptedHeaders, keyOf = worksheetKey) {
+  if (!sheet['!ref']) return null;
+  const range = window.XLSX.utils.decode_range(sheet['!ref']);
+  const fields = Object.keys(acceptedHeaders);
+  const lastRow = Math.min(range.e.r, range.s.r + 49);
+  const lastColumn = Math.min(range.e.c, range.s.c + 99);
+  for (let row = range.s.r; row <= lastRow; row++) {
+    const columns = {};
+    const labels = {};
+    for (let column = range.s.c; column <= lastColumn; column++) {
+      const label = cellText(sheetCell(sheet, row, column));
+      if (!label) continue;
+      const token = keyOf(label);
+      const field = fields.find(key => columns[key] == null && acceptedHeaders[key].includes(token));
+      if (field) {
+        columns[field] = column;
+        labels[field] = label;
+      }
+    }
+    if (fields.every(field => columns[field] != null)) {
+      return { row, columns, labels, firstColumn: range.s.c, lastColumn };
+    }
+  }
+  return null;
+}
+
+function dataRowNumbers(sheet, headerRow) {
+  const rows = new Set();
+  for (const address of Object.keys(sheet)) {
+    const match = /^[A-Z]+(\d+)$/.exec(address);
+    if (match && Number(match[1]) - 1 > headerRow) rows.add(Number(match[1]) - 1);
+  }
+  return Array.from(rows).sort((a, b) => a - b);
+}
+
+function readSettings(workbook) {
+  const pageSheet = getWorksheet(workbook, 'Page');
+  const pageHeader = findTableHeader(pageSheet, exactHeaders({ setting: 'Setting', value: 'Value' }));
+  if (!pageHeader) throw Error('The Page sheet needs the Setting and Value columns.');
+  const page = { ...DEFAULT_SETTINGS.page };
+  const knownFields = new Set();
+  for (const row of dataRowNumbers(pageSheet, pageHeader.row)) {
+    const setting = headerKey(cellText(sheetCell(pageSheet, row, pageHeader.columns.setting)));
+    if (!Object.prototype.hasOwnProperty.call(PAGE_FIELDS, setting)) continue;
+    const field = PAGE_FIELDS[setting];
+    if (knownFields.has(field)) throw Error('Remove the duplicate setting in Page row ' + (row + 1) + '.');
+    knownFields.add(field);
+    const value = cellText(sheetCell(pageSheet, row, pageHeader.columns.value));
+    if (value || (field !== 'pageTitle' && field !== 'mainHeading')) page[field] = value;
+  }
+
+  const tabSheet = getWorksheet(workbook, 'Tabs');
+  const tabHeader = findTableHeader(tabSheet, exactHeaders(TAB_HEADERS));
+  if (!tabHeader) throw Error('The Tabs sheet is missing one of its five column headings.');
+  const tabs = [];
+  const names = new Set();
+  for (const row of dataRowNumbers(tabSheet, tabHeader.row)) {
+    const values = Object.fromEntries(Object.entries(tabHeader.columns).map(([field, column]) =>
+      [field, cellText(sheetCell(tabSheet, row, column))]
+    ));
+    if (!Object.values(values).some(Boolean)) continue;
+    if (!values.sheetName || DATA_FIELDS.some(field => !values[field])) {
+      throw Error('Enter the sheet name and all three column names in Tabs row ' + (row + 1) + '.');
+    }
+    const sheetKey = worksheetKey(values.sheetName);
+    if (names.has(sheetKey)) throw Error('List "' + values.sheetName + '" once in Tabs.');
+    const columns = { date: values.date, title: values.title, subject: values.subject };
+    const headerKeys = Object.values(columns).map(worksheetKey);
+    if (headerKeys.includes('') || new Set(headerKeys).size !== DATA_FIELDS.length) {
+      throw Error('Use three different column names in Tabs row ' + (row + 1) + '.');
+    }
+    names.add(sheetKey);
+    tabs.push({ sheetName: values.sheetName, tabName: values.tabName, columns });
+  }
+  if (!tabs.length) throw Error('Add at least one worksheet in the Tabs sheet.');
+  return { page, tabs };
+}
+
+function sameColumns(left, right) {
+  return DATA_FIELDS.every(field => worksheetKey(left[field]) === worksheetKey(right[field]));
+}
+
+function createSections(tabs, previous) {
+  return tabs.map((tab, index) => {
+    const sheetKey = worksheetKey(tab.sheetName);
+    const standard = DEFAULT_SETTINGS.tabs.find(spec => worksheetKey(spec.sheetName) === sheetKey);
+    const saved = previous.find(section => worksheetKey(section.sheetName) === sheetKey);
+    const keepRows = saved && sameColumns(saved.columns, tab.columns);
+    const key = standard ? standard.key : 'sheet-' + (index + 1);
+    return {
+      key,
+      sheetName: tab.sheetName,
+      name: tab.tabName || tab.sheetName,
+      icon: standard ? standard.icon : 'file',
+      base: attr('data-folder-' + key, attr('data-sharepoint-base')),
+      columns: tab.columns,
+      headings: keepRows ? saved.headings : tab.columns,
+      allowLegacyHeaders: Boolean(standard && sameColumns(standard.columns, tab.columns)),
+      rows: keepRows ? saved.rows : [],
+      loaded: keepRows ? saved.loaded : false,
+      updated: keepRows ? saved.updated : '',
+      error: '',
+      failedLinks: keepRows ? saved.failedLinks : [],
+      query: saved ? saved.query : '',
+      sort: saved ? saved.sort : 'stamp',
+      direction: saved ? saved.direction : -1,
+      page: saved ? saved.page : 1
+    };
+  });
+}
+
+function parseSheet(workbook, section) {
+  const sheet = getWorksheet(workbook, section.sheetName);
+  if (!sheet['!ref']) return { rows: [], headings: section.columns };
+  let header = findTableHeader(sheet, exactHeaders(section.columns));
+  if (!header && section.allowLegacyHeaders) {
+    header = findTableHeader(sheet, { date: aliases.date, title: aliases.title, subject: aliases.subject }, headerKey);
+  }
+  if (!header) {
+    const names = DATA_FIELDS.map(field => '"' + section.columns[field] + '"').join(', ');
+    throw Error('Check these column headings in "' + section.sheetName + '": ' + names + '.');
+  }
+
+  const map = header.columns;
+  const usedColumns = new Set(Object.values(map));
+  let linkColumn;
+  for (let column = header.firstColumn; column <= header.lastColumn; column++) {
+    if (usedColumns.has(column)) continue;
+    const label = headerKey(cellText(sheetCell(sheet, header.row, column)));
+    if (aliases.link.includes(label)) {
+      linkColumn = column;
+      break;
+    }
+  }
+
+  const rows = [];
+  for (const row of dataRowNumbers(sheet, header.row)) {
+    const dateCell = sheetCell(sheet, row, map.date);
+    const titleCell = sheetCell(sheet, row, map.title);
+    const subjectCell = sheetCell(sheet, row, map.subject);
+    const linkCell = sheetCell(sheet, row, linkColumn);
+    const title = cellText(titleCell);
+    const subject = cellText(subjectCell);
+    const date = dateInfo(dateCell, workbook);
+    if (!date.text && !title && !subject) continue;
+    const repeatedHeader = worksheetKey(date.original) === worksheetKey(header.labels.date) &&
+      worksheetKey(title) === worksheetKey(header.labels.title) &&
+      worksheetKey(subject) === worksheetKey(header.labels.subject);
+    if (repeatedHeader) continue;
+    const raw = cellLink(sheet, titleCell) || cellLink(sheet, linkCell) ||
+      (linkCell ? String(linkCell.v || '').trim() : '') || cellLink(sheet, subjectCell);
+    rows.push({
+      date: date.text,
+      stamp: date.stamp,
+      fileDate: date.file,
+      title,
+      subject,
+      raw,
+      link: directUrl(raw),
+      order: rows.length,
+      search: norm([date.text, date.file, date.original, title, subject].join(' '))
+    });
+  }
+  return { rows, headings: header.labels };
 }
 const nameKey=value=>String(value||'').normalize('NFC').toLowerCase();
 const stem=value=>norm(value).replace(/\.[a-z0-9]{1,8}$/i,'').replace(/&/g,'and').replace(/[^a-z0-9\u0600-\u06ff]+/g,'');
@@ -209,15 +441,82 @@ if(sheetTask)return sheetTask;
 sheetTask=new Promise((resolve,reject)=>{const src=webUrl(attr('data-sheetjs-src'),location.href);if(!src){reject(Error('Excel reader URL is missing.'));return;}const script=document.createElement('script');let done=false;const finish=ok=>{if(done)return;done=true;clearTimeout(timeout);script.onload=script.onerror=null;if(ok)resolve();else{script.remove();reject(Error('Unable to load the Excel reader. Check the library URL and access.'));}};const timeout=setTimeout(()=>finish(false),20000);script.src=src;script.async=true;script.onload=()=>finish(!!(window.XLSX&&window.XLSX.read&&window.XLSX.utils&&window.XLSX.SSF));script.onerror=()=>finish(false);document.head.appendChild(script);}).catch(error=>{sheetTask=null;throw error;});
 return sheetTask;
 }
-function showMessage(){
-  ui.message.hidden = true;
-  ui.message.textContent = '';
-  ui.message.dataset.error = 'false';
-}function updateTabs(){
-sections.forEach((section,i)=>{const tab=$('rcTab-'+section.key);tab.setAttribute('aria-selected',String(i===active));tab.tabIndex=i===active?0:-1;tab.disabled=busy;tab.querySelector('.rc-count').textContent=section.loaded?section.rows.length.toLocaleString():section.error?'!':'—';});
-ui.total.textContent=sections.some(s=>s.loaded)?sections.reduce((sum,s)=>sum+s.rows.length,0).toLocaleString():'—';
-ui.total.parentElement.title=sections.some(s=>s.error)?'Total for available sections':'Total records across all sections';
-ui.panel.setAttribute('aria-labelledby','rcTab-'+current().key);
+function updateSharePointTitle(nextTitle, previousTitle) {
+  // Update the visible title text while preserving its anchor and page address.
+  const titleKey = value => norm(value).replace(/\s*&\s*/g, '&');
+  const previousTitles = new Set([
+    'CBO & CMA Circulars Library',
+    DEFAULT_SETTINGS.page.pageTitle,
+    previousTitle
+  ].filter(Boolean).map(titleKey));
+  const headingSelector = [
+    '#pageTitle', '#DeltaPlaceHolderPageTitleInTitleArea',
+    '#PlaceHolderPageTitleInTitleArea', '#pageTitle a',
+    '#DeltaPlaceHolderPageTitleInTitleArea a', 'h1', 'h2', '[role="heading"]'
+  ].join(',');
+  for (const heading of document.querySelectorAll(headingSelector)) {
+    if (root.contains(heading) || !previousTitles.has(titleKey(heading.textContent))) continue;
+    const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) {
+      if (clean(walker.currentNode.nodeValue)) nodes.push(walker.currentNode);
+    }
+    if (!nodes.length) continue;
+    const titleNode = nodes.find(node => node.parentElement && node.parentElement.closest('a')) || nodes[0];
+    for (const node of nodes) node.nodeValue = node === titleNode ? nextTitle : '';
+  }
+  const oldTitle = /CBO\s*&\s*CMA\s+Circulars\s+Library/i;
+  if (oldTitle.test(document.title)) {
+    document.title = document.title.replace(oldTitle, () => nextTitle);
+  } else if (previousTitle && document.title.includes(previousTitle)) {
+    document.title = document.title.replace(previousTitle, () => nextTitle);
+  }
+}
+
+function applyPageSettings(page, previousTitle) {
+  ui.sectionLabel.textContent = page.sectionLabel;
+  ui.sectionLabel.hidden = !page.sectionLabel;
+  ui.heading.textContent = page.mainHeading;
+  ui.subtitle.textContent = page.subtitle;
+  ui.subtitle.hidden = !page.subtitle;
+  updateSharePointTitle(page.pageTitle, previousTitle);
+}
+
+function showMessage() {
+  const messages = [loadError, settingsError, current().error].filter(Boolean);
+  ui.message.textContent = messages.join('\n');
+  ui.message.hidden = !messages.length;
+  ui.message.dataset.error = String(Boolean(loadError || current().error));
+}
+
+function mountTabs() {
+  root.style.setProperty('--rc-tab-columns', String(Math.min(3, sections.length)));
+  ui.tabs.innerHTML = sections.map((section, index) =>
+    '<button id="rcTab-' + section.key + '" class="rc-tab" type="button" role="tab" ' +
+    'aria-selected="' + (index === active) + '" aria-controls="rcPanel" ' +
+    'tabindex="' + (index === active ? '0' : '-1') + '" data-index="' + index + '">' +
+    '<span class="rc-tab-icon">' + icon(section.icon) + '</span>' +
+    '<span class="rc-tab-name">' + esc(section.name) + '</span>' +
+    '<span class="rc-count">—</span></button>'
+  ).join('');
+}
+
+function updateTabs() {
+  sections.forEach((section, index) => {
+    const tab = $('rcTab-' + section.key);
+    tab.setAttribute('aria-selected', String(index === active));
+    tab.tabIndex = index === active ? 0 : -1;
+    tab.disabled = busy;
+    tab.querySelector('.rc-count').textContent = section.loaded
+      ? section.rows.length.toLocaleString()
+      : section.error ? '!' : '—';
+  });
+  const totalRows = sections.reduce((sum, section) => sum + section.rows.length, 0);
+  ui.total.textContent = sections.some(section => section.loaded) ? totalRows.toLocaleString() : '—';
+  ui.total.parentElement.title = sections.some(section => section.error)
+    ? 'Total for available sections'
+    : 'Total records across all sections';
+  ui.panel.setAttribute('aria-labelledby', 'rcTab-' + current().key);
 }
 function setBusy(value){busy=value;ui.panel.setAttribute('aria-busy',String(value));ui.refresh.setAttribute('aria-busy',String(value));ui.refresh.querySelector('span').textContent=value?'Refreshing...':'Refresh';[ui.search,ui.clear,ui.refresh,ui.size,ui.prev,ui.next].forEach(el=>el.disabled=value);ui.head.querySelectorAll('button').forEach(el=>el.disabled=value);updateTabs();}
 function render(){
@@ -225,31 +524,132 @@ const section=current(),tokens=norm(section.query).split(/\s+/).filter(Boolean),
 rows.sort((a,b)=>{let comparison;if(section.sort==='stamp'){if(a.stamp==null||b.stamp==null)return a.stamp==null&&b.stamp==null?a.order-b.order:a.stamp==null?1:-1;comparison=a.stamp-b.stamp;}else comparison=norm(a[section.sort]).localeCompare(norm(b[section.sort]),undefined,{numeric:true});return comparison*section.direction||a.order-b.order;});
 const size=Number(ui.size.value),pages=Math.max(1,Math.ceil(rows.length/size));section.page=Math.max(1,Math.min(section.page,pages));const start=(section.page-1)*size,visible=rows.slice(start,start+size);
 ui.table.setAttribute('aria-label',section.name);ui.search.value=section.query;
-ui.head.innerHTML=[['stamp','Date'],['title',section.label],['subject','Subject']].map(c=>'<th scope="col" aria-sort="'+(section.sort===c[0]?(section.direction===1?'ascending':'descending'):'none')+'"><button class="rc-sort" type="button" data-sort="'+c[0]+'"'+(busy?' disabled':'')+'><span>'+esc(c[1])+'</span><span aria-hidden="true">'+(section.sort===c[0]?(section.direction===1?'↑':'↓'):'↕')+'</span></button></th>').join('');
+ui.head.innerHTML=[['stamp',section.headings.date],['title',section.headings.title],['subject',section.headings.subject]].map(c=>'<th scope="col" aria-sort="'+(section.sort===c[0]?(section.direction===1?'ascending':'descending'):'none')+'"><button class="rc-sort" type="button" data-sort="'+c[0]+'"'+(busy?' disabled':'')+'><span>'+esc(c[1])+'</span><span aria-hidden="true">'+(section.sort===c[0]?(section.direction===1?'↑':'↓'):'↕')+'</span></button></th>').join('');
 if(visible.length)ui.body.innerHTML=visible.map(row=>'<tr><td class="rc-date">'+esc(row.date||'—')+'</td><td><div class="rc-doc">'+icon('file')+(row.link?'<a class="rc-link" dir="auto" href="'+esc(row.link)+'" target="_blank" rel="noopener noreferrer" title="Open document in a new tab">'+esc(row.title||'Open document')+'</a>':'<span class="rc-doc-text" dir="auto">'+esc(row.title||'—')+'</span>')+'</div></td><td class="rc-subject" dir="auto">'+esc(row.subject||'—')+'</td></tr>').join('');
 else ui.body.innerHTML='<tr><td colspan="3" class="rc-empty">'+icon('search')+esc(!section.loaded?(busy?'Loading records...':'Records are unavailable.'):tokens.length?'No records match your search.':'No records in this section yet.')+'</td></tr>';
 ui.results.innerHTML='<strong>'+esc(section.name)+'</strong> · '+(section.loaded?(rows.length?'Showing '+(start+1)+'–'+Math.min(start+size,rows.length)+' of '+rows.length.toLocaleString():'0 records')+(tokens.length?' · '+section.rows.length.toLocaleString()+' total':''):busy?'Loading...':'Unavailable');
 ui.page.textContent='Page '+section.page+' of '+pages;ui.prev.disabled=busy||section.page===1;ui.next.disabled=busy||section.page>=pages;ui.clear.disabled=busy||!section.query;ui.wrap.scrollTop=0;
-ui.updated.textContent=section.updated?'Last loaded '+section.updated:busy?'Loading records...':'No data loaded';
+ui.updated.textContent = section.updated
+  ? [settings.page.footerLabel, section.updated].filter(Boolean).join(' ')
+  : busy ? 'Loading records...' : 'No data loaded';
 ui.body.classList.remove('rc-reveal');void ui.body.offsetWidth;ui.body.classList.add('rc-reveal');updateTabs();showMessage();
 }
-async function load(){
-if(busy)return;
-clearTimeout(timer);loadError='';setBusy(true);showMessage();ui.updated.textContent='Loading records...';
-try{
-await ensureReader();const url=webUrl(attr('data-config-xlsx'),location.href);if(!url)throw Error('Excel configuration URL is missing.');const fetchUrl=new URL(url);fetchUrl.searchParams.set('rcv',Date.now());
-let buffer;try{buffer=await request(fetchUrl.href,'buffer');}catch(error){throw Error('Unable to load the Excel file. Check your SharePoint session, file URL and access.');}
-const bytes=new Uint8Array(buffer);if(bytes[0]!==80||bytes[1]!==75)throw Error('The configuration is not a valid .xlsx file.');
-let workbook;try{workbook=window.XLSX.read(bytes,{type:'array',cellFormula:true,cellText:true,cellDates:false});}catch(error){throw Error('The Excel file could not be read.');}
-const fresh=sections.map(section=>{try{return {section:section,rows:parseSheet(workbook,section),error:''};}catch(error){return {section:section,rows:null,error:error.message};}}),catalogs=new Map();
-await Promise.all(Array.from(new Set(fresh.filter(item=>item.rows&&item.rows.some(row=>!row.link)).map(item=>item.section.base))).map(async base=>{try{catalogs.set(base,await inventory(base));}catch(error){catalogs.set(base,null);}}));
-const loadedAt=new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-fresh.forEach(item=>{const section=item.section;section.error=item.error;if(item.rows){const index=catalogs.get(section.base);section.failedLinks=[];item.rows.forEach(row=>{row.link=resolveLink(row,section,index);if(row.linkIssue)section.failedLinks.push(failedLinkName(row));});section.rows=item.rows;section.loaded=true;section.updated=loadedAt;}else if(section.loaded)section.error+=' Previously loaded records are still shown.';});
-}catch(error){loadError=error.message+(sections.some(section=>section.loaded)?' Previously loaded records are still shown.':'');}
-finally{setBusy(false);render();}
+async function readWorkbook(url, timeout) {
+  const fetchUrl = new URL(url);
+  fetchUrl.searchParams.set('rcv', Date.now());
+  const buffer = await request(fetchUrl.href, 'buffer', timeout);
+  const bytes = new Uint8Array(buffer);
+  if (bytes[0] !== 80 || bytes[1] !== 75) throw Error('The file is not a valid .xlsx workbook.');
+  try {
+    const workbook = window.XLSX.read(bytes, {
+      type: 'array', cellFormula: true, cellText: true, cellDates: false
+    });
+    if (!Array.isArray(workbook.SheetNames) || !workbook.Sheets) throw Error('Missing worksheets.');
+    return workbook;
+  } catch (error) {
+    throw Error('The Excel workbook could not be read.');
+  }
+}
+
+async function loadSettings(dataUrl) {
+  const settingsUrl = new URL(SETTINGS_FILE, dataUrl).href;
+  try {
+    const workbook = await readWorkbook(settingsUrl, 8000);
+    return { value: readSettings(workbook), error: '' };
+  } catch (error) {
+    if (error.status === 404) return { value: DEFAULT_SETTINGS, error: '' };
+    return { value: settings, error: SETTINGS_FILE + ' could not be loaded. ' + error.message };
+  }
+}
+
+async function load() {
+  if (busy) return;
+  clearTimeout(timer);
+  current().query = ui.search.value;
+  const selectedSheet = worksheetKey(current().sheetName);
+  loadError = '';
+  settingsError = '';
+  setBusy(true);
+  showMessage();
+  ui.updated.textContent = 'Loading records...';
+  try {
+    await ensureReader();
+    const dataUrl = webUrl(attr('data-config-xlsx'), location.href);
+    if (!dataUrl) throw Error('The Excel data workbook URL is missing.');
+    const [workbook, outcome] = await Promise.all([
+      readWorkbook(dataUrl).catch(error => {
+        if (error.status || error.name === 'AbortError' || error.name === 'TypeError') {
+          throw Error('Unable to load the data workbook. Check its SharePoint location and access.');
+        }
+        throw error;
+      }),
+      loadSettings(dataUrl)
+    ]);
+    const nextSettings = outcome.value;
+    const nextSections = createSections(nextSettings.tabs, sections);
+    const results = nextSections.map(section => {
+      try {
+        return { section, parsed: parseSheet(workbook, section) };
+      } catch (error) {
+        section.error = error.message;
+        if (section.loaded) section.error += ' Previously loaded records are shown.';
+        return { section, parsed: null };
+      }
+    });
+
+    const folders = new Set();
+    for (const result of results) {
+      if (result.parsed && result.parsed.rows.some(row => !row.link)) folders.add(result.section.base);
+    }
+    const catalogs = new Map();
+    await Promise.all(Array.from(folders, async folder => {
+      try {
+        catalogs.set(folder, await inventory(folder));
+      } catch (error) {
+        catalogs.set(folder, null);
+      }
+    }));
+    const loadedAt = new Date().toLocaleString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+    for (const { section, parsed } of results) {
+      if (!parsed) continue;
+      const index = catalogs.get(section.base);
+      section.failedLinks = [];
+      for (const row of parsed.rows) {
+        row.link = resolveLink(row, section, index);
+        if (row.linkIssue) section.failedLinks.push(failedLinkName(row));
+      }
+      section.rows = parsed.rows;
+      section.headings = parsed.headings;
+      section.loaded = true;
+      section.updated = loadedAt;
+    }
+
+    const previousTitle = settings.page.pageTitle;
+    settings = nextSettings;
+    settingsError = outcome.error;
+    sections = nextSections;
+    active = Math.max(0, sections.findIndex(section => worksheetKey(section.sheetName) === selectedSheet));
+    mountTabs();
+    applyPageSettings(settings.page, previousTitle);
+  } catch (error) {
+    loadError = error.message;
+    if (sections.some(section => section.loaded)) loadError += ' Previously loaded records are shown.';
+  } finally {
+    setBusy(false);
+    render();
+  }
 }
 function switchTab(index,focus){if(busy)return;clearTimeout(timer);current().query=ui.search.value;active=index;render();if(focus)$('rcTab-'+current().key).focus();}
-ui.tabs.innerHTML=sections.map((section,i)=>'<button id="rcTab-'+section.key+'" class="rc-tab" type="button" role="tab" aria-selected="'+String(i===0)+'" aria-controls="rcPanel" tabindex="'+(i===0?'0':'-1')+'" data-index="'+i+'"><span class="rc-tab-icon">'+icon(section.icon)+'</span><span class="rc-tab-name">'+esc(section.name)+'</span><span class="rc-count">—</span></button>').join('');
+sections = createSections(settings.tabs, []);
+applyPageSettings(settings.page, settings.page.pageTitle);
+mountTabs();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    updateSharePointTitle(settings.page.pageTitle, settings.page.pageTitle);
+  }, { once: true });
+}
 ui.tabs.addEventListener('click',event=>{const tab=event.target.closest('[data-index]');if(tab)switchTab(Number(tab.dataset.index),false);});
 ui.tabs.addEventListener('keydown',event=>{if(!['ArrowRight','ArrowLeft','ArrowDown','ArrowUp','Home','End'].includes(event.key))return;event.preventDefault();switchTab(event.key==='Home'?0:event.key==='End'?sections.length-1:(active+(['ArrowRight','ArrowDown'].includes(event.key)?1:sections.length-1))%sections.length,true);});
 ui.search.addEventListener('input',()=>{current().query=ui.search.value;current().page=1;clearTimeout(timer);timer=setTimeout(()=>{if(!busy)render();},140);});
